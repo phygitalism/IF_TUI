@@ -13,6 +13,8 @@ namespace MarkerRegistratorGui.ViewModel
 		public ObservableCollection<TrackedMarkerViewModel> TrackedMarkers { get; }
 			= new ObservableCollection<TrackedMarkerViewModel>();
 
+		public ReactiveProperty<IdSelectionViewModel> IdSelection { get; }
+
 		public ReactiveProperty<float> WindowWidth { get; }
 		public ReactiveProperty<float> WindowHeight { get; }
 
@@ -20,6 +22,9 @@ namespace MarkerRegistratorGui.ViewModel
 		{
 			WindowWidth = new ReactiveProperty<float>();
 			WindowHeight = new ReactiveProperty<float>();
+
+			IdSelection = new ReactiveProperty<IdSelectionViewModel>();
+			IdSelection.Value = new IdSelectionViewModel(_markerService.IdsCount);
 
 			_markerService.OnMarkerDown += HandleMarkerDown;
 			_markerService.OnMarkerUp += HandleMarkerUp;

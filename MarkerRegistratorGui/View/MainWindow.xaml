@@ -54,8 +54,21 @@
 				</Canvas>
 			</Canvas>
 		</DataTemplate>
+		<DataTemplate DataType="{x:Type viewmodel:IdSelectionViewModel}">
+			<StackPanel>
+				<Label Content="Select marker Id"/>
+				<ItemsControl ItemsSource="{Binding SelectableIds}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate DataType="{x:Type viewmodel:SelectableIdViewModel}">
+							<Button Content="{Binding Id}" Command="{Binding SelectedCommand}" />
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</StackPanel>
+		</DataTemplate>
 	</Window.Resources>
 	<Canvas>
-		<ItemsControl ItemsSource="{Binding TrackedMarkers}"/>
+		<ItemsControl Name="Markers" ItemsSource="{Binding TrackedMarkers}"/>
+		<ContentControl Name="IdSelection" Content="{Binding IdSelection.Value}"/>
 	</Canvas>
 </Window>
