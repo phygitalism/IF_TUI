@@ -1,0 +1,61 @@
+﻿<Window x:Class="MarkerRegistratorGui.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:local="clr-namespace:MarkerRegistratorGui"
+		xmlns:viewmodel="clr-namespace:MarkerRegistratorGui.ViewModel"
+		xmlns:converters="clr-namespace:MarkerRegistratorGui.View.Converters"
+		mc:Ignorable="d"
+		Title="MainWindow"
+		WindowState="Maximized" WindowStyle="None" ResizeMode="NoResize"
+		Height="{Binding WindowHeight.Value, Mode=OneWayToSource}"
+		Width="{Binding WindowWidth.Value, Mode=OneWayToSource}">
+	<Window.DataContext>
+		<viewmodel:MainViewModel/>
+	</Window.DataContext>
+	<Window.Resources>
+		<converters:VectorConverter x:Key="vectorConverter"/>
+		<converters:PiToDegreeConverter x:Key="angleConverter"/>
+		<converters:MultiplyConverter x:Key="multiplyConverter"/>
+		<DataTemplate DataType="{x:Type viewmodel:TrackedMarkerViewModel}">
+			<Canvas>
+				<Canvas.RenderTransform>
+					<TranslateTransform 
+						X="{Binding ScaledPosition.Value, Converter={StaticResource vectorConverter}, ConverterParameter='X'}"
+						Y="{Binding ScaledPosition.Value, Converter={StaticResource vectorConverter}, ConverterParameter='Y'}"/>
+				</Canvas.RenderTransform>
+
+				<TextBlock Text="{Binding Rotation.Value, Converter={StaticResource angleConverter}, StringFormat='Angle:{0}'}"/>
+				<Canvas>
+					<Canvas.Resources>
+						<Style x:Key="ShapeStyle" TargetType="Shape">
+							<Setter Property="StrokeThickness" Value="10"/>
+							<Setter Property="Stroke">
+								<Setter.Value>
+									<SolidColorBrush Color="{Binding Color}"/>
+								</Setter.Value>
+							</Setter>
+						</Style>
+					</Canvas.Resources>
+					<Canvas.RenderTransform>
+						<RotateTransform Angle="{Binding Rotation.Value, Converter={StaticResource angleConverter}}"/>
+					</Canvas.RenderTransform>
+					<Ellipse
+						Canvas.Top="{Binding ScaledRadius.Value, Converter={StaticResource multiplyConverter}, ConverterParameter='-1'}"
+						Canvas.Left="{Binding ScaledRadius.Value, Converter={StaticResource multiplyConverter}, ConverterParameter='-1'}"
+						Width="{Binding ScaledRadius.Value, Converter={StaticResource multiplyConverter}, ConverterParameter='2'}"
+						Height="{Binding ScaledRadius.Value, Converter={StaticResource multiplyConverter}, ConverterParameter='2'}"
+						Fill="Transparent"
+						Style="{DynamicResource ShapeStyle}"/>
+					<Line
+						Y2="{Binding ScaledRadius.Value, Converter={StaticResource multiplyConverter}, ConverterParameter='-1'}"
+						Style="{DynamicResource ShapeStyle}"/>
+				</Canvas>
+			</Canvas>
+		</DataTemplate>
+	</Window.Resources>
+	<Canvas>
+		<ItemsControl ItemsSource="{Binding TrackedMarkers}"/>
+	</Canvas>
+</Window>
