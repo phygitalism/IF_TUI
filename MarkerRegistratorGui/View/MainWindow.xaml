@@ -6,6 +6,7 @@
 		xmlns:local="clr-namespace:MarkerRegistratorGui"
 		xmlns:viewmodel="clr-namespace:MarkerRegistratorGui.ViewModel"
 		xmlns:converters="clr-namespace:MarkerRegistratorGui.View.Converters"
+		xmlns:wpfautogrid="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
 		mc:Ignorable="d"
 		Title="MainWindow"
 		WindowState="Maximized" WindowStyle="None" ResizeMode="NoResize"
@@ -55,14 +56,31 @@
 			</Canvas>
 		</DataTemplate>
 		<DataTemplate DataType="{x:Type viewmodel:IdSelectionViewModel}">
-			<StackPanel>
-				<Label Content="Select marker Id"/>
+			<StackPanel
+				Background="Gray"
+				Opacity="0.8"
+				OpacityMask="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}">
+				<StackPanel.Resources>
+					<Style TargetType="{x:Type Button}">
+						<Setter Property="FontSize" Value="50"/>
+					</Style>
+				</StackPanel.Resources>
+				<Label Content="Select marker Id" FontSize="50"/>
 				<ItemsControl ItemsSource="{Binding SelectableIds}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate DataType="{x:Type viewmodel:SelectableIdViewModel}">
-							<Button Content="{Binding Id}" Command="{Binding SelectedCommand}" />
+							<Button
+								Content="{Binding Id}"
+								Command="{Binding SelectedCommand}"
+								Height="100"
+								Width="100"/>
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<wpfautogrid:AutoGrid RowCount="5" ColumnCount="5"/>
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
 				</ItemsControl>
 			</StackPanel>
 		</DataTemplate>
