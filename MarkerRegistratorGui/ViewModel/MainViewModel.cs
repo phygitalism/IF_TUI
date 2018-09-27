@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using MarkerRegistratorGui.Model;
 using Reactive.Bindings;
 
@@ -24,13 +25,24 @@ namespace MarkerRegistratorGui.ViewModel
 			WindowHeight = new ReactiveProperty<float>();
 
 			IdSelection = new ReactiveProperty<IdSelectionViewModel>();
-			IdSelection.Value = new IdSelectionViewModel(_markerService.IdsCount);
 
 			_markerService.OnMarkerDown += HandleMarkerDown;
 			_markerService.OnMarkerUp += HandleMarkerUp;
 			_markerService.OnMarkerStateUpdate += HandleMarkerUpdate;
 
 			_markerService.Start();
+
+			SelectIdAsync();
+		}
+
+		private async void SelectIdAsync()
+		{
+			IdSelection.Value = new IdSelectionViewModel(_markerService.IdsCount);
+
+			var selectedId = await IdSelection.Value.SelectedId;
+			Debug.Print($"Selected id {selectedId}");
+
+			IdSelection.Value = null;
 		}
 
 		private void HandleMarkerDown(int id)

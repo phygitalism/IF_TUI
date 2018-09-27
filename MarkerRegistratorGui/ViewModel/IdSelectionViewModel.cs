@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using Reactive.Bindings;
@@ -23,7 +22,6 @@ namespace MarkerRegistratorGui.ViewModel
 				selectable => selectable.SelectedCommand.Select(_ => selectable.Id)
 			)
 			.Merge()
-			.Do(id => Debug.Print($"Selected id {id}"))
 			.ToReactiveProperty();
 		}
 	}
