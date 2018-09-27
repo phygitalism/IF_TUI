@@ -65,7 +65,7 @@
 						<Setter Property="FontSize" Value="50"/>
 					</Style>
 				</StackPanel.Resources>
-				<Label Content="Select marker Id" FontSize="50"/>
+				<Label Content="Select marker Id" FontSize="50" HorizontalAlignment="Center"/>
 				<ItemsControl ItemsSource="{Binding SelectableIds}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate DataType="{x:Type viewmodel:SelectableIdViewModel}">
