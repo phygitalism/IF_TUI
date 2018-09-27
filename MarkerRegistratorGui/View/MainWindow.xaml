@@ -106,7 +106,7 @@
 					</ItemsControl.ItemTemplate>
 					<ItemsControl.ItemsPanel>
 						<ItemsPanelTemplate>
-							<wpfautogrid:AutoGrid RowCount="5" ColumnCount="5"/>
+							<wpfautogrid:AutoGrid RowCount="5" ColumnCount="5" Margin="1"/>
 						</ItemsPanelTemplate>
 					</ItemsControl.ItemsPanel>
 				</ItemsControl>
