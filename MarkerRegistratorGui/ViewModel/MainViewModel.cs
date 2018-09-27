@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Reactive.Linq;
 using MarkerRegistratorGui.Model;
 using Reactive.Bindings;
 
@@ -39,7 +40,7 @@ namespace MarkerRegistratorGui.ViewModel
 		{
 			IdSelection.Value = new IdSelectionViewModel(_markerService.IdsCount);
 
-			var selectedId = await IdSelection.Value.SelectedId;
+			var selectedId = await IdSelection.Value.SelectedId.FirstAsync();
 			Debug.Print($"Selected id {selectedId}");
 
 			IdSelection.Value = null;

@@ -1,7 +1,7 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
-using Reactive.Bindings;
 
 namespace MarkerRegistratorGui.ViewModel
 {
@@ -9,7 +9,7 @@ namespace MarkerRegistratorGui.ViewModel
 	{
 		public ObservableCollection<SelectableIdViewModel> SelectableIds { get; }
 
-		public ReactiveProperty<int> SelectedId { get; }
+		public IObservable<int> SelectedId { get; }
 
 		public IdSelectionViewModel(int idsCount)
 		{
@@ -21,8 +21,7 @@ namespace MarkerRegistratorGui.ViewModel
 			SelectedId = SelectableIds.Select(
 				selectable => selectable.SelectedCommand.Select(_ => selectable.Id)
 			)
-			.Merge()
-			.ToReactiveProperty();
+			.Merge();
 		}
 	}
 }
