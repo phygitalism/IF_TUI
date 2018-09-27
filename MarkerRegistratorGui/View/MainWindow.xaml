@@ -19,106 +19,102 @@
 		<converters:VectorConverter x:Key="vectorConverter"/>
 		<converters:PiToDegreeConverter x:Key="angleConverter"/>
 		<converters:MultiplyConverter x:Key="multiplyConverter"/>
+		<DataTemplate DataType="{x:Type viewmodel:TrackedMarkerViewModel}">
+			<Canvas>
+				<Canvas.RenderTransform>
+					<TranslateTransform 
+						X="{Binding
+							ScaledPosition.Value,
+							Converter={StaticResource vectorConverter},
+							ConverterParameter='X'}"
+						Y="{Binding
+							ScaledPosition.Value,
+							Converter={StaticResource vectorConverter},
+							ConverterParameter='Y'}"/>
+				</Canvas.RenderTransform>
+
+				<TextBlock
+					Text="{Binding
+						Rotation.Value,
+						Converter={StaticResource angleConverter},
+						StringFormat='Angle:{0}'}"/>
+				<Canvas>
+					<Canvas.Resources>
+						<Style x:Key="ShapeStyle" TargetType="Shape">
+							<Setter Property="StrokeThickness" Value="10"/>
+							<Setter Property="Stroke">
+								<Setter.Value>
+									<SolidColorBrush Color="{Binding Color}"/>
+								</Setter.Value>
+							</Setter>
+						</Style>
+					</Canvas.Resources>
+					<Canvas.RenderTransform>
+						<RotateTransform
+							Angle="{Binding
+								Rotation.Value,
+								Converter={StaticResource angleConverter}}"/>
+					</Canvas.RenderTransform>
+					<Ellipse
+						Canvas.Top="{Binding
+							ScaledRadius.Value,
+							Converter={StaticResource multiplyConverter},
+							ConverterParameter='-1'}"
+						Canvas.Left="{Binding
+							ScaledRadius.Value,
+							Converter={StaticResource multiplyConverter},
+							ConverterParameter='-1'}"
+						Width="{Binding
+							ScaledRadius.Value,
+							Converter={StaticResource multiplyConverter},
+							ConverterParameter='2'}"
+						Height="{Binding
+							ScaledRadius.Value,
+							Converter={StaticResource multiplyConverter},
+							ConverterParameter='2'}"
+						Fill="Transparent"
+						Style="{DynamicResource ShapeStyle}"/>
+					<Line
+						Y2="{Binding
+							ScaledRadius.Value,
+							Converter={StaticResource multiplyConverter},
+							ConverterParameter='-1'}"
+						Style="{DynamicResource ShapeStyle}"/>
+				</Canvas>
+			</Canvas>
+		</DataTemplate>
+		<DataTemplate DataType="{x:Type viewmodel:IdSelectionViewModel}">
+			<StackPanel
+				Background="Gray"
+				Opacity="0.8"
+				OpacityMask="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}">
+				<StackPanel.Resources>
+					<Style TargetType="{x:Type Button}">
+						<Setter Property="FontSize" Value="50"/>
+					</Style>
+				</StackPanel.Resources>
+				<Label Content="Select marker Id" FontSize="50" HorizontalAlignment="Center"/>
+				<ItemsControl ItemsSource="{Binding SelectableIds}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate DataType="{x:Type viewmodel:SelectableIdViewModel}">
+							<Button
+								Content="{Binding Id}"
+								Command="{Binding SelectedCommand}"
+								Height="100"
+								Width="100"/>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<wpfautogrid:AutoGrid RowCount="5" ColumnCount="5"/>
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+				</ItemsControl>
+			</StackPanel>
+		</DataTemplate>
 	</Window.Resources>
 	<Canvas>
-		<ItemsControl Name="Markers" ItemsSource="{Binding TrackedMarkers}">
-			<ItemsControl.ItemTemplate>
-				<DataTemplate DataType="{x:Type viewmodel:TrackedMarkerViewModel}">
-					<Canvas>
-						<Canvas.RenderTransform>
-							<TranslateTransform 
-								X="{Binding
-									ScaledPosition.Value,
-									Converter={StaticResource vectorConverter},
-									ConverterParameter='X'}"
-								Y="{Binding
-									ScaledPosition.Value,
-									Converter={StaticResource vectorConverter},
-									ConverterParameter='Y'}"/>
-						</Canvas.RenderTransform>
-
-						<TextBlock Text="{Binding
-							Rotation.Value,
-							Converter={StaticResource angleConverter},
-							StringFormat='Angle:{0}'}"/>
-						<Canvas>
-							<Canvas.Resources>
-								<Style x:Key="ShapeStyle" TargetType="Shape">
-									<Setter Property="StrokeThickness" Value="10"/>
-									<Setter Property="Stroke">
-										<Setter.Value>
-											<SolidColorBrush Color="{Binding Color}"/>
-										</Setter.Value>
-									</Setter>
-								</Style>
-							</Canvas.Resources>
-							<Canvas.RenderTransform>
-								<RotateTransform Angle="{Binding
-									Rotation.Value,
-									Converter={StaticResource angleConverter}}"/>
-							</Canvas.RenderTransform>
-							<Ellipse
-								Canvas.Top="{Binding
-									ScaledRadius.Value,
-									Converter={StaticResource multiplyConverter},
-									ConverterParameter='-1'}"
-								Canvas.Left="{Binding
-									ScaledRadius.Value,
-									Converter={StaticResource multiplyConverter},
-									ConverterParameter='-1'}"
-								Width="{Binding
-									ScaledRadius.Value,
-									Converter={StaticResource multiplyConverter},
-									ConverterParameter='2'}"
-								Height="{Binding
-									ScaledRadius.Value,
-									Converter={StaticResource multiplyConverter},
-									ConverterParameter='2'}"
-								Fill="Transparent"
-								Style="{DynamicResource ShapeStyle}"/>
-							<Line
-								Y2="{Binding
-									ScaledRadius.Value,
-									Converter={StaticResource multiplyConverter},
-									ConverterParameter='-1'}"
-								Style="{DynamicResource ShapeStyle}"/>
-						</Canvas>
-					</Canvas>
-				</DataTemplate>
-			</ItemsControl.ItemTemplate>
-		</ItemsControl>
-		<ContentControl Name="IdSelection" Content="{Binding IdSelection.Value}">
-			<ContentControl.ContentTemplate>
-				<DataTemplate DataType="{x:Type viewmodel:IdSelectionViewModel}">
-					<StackPanel
-						Background="Gray"
-						Opacity="0.8"
-						OpacityMask="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}">
-						<StackPanel.Resources>
-							<Style TargetType="{x:Type Button}">
-								<Setter Property="FontSize" Value="50"/>
-							</Style>
-						</StackPanel.Resources>
-						<Label Content="Select marker Id" FontSize="50" HorizontalAlignment="Center"/>
-						<ItemsControl ItemsSource="{Binding SelectableIds}">
-							<ItemsControl.ItemTemplate>
-								<DataTemplate DataType="{x:Type viewmodel:SelectableIdViewModel}">
-									<Button
-										Content="{Binding Id}"
-										Command="{Binding SelectedCommand}"
-										Height="100"
-										Width="100"/>
-								</DataTemplate>
-							</ItemsControl.ItemTemplate>
-							<ItemsControl.ItemsPanel>
-								<ItemsPanelTemplate>
-									<wpfautogrid:AutoGrid RowCount="5" ColumnCount="5"/>
-								</ItemsPanelTemplate>
-							</ItemsControl.ItemsPanel>
-						</ItemsControl>
-					</StackPanel>
-				</DataTemplate>
-			</ContentControl.ContentTemplate>
-		</ContentControl>
+		<ItemsControl Name="Markers" ItemsSource="{Binding TrackedMarkers}"/>
+		<ContentControl Name="IdSelection" Content="{Binding IdSelection.Value}"/>
 	</Canvas>
 </Window>
