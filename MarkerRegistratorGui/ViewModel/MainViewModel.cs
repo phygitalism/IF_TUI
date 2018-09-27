@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Reactive.Linq;
 using MarkerRegistratorGui.Model;
 using Reactive.Bindings;
 
@@ -13,6 +15,8 @@ namespace MarkerRegistratorGui.ViewModel
 		public ObservableCollection<TrackedMarkerViewModel> TrackedMarkers { get; }
 			= new ObservableCollection<TrackedMarkerViewModel>();
 
+		public ReactiveProperty<IdSelectionViewModel> IdSelection { get; }
+
 		public ReactiveProperty<float> WindowWidth { get; }
 		public ReactiveProperty<float> WindowHeight { get; }
 
@@ -21,11 +25,25 @@ namespace MarkerRegistratorGui.ViewModel
 			WindowWidth = new ReactiveProperty<float>();
 			WindowHeight = new ReactiveProperty<float>();
 
+			IdSelection = new ReactiveProperty<IdSelectionViewModel>();
+
 			_markerService.OnMarkerDown += HandleMarkerDown;
 			_markerService.OnMarkerUp += HandleMarkerUp;
 			_markerService.OnMarkerStateUpdate += HandleMarkerUpdate;
 
 			_markerService.Start();
+
+			SelectIdAsync();
+		}
+
+		private async void SelectIdAsync()
+		{
+			IdSelection.Value = new IdSelectionViewModel(_markerService.IdsCount);
+
+			var selectedId = await IdSelection.Value.SelectedId.FirstAsync();
+			Debug.Print($"Selected id {selectedId}");
+
+			IdSelection.Value = null;
 		}
 
 		private void HandleMarkerDown(int id)

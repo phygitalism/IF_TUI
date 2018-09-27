@@ -10,6 +10,7 @@ namespace MarkerRegistratorGui.Model
 		private readonly List<int> _registeredMarkers = new List<int>();
 
 		public IEnumerable<int> RegisteredMarkers { get; }
+		public int IdsCount => 10;
 
 		public event Action<int> OnMarkerDown;
 		public event Action<int> OnMarkerUp;
