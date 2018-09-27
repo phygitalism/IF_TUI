@@ -27,11 +27,20 @@
 					<Canvas>
 						<Canvas.RenderTransform>
 							<TranslateTransform 
-								X="{Binding ScaledPosition.Value, Converter={StaticResource vectorConverter}, ConverterParameter='X'}"
-								Y="{Binding ScaledPosition.Value, Converter={StaticResource vectorConverter}, ConverterParameter='Y'}"/>
+								X="{Binding
+									ScaledPosition.Value,
+									Converter={StaticResource vectorConverter},
+									ConverterParameter='X'}"
+								Y="{Binding
+									ScaledPosition.Value,
+									Converter={StaticResource vectorConverter},
+									ConverterParameter='Y'}"/>
 						</Canvas.RenderTransform>
 
-						<TextBlock Text="{Binding Rotation.Value, Converter={StaticResource angleConverter}, StringFormat='Angle:{0}'}"/>
+						<TextBlock Text="{Binding
+							Rotation.Value,
+							Converter={StaticResource angleConverter},
+							StringFormat='Angle:{0}'}"/>
 						<Canvas>
 							<Canvas.Resources>
 								<Style x:Key="ShapeStyle" TargetType="Shape">
@@ -44,17 +53,34 @@
 								</Style>
 							</Canvas.Resources>
 							<Canvas.RenderTransform>
-								<RotateTransform Angle="{Binding Rotation.Value, Converter={StaticResource angleConverter}}"/>
+								<RotateTransform Angle="{Binding
+									Rotation.Value,
+									Converter={StaticResource angleConverter}}"/>
 							</Canvas.RenderTransform>
 							<Ellipse
-								Canvas.Top="{Binding ScaledRadius.Value, Converter={StaticResource multiplyConverter}, ConverterParameter='-1'}"
-								Canvas.Left="{Binding ScaledRadius.Value, Converter={StaticResource multiplyConverter}, ConverterParameter='-1'}"
-								Width="{Binding ScaledRadius.Value, Converter={StaticResource multiplyConverter}, ConverterParameter='2'}"
-								Height="{Binding ScaledRadius.Value, Converter={StaticResource multiplyConverter}, ConverterParameter='2'}"
+								Canvas.Top="{Binding
+									ScaledRadius.Value,
+									Converter={StaticResource multiplyConverter},
+									ConverterParameter='-1'}"
+								Canvas.Left="{Binding
+									ScaledRadius.Value,
+									Converter={StaticResource multiplyConverter},
+									ConverterParameter='-1'}"
+								Width="{Binding
+									ScaledRadius.Value,
+									Converter={StaticResource multiplyConverter},
+									ConverterParameter='2'}"
+								Height="{Binding
+									ScaledRadius.Value,
+									Converter={StaticResource multiplyConverter},
+									ConverterParameter='2'}"
 								Fill="Transparent"
 								Style="{DynamicResource ShapeStyle}"/>
 							<Line
-								Y2="{Binding ScaledRadius.Value, Converter={StaticResource multiplyConverter}, ConverterParameter='-1'}"
+								Y2="{Binding
+									ScaledRadius.Value,
+									Converter={StaticResource multiplyConverter},
+									ConverterParameter='-1'}"
 								Style="{DynamicResource ShapeStyle}"/>
 						</Canvas>
 					</Canvas>
