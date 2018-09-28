@@ -18,10 +18,10 @@ namespace MarkerRegistratorGui.Model
 
 		public void Start()
 		{
-			AddTestMarkerAsync(new Vector2(1.0f, 0.0f), 0.1f, -0.75f);
-			AddTestMarkerAsync(new Vector2(0.0f, 1.0f), 0.1f, 0.25f);
-			AddTestMarkerAsync(new Vector2(0.0f, 0.0f), 0.1f, 0.75f);
-			AddTestMarkerAsync(new Vector2(1.0f, 1.0f), 0.1f, -0.25f);
+			AddTestMarkerAsync(new Vector2(0.20f, 0.20f), 0.05f, -0.75f);
+			AddTestMarkerAsync(new Vector2(0.20f, 0.80f), 0.05f, 0.25f);
+			AddTestMarkerAsync(new Vector2(0.80f, 0.20f), 0.05f, 0.75f);
+			AddTestMarkerAsync(new Vector2(0.80f, 0.80f), 0.05f, -0.25f);
 		}
 
 		public void Stop()
@@ -45,7 +45,7 @@ namespace MarkerRegistratorGui.Model
 						i += 0.1f;
 
 						var newRotation = rotation + (float)Math.Sin(i) * 0.25f;
-						var newPosition = position;// + new Vector2((float)Math.Cos(i), (float)Math.Sin(i)) * radius;
+						var newPosition = position + new Vector2((float)Math.Cos(i), (float)Math.Sin(i)) * radius;
 
 						OnMarkerStateUpdate?.Invoke(new MarkerState(id, newPosition, newRotation, radius));
 						await Task.Delay(10);
