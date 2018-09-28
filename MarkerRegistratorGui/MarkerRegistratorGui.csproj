@@ -104,6 +104,7 @@
     <Compile Include="Model\TestMarkerService.cs" />
     <Compile Include="ViewModel\IdSelectionViewModel.cs" />
     <Compile Include="ViewModel\MarkerRegistrationViewModel.cs" />
+    <Compile Include="ViewModel\ScaleAdapter.cs" />
     <Compile Include="ViewModel\SelectableIdViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\TrackedMarkerViewModel.cs" />

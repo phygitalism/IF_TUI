@@ -11,19 +11,22 @@ namespace MarkerRegistratorGui.ViewModel
 		private readonly IMarkerRegistrationService _registrationService;
 
 		public ReactiveProperty<Vector2> FieldPosition { get; }
-			= new ReactiveProperty<Vector2>();
 		public ReactiveProperty<Vector2> FieldSize { get; }
-			= new ReactiveProperty<Vector2>();
 
 		public ReactiveProperty<IdSelectionViewModel> IdSelection { get; }
 			= new ReactiveProperty<IdSelectionViewModel>();
 
-		public MarkerRegistrationViewModel(IMarkerRegistrationService registrationService)
+		public MarkerRegistrationViewModel(IMarkerRegistrationService registrationService, ScaleAdapter scaleAdapter)
 		{
 			_registrationService = registrationService;
 
-			FieldPosition.Value = _registrationService.RegistrationField.position;
-			FieldSize.Value = _registrationService.RegistrationField.size;
+			FieldPosition = Observable.Return(_registrationService.RegistrationField.position)
+				.ScaleToScreen(scaleAdapter)
+				.ToReactiveProperty();
+
+			FieldSize = Observable.Return(_registrationService.RegistrationField.size)
+				.ScaleToScreen(scaleAdapter)
+				.ToReactiveProperty();
 
 			SelectIdAsync();
 		}

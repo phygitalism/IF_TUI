@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using MarkerRegistratorGui.Model;
-using Reactive.Bindings;
 
 namespace MarkerRegistratorGui.ViewModel
 {
@@ -13,18 +12,13 @@ namespace MarkerRegistratorGui.ViewModel
 		public ObservableCollection<TrackedMarkerViewModel> TrackedMarkers { get; }
 			= new ObservableCollection<TrackedMarkerViewModel>();
 
-		public ReactiveProperty<MarkerRegistrationViewModel> MarkerRegistration { get; }
-			= new ReactiveProperty<MarkerRegistrationViewModel>();
-
-		public ReactiveProperty<float> WindowWidth { get; }
-		public ReactiveProperty<float> WindowHeight { get; }
+		public ScaleAdapter ScaleAdapter { get; }
+		public MarkerRegistrationViewModel MarkerRegistration { get; }
 
 		public MainViewModel()
 		{
-			MarkerRegistration.Value = new MarkerRegistrationViewModel(_markerService.RegistrationService);
-
-			WindowWidth = new ReactiveProperty<float>();
-			WindowHeight = new ReactiveProperty<float>();
+			ScaleAdapter = new ScaleAdapter();
+			MarkerRegistration = new MarkerRegistrationViewModel(_markerService.RegistrationService, ScaleAdapter);
 
 			_markerService.OnMarkerDown += HandleMarkerDown;
 			_markerService.OnMarkerUp += HandleMarkerUp;
@@ -38,7 +32,7 @@ namespace MarkerRegistratorGui.ViewModel
 			if (_markers.ContainsKey(id))
 				HandleMarkerUp(id);
 
-			var marker = new TrackedMarkerViewModel(id, this);
+			var marker = new TrackedMarkerViewModel(id, ScaleAdapter);
 
 			_markers.Add(id, marker);
 			TrackedMarkers.Add(marker);

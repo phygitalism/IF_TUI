@@ -10,8 +10,8 @@
 		mc:Ignorable="d"
 		Title="MainWindow"
 		WindowState="Maximized" WindowStyle="None" ResizeMode="NoResize"
-		Height="{Binding WindowHeight.Value, Mode=OneWayToSource}"
-		Width="{Binding WindowWidth.Value, Mode=OneWayToSource}">
+		Height="{Binding ScaleAdapter.WindowHeight.Value, Mode=OneWayToSource}"
+		Width="{Binding ScaleAdapter.WindowWidth.Value, Mode=OneWayToSource}">
 	<Window.DataContext>
 		<viewmodel:MainViewModel/>
 	</Window.DataContext>
