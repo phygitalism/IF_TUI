@@ -12,6 +12,9 @@ namespace MarkerRegistratorGui.Model
 		public IEnumerable<int> RegisteredMarkers { get; }
 		public int IdsCount => 10;
 
+		public (Vector2 position, Vector2 size) RegistrationField
+			=> (new Vector2(0.1f, 0.1f), new Vector2(0.2f, 0.2f));
+
 		public event Action<int> OnMarkerDown;
 		public event Action<int> OnMarkerUp;
 		public event Action<MarkerState> OnMarkerStateUpdate;
