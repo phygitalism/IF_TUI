@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Reactive.Linq;
 using MarkerRegistratorGui.Model;
 using Reactive.Bindings;
@@ -13,12 +12,14 @@ namespace MarkerRegistratorGui.ViewModel
 		public ReactiveProperty<Vector2> FieldPosition { get; }
 		public ReactiveProperty<Vector2> FieldSize { get; }
 
-		public ReactiveProperty<IdSelectionViewModel> IdSelection { get; }
-			= new ReactiveProperty<IdSelectionViewModel>();
+		public IdSelectionViewModel IdSelectionPanel { get; }
+		public ReactiveProperty<bool> IsSelectingId { get; }
 
 		public MarkerRegistrationViewModel(IMarkerRegistrationService registrationService, ScaleAdapter scaleAdapter)
 		{
 			_registrationService = registrationService;
+
+			IdSelectionPanel = new IdSelectionViewModel(registrationService.IdsCount);
 
 			FieldPosition = Observable.Return(_registrationService.RegistrationField.position)
 				.ScaleToScreen(scaleAdapter)
@@ -28,17 +29,9 @@ namespace MarkerRegistratorGui.ViewModel
 				.ScaleToScreen(scaleAdapter)
 				.ToReactiveProperty();
 
-			SelectIdAsync();
-		}
-
-		private async void SelectIdAsync()
-		{
-			IdSelection.Value = new IdSelectionViewModel(_registrationService.IdsCount);
-
-			var selectedId = await IdSelection.Value.SelectedId.FirstAsync();
-			Debug.Print($"Selected id {selectedId}");
-
-			IdSelection.Value = null;
+			IsSelectingId = Observable.Return(true)
+				.Merge(IdSelectionPanel.SelectedId.Select(_ => false))
+				.ToReactiveProperty();
 		}
 	}
 }

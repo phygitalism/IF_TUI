@@ -124,7 +124,7 @@
 					ConverterParameter='Y'}"
 				Background="LightGray"
 				Opacity="0.8">
-				<Canvas.LayoutTransform>
+				<Canvas.RenderTransform>
 					<TranslateTransform
 						X="{Binding
 							FieldPosition.Value,
@@ -133,10 +133,16 @@
 						Y="{Binding
 							FieldPosition.Value,
 							Converter={StaticResource vectorConverter},
-							ConverterParameter='Y'}"
-					/>
-				</Canvas.LayoutTransform>
-				<ContentControl Name="IdSelection" Content="{Binding IdSelection.Value}"/>
+							ConverterParameter='Y'}"/>
+				</Canvas.RenderTransform>
+				<Popup
+					Name="IdSelection"
+					IsOpen="{Binding IsSelectingId.Value}"
+					PopupAnimation="Slide"
+					AllowsTransparency="True"
+					Placement="Right">
+					<ContentControl Content="{Binding IdSelectionPanel}"/>
+				</Popup>
 			</Canvas>
 		</DataTemplate>
 	</Window.Resources>
