@@ -10,10 +10,9 @@ namespace MarkerRegistratorGui.Model
 		private readonly List<int> _registeredMarkers = new List<int>();
 
 		public IEnumerable<int> RegisteredMarkers { get; }
-		public int IdsCount => 10;
 
-		public (Vector2 position, Vector2 size) RegistrationField
-			=> (new Vector2(0.1f, 0.1f), new Vector2(0.2f, 0.2f));
+		public IMarkerRegistrationService RegistrationService { get; }
+			= new DummyRegistrationService();
 
 		public event Action<int> OnMarkerDown;
 		public event Action<int> OnMarkerUp;
@@ -56,6 +55,14 @@ namespace MarkerRegistratorGui.Model
 			});
 
 			OnMarkerUp?.Invoke(id);
+		}
+
+		private class DummyRegistrationService : IMarkerRegistrationService
+		{
+			public int IdsCount => 10;
+
+			public (Vector2 position, Vector2 size) RegistrationField
+				=> (new Vector2(0.1f, 0.1f), new Vector2(0.2f, 0.2f));
 		}
 	}
 }
