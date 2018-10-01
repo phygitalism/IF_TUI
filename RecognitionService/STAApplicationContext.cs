@@ -16,11 +16,23 @@ namespace RecognitionService
         {
             _touchOverlay = new TouchOverlay();
             _menuViewController = new MenuViewController(_touchOverlay);
+
+            _touchOverlay.OnStateChanged += _menuViewController.OnStateChanged;
+            _touchOverlay.Init();
+            _touchOverlay.Start();
         }
 
         // Called from the Dispose method of the base class
         protected override void Dispose(bool disposing)
         {
+            if ((_touchOverlay != null) && (_menuViewController != null))
+            {
+                _touchOverlay.OnStateChanged -= _menuViewController.OnStateChanged;
+            }
+            if (_touchOverlay != null)
+            {
+                _touchOverlay.Terminate();
+            }
             _touchOverlay = null;
             _menuViewController = null;
         }

@@ -8,5 +8,11 @@ namespace RecognitionService
 {
     public interface IDeviceController
     {
+        string DeviceName { get; }
+        DeviceState State { get; }
+        
+        void Init();
+        void Start();
+        void Stop();
     }
 }
