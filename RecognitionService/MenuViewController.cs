@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Forms;
 using System.Reflection;
 
@@ -11,6 +10,11 @@ namespace RecognitionService
 {
     public class MenuViewController
     {
+        private System.ComponentModel.IContainer _components;
+        private NotifyIcon _notifyIcon;
+        private ToolStripMenuItem _exitMenuItem;
+        IDeviceController _deviceController;
+
         public MenuViewController(IDeviceController deviceController)
         {
             System.Diagnostics.Debug.Assert(deviceController != null);
@@ -18,26 +22,15 @@ namespace RecognitionService
             _deviceController = deviceController;
 
             _components = new System.ComponentModel.Container();
-            _notifyIcon = new System.Windows.Forms.NotifyIcon(_components)
+            _notifyIcon = new NotifyIcon(_components)
             {
                 ContextMenuStrip = new ContextMenuStrip(),
-                Icon = RecognitionService.Properties.Resources.NotReadyIcon,
+                Icon = Properties.Resources.NotReadyIcon,
                 Text = "Overlay is not found",
                 Visible = true,
             };
 
-            // _notifyIcon.ContextMenuStrip.Opening += ContextMenuStrip_Opening;
-            // _notifyIcon.DoubleClick += notifyIcon_DoubleClick;
-            // _notifyIcon.MouseUp += notifyIcon_MouseUp;
-
-            //_aboutViewModel = new WpfFormLibrary.ViewModel.AboutViewModel();
-            //_statusViewModel = new WpfFormLibrary.ViewModel.StatusViewModel();
-
-            // _statusViewModel.Icon = AppIcon;
-            // _aboutViewModel.Icon = _statusViewModel.Icon;
-
-            // _hiddenWindow = new System.Windows.Window();
-            // _hiddenWindow.Hide();
+            _notifyIcon.ContextMenuStrip.Opening += ContextMenuStrip_Opening;
         }
 
         System.Windows.Media.ImageSource AppIcon
@@ -53,12 +46,32 @@ namespace RecognitionService
             }
         }
 
-        // This allows code to be run on a GUI thread
-        // private System.Windows.Window _hiddenWindow;
+        private void ContextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = false;
 
-        private System.ComponentModel.IContainer _components;
-        // The Windows system tray class
-        private NotifyIcon _notifyIcon;
-        IDeviceController _deviceController;
+            if (_notifyIcon.ContextMenuStrip.Items.Count == 0)
+            {
+                _exitMenuItem = ToolStripMenuItemWithHandler("&Exit", "Exits Recognition Service", exitItem_Click);
+                _notifyIcon.ContextMenuStrip.Items.Add(_exitMenuItem);
+            }
+        }
+
+        private ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, string tooltipText, EventHandler eventHandler)
+        {
+            var item = new ToolStripMenuItem(displayText);
+            if (eventHandler != null)
+            {
+                item.Click += eventHandler;
+            }
+
+            item.ToolTipText = tooltipText;
+            return item;
+        }
+
+        private void exitItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
     }
 }
