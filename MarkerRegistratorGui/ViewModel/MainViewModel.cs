@@ -1,15 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Reactive.Linq;
+using System.Threading;
 using MarkerRegistratorGui.Model;
 
 namespace MarkerRegistratorGui.ViewModel
 {
-	public class MainViewModel
+	public class MainViewModel : IDisposable
 	{
 		private readonly Dictionary<int, TrackedMarkerViewModel> _markers = new Dictionary<int, TrackedMarkerViewModel>();
 		private readonly ModelRoot _modelRoot = new ModelRoot()
 		{
-			TrackingService = new TestMarkerService(),
+			TrackingService = new TuioTrackingService(),
 			RegistrationService = new DummyRegistrationService()
 		};
 
@@ -19,14 +22,36 @@ namespace MarkerRegistratorGui.ViewModel
 		public ScaleAdapter ScaleAdapter { get; }
 		public MarkerRegistrationViewModel MarkerRegistration { get; }
 
+		private readonly List<IDisposable> _disposables;
+
 		public MainViewModel()
 		{
 			ScaleAdapter = new ScaleAdapter();
 			MarkerRegistration = new MarkerRegistrationViewModel(_modelRoot.RegistrationService, ScaleAdapter);
 
-			_modelRoot.TrackingService.OnMarkerDown += HandleMarkerDown;
-			_modelRoot.TrackingService.OnMarkerUp += HandleMarkerUp;
-			_modelRoot.TrackingService.OnMarkerStateUpdate += HandleMarkerUpdate;
+
+			_disposables = new List<IDisposable>()
+			{
+				Observable.FromEvent<int>(
+					handler => _modelRoot.TrackingService.OnMarkerDown += handler,
+					handler => _modelRoot.TrackingService.OnMarkerDown -= handler
+				)
+				.ObserveOn(SynchronizationContext.Current)
+				.Subscribe(HandleMarkerDown),
+
+				Observable.FromEvent<MarkerState>(
+					handler => _modelRoot.TrackingService.OnMarkerStateUpdate += handler,
+					handler => _modelRoot.TrackingService.OnMarkerStateUpdate -= handler
+				)
+				.Subscribe(HandleMarkerUpdate),
+
+				Observable.FromEvent<int>(
+					handler => _modelRoot.TrackingService.OnMarkerUp += handler,
+					handler => _modelRoot.TrackingService.OnMarkerUp -= handler
+				)
+				.ObserveOn(SynchronizationContext.Current)
+				.Subscribe(HandleMarkerUp),
+			};
 
 			_modelRoot.TrackingService.Start();
 		}
@@ -55,6 +80,12 @@ namespace MarkerRegistratorGui.ViewModel
 		{
 			if (_markers.TryGetValue(state.id, out var marker))
 				marker.UpdateValues(state.position, state.rotation, state.radius);
+		}
+
+		public void Dispose()
+		{
+			_disposables.ForEach(d => d.Dispose());
+			_modelRoot.TrackingService.Stop();
 		}
 	}
 }
