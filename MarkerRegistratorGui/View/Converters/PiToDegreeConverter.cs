@@ -11,7 +11,7 @@ namespace MarkerRegistratorGui.View.Converters
 		{
 			var pis = (float)value;
 
-			return pis * 180;
+			return 180.0f * pis / Math.PI;
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
