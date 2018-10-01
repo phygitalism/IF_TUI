@@ -7,7 +7,11 @@ namespace MarkerRegistratorGui.ViewModel
 	public class MainViewModel
 	{
 		private readonly Dictionary<int, TrackedMarkerViewModel> _markers = new Dictionary<int, TrackedMarkerViewModel>();
-		private readonly IMarkerService _markerService = new TestMarkerService();
+		private readonly ModelRoot _modelRoot = new ModelRoot()
+		{
+			TrackingService = new TestMarkerService(),
+			RegistrationService = new DummyRegistrationService()
+		};
 
 		public ObservableCollection<TrackedMarkerViewModel> TrackedMarkers { get; }
 			= new ObservableCollection<TrackedMarkerViewModel>();
@@ -18,13 +22,13 @@ namespace MarkerRegistratorGui.ViewModel
 		public MainViewModel()
 		{
 			ScaleAdapter = new ScaleAdapter();
-			MarkerRegistration = new MarkerRegistrationViewModel(_markerService.RegistrationService, ScaleAdapter);
+			MarkerRegistration = new MarkerRegistrationViewModel(_modelRoot.RegistrationService, ScaleAdapter);
 
-			_markerService.OnMarkerDown += HandleMarkerDown;
-			_markerService.OnMarkerUp += HandleMarkerUp;
-			_markerService.OnMarkerStateUpdate += HandleMarkerUpdate;
+			_modelRoot.TrackingService.OnMarkerDown += HandleMarkerDown;
+			_modelRoot.TrackingService.OnMarkerUp += HandleMarkerUp;
+			_modelRoot.TrackingService.OnMarkerStateUpdate += HandleMarkerUpdate;
 
-			_markerService.Start();
+			_modelRoot.TrackingService.Start();
 		}
 
 		private void HandleMarkerDown(int id)

@@ -103,8 +103,11 @@
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
+    <Compile Include="Model\DummyRegistrationService.cs" />
     <Compile Include="Model\IMarkerRegistrationService.cs" />
+    <Compile Include="Model\ModelRoot.cs" />
     <Compile Include="Model\TestMarkerService.cs" />
+    <Compile Include="Model\TuioListener.cs" />
     <Compile Include="ViewModel\IdSelectionViewModel.cs" />
     <Compile Include="ViewModel\MarkerRegistrationViewModel.cs" />
     <Compile Include="ViewModel\ScaleAdapter.cs" />
@@ -129,7 +132,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Model\IMarkerService.cs" />
+    <Compile Include="Model\IMarkerTrackingService.cs" />
     <Compile Include="Model\MarkerState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

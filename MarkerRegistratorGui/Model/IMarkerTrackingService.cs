@@ -2,10 +2,8 @@
 
 namespace MarkerRegistratorGui.Model
 {
-	public interface IMarkerService
+	public interface IMarkerTrackingService
 	{
-		IMarkerRegistrationService RegistrationService { get; }
-
 		event Action<int> OnMarkerDown;
 		event Action<int> OnMarkerUp;
 		event Action<MarkerState> OnMarkerStateUpdate;
