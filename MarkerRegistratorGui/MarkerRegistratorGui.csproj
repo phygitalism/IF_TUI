@@ -107,6 +107,7 @@
     <Compile Include="Model\TuioTrackingService.cs" />
     <Compile Include="ViewModel\IdSelectionViewModel.cs" />
     <Compile Include="ViewModel\MarkerRegistrationViewModel.cs" />
+    <Compile Include="ViewModel\MarkerTrackingViewModel.cs" />
     <Compile Include="ViewModel\ScaleAdapter.cs" />
     <Compile Include="ViewModel\SelectableIdViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
