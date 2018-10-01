@@ -42,12 +42,12 @@ namespace MarkerRegistratorGui.ViewModel
 				}
 
 				marker = new TrackedMarkerViewModel(e.id, _scaleAdapter);
+				marker.UpdateValues(e.state);
 
 				_markers.Add(e.id, marker);
 				TrackedMarkers.Add(marker);
 			}
-
-			if (e.type == MarkerEventType.Up)
+			else if (e.type == MarkerEventType.Up)
 			{
 				if (_markers.TryGetValue(e.id, out var marker))
 				{
@@ -55,8 +55,7 @@ namespace MarkerRegistratorGui.ViewModel
 					TrackedMarkers.Remove(marker);
 				}
 			}
-
-			if (e.type == MarkerEventType.Update)
+			else if (e.type == MarkerEventType.Update)
 			{
 				if (_markers.TryGetValue(e.id, out var marker))
 					marker.UpdateValues(e.state);
