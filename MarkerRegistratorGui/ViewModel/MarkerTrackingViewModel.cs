@@ -22,52 +22,45 @@ namespace MarkerRegistratorGui.ViewModel
 
 			_disposables = new List<IDisposable>()
 			{
-				Observable.FromEvent<int>(
-					handler => markerTracking.OnMarkerDown += handler,
-					handler => markerTracking.OnMarkerDown -= handler
+				Observable.FromEvent<MarkerEvent>(
+					handler => markerTracking.OnMarkerEvent += handler,
+					handler => markerTracking.OnMarkerEvent -= handler
 				)
 				.ObserveOn(SynchronizationContext.Current)
-				.Subscribe(HandleMarkerDown),
-
-				Observable.FromEvent<MarkerState>(
-					handler => markerTracking.OnMarkerStateUpdate += handler,
-					handler => markerTracking.OnMarkerStateUpdate -= handler
-				)
-				.Subscribe(HandleMarkerUpdate),
-
-				Observable.FromEvent<int>(
-					handler => markerTracking.OnMarkerUp += handler,
-					handler => markerTracking.OnMarkerUp -= handler
-				)
-				.ObserveOn(SynchronizationContext.Current)
-				.Subscribe(HandleMarkerUp),
+				.Subscribe(HandleMarkerEvent)
 			};
 		}
 
-		private void HandleMarkerDown(int id)
+		private void HandleMarkerEvent(MarkerEvent e)
 		{
-			if (_markers.ContainsKey(id))
-				HandleMarkerUp(id);
-
-			var marker = new TrackedMarkerViewModel(id, _scaleAdapter);
-
-			_markers.Add(id, marker);
-			TrackedMarkers.Add(marker);
-		}
-
-		private void HandleMarkerUp(int id)
-		{
-			if (_markers.TryGetValue(id, out var marker))
+			if (e.type == MarkerEventType.Down)
 			{
-				_markers.Remove(id);
-				TrackedMarkers.Remove(marker);
-			}
-		}
+				if (_markers.TryGetValue(e.id, out var marker))
+				{
+					_markers.Remove(e.id);
+					TrackedMarkers.Remove(marker);
+				}
 
-		private void HandleMarkerUpdate(MarkerState state)
-		{
-			if (_markers.TryGetValue(state.id, out var marker))
-				marker.UpdateValues(state.position, state.rotation, state.radius);
+				marker = new TrackedMarkerViewModel(e.id, _scaleAdapter);
+
+				_markers.Add(e.id, marker);
+				TrackedMarkers.Add(marker);
+			}
+
+			if (e.type == MarkerEventType.Up)
+			{
+				if (_markers.TryGetValue(e.id, out var marker))
+				{
+					_markers.Remove(e.id);
+					TrackedMarkers.Remove(marker);
+				}
+			}
+
+			if (e.type == MarkerEventType.Update)
+			{
+				if (_markers.TryGetValue(e.id, out var marker))
+					marker.UpdateValues(e.state);
+			}
 		}
 
 		public void Dispose() => _disposables.ForEach(d => d.Dispose());

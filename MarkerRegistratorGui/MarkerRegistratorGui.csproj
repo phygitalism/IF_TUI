@@ -131,7 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\IMarkerTrackingService.cs" />
-    <Compile Include="Model\MarkerState.cs" />
+    <Compile Include="Model\MarkerEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

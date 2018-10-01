@@ -12,44 +12,30 @@ namespace MarkerRegistratorGui.Model
 		private readonly TuioClient _tuioClient = new TuioClient();
 		private readonly TuioListener _tuioListener = new TuioListener();
 
-		public event Action<int> OnMarkerDown;
-		public event Action<int> OnMarkerUp;
-		public event Action<MarkerState> OnMarkerStateUpdate;
+		public event Action<MarkerEvent> OnMarkerEvent;
 
 		public TuioTrackingService()
 		{
-			_tuioListener.OnObjectAdd += HandleObjectAdd;
-			_tuioListener.OnObjectUpdate += HandleObjectUpdate;
-			_tuioListener.OnObjectRemove += HandleObjectRemove;
+			_tuioListener.OnObjectAdd += obj => InvokeMarkerEvent(MarkerEventType.Down, obj);
+			_tuioListener.OnObjectUpdate += obj => InvokeMarkerEvent(MarkerEventType.Update, obj);
+			_tuioListener.OnObjectRemove += obj => InvokeMarkerEvent(MarkerEventType.Up, obj);
 
 			_tuioClient.addTuioListener(_tuioListener);
 		}
 
-		private void HandleObjectAdd(TuioObject obj)
+		private void InvokeMarkerEvent(MarkerEventType type, TuioObject obj)
 		{
-			Debug.WriteLine($"Object add {obj.SymbolID}", typeof(TuioTrackingService));
+			Debug.WriteLine($"Marker {type} {new Vector2(obj.X, obj.Y)}");
 
-			OnMarkerDown?.Invoke(obj.SymbolID);
-			HandleObjectUpdate(obj);
-		}
-
-		private void HandleObjectUpdate(TuioObject obj)
-		{
-			Trace.WriteLine($"Object update {obj.SymbolID} pos: {new Vector2(obj.X, obj.Y)}");
-
-			OnMarkerStateUpdate?.Invoke(new MarkerState(
+			OnMarkerEvent?.Invoke(new MarkerEvent(
 				obj.SymbolID,
-				new Vector2(obj.X, obj.Y),
-				obj.Angle,
-				_markerRadius
+				type,
+				new MarkerState(
+					new Vector2(obj.X, obj.Y),
+					obj.Angle,
+					_markerRadius
+				)
 			));
-		}
-
-		private void HandleObjectRemove(TuioObject obj)
-		{
-			Debug.WriteLine($"Object remove {obj.SymbolID}", typeof(TuioTrackingService));
-
-			OnMarkerDown?.Invoke(obj.SymbolID);
 		}
 
 		public void Start()
