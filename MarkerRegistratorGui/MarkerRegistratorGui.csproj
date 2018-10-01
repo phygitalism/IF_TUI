@@ -46,9 +46,6 @@
     <Reference Include="ReactiveProperty.NET46, Version=5.2.6788.26146, Culture=neutral, PublicKeyToken=3d1fed915120cbde, processorArchitecture=MSIL">
       <HintPath>..\packages\ReactiveProperty.5.2.0\lib\net461\ReactiveProperty.NET46.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=8.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveUI.8.7.2\lib\net461\ReactiveUI.dll</HintPath>
-    </Reference>
     <Reference Include="Splat, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Splat.4.0.2\lib\net461\Splat.dll</HintPath>
     </Reference>
@@ -107,7 +104,7 @@
     <Compile Include="Model\IMarkerRegistrationService.cs" />
     <Compile Include="Model\ModelRoot.cs" />
     <Compile Include="Model\TestMarkerService.cs" />
-    <Compile Include="Model\TuioListener.cs" />
+    <Compile Include="Model\TuioTrackingService.cs" />
     <Compile Include="ViewModel\IdSelectionViewModel.cs" />
     <Compile Include="ViewModel\MarkerRegistrationViewModel.cs" />
     <Compile Include="ViewModel\ScaleAdapter.cs" />
