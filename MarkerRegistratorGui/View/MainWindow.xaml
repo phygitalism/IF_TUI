@@ -10,8 +10,8 @@
 		mc:Ignorable="d"
 		Title="MainWindow"
 		WindowState="Maximized" WindowStyle="None" ResizeMode="NoResize"
-		Height="{Binding WindowHeight.Value, Mode=OneWayToSource}"
-		Width="{Binding WindowWidth.Value, Mode=OneWayToSource}">
+		Height="{Binding ScaleAdapter.WindowHeight.Value, Mode=OneWayToSource}"
+		Width="{Binding ScaleAdapter.WindowWidth.Value, Mode=OneWayToSource}">
 	<Window.DataContext>
 		<viewmodel:MainViewModel/>
 	</Window.DataContext>
@@ -112,9 +112,42 @@
 				</ItemsControl>
 			</StackPanel>
 		</DataTemplate>
+		<DataTemplate DataType="{x:Type viewmodel:MarkerRegistrationViewModel}">
+			<Canvas
+				Width="{Binding
+					FieldSize.Value,
+					Converter={StaticResource vectorConverter},
+					ConverterParameter='X'}"
+				Height="{Binding
+					FieldSize.Value,
+					Converter={StaticResource vectorConverter},
+					ConverterParameter='Y'}"
+				Background="LightGray"
+				Opacity="0.8">
+				<Canvas.RenderTransform>
+					<TranslateTransform
+						X="{Binding
+							FieldPosition.Value,
+							Converter={StaticResource vectorConverter},
+							ConverterParameter='X'}"
+						Y="{Binding
+							FieldPosition.Value,
+							Converter={StaticResource vectorConverter},
+							ConverterParameter='Y'}"/>
+				</Canvas.RenderTransform>
+				<Popup
+					Name="IdSelection"
+					IsOpen="{Binding IsSelectingId.Value}"
+					PopupAnimation="Slide"
+					AllowsTransparency="True"
+					Placement="Right">
+					<ContentControl Content="{Binding IdSelectionPanel}"/>
+				</Popup>
+			</Canvas>
+		</DataTemplate>
 	</Window.Resources>
 	<Canvas>
 		<ItemsControl Name="Markers" ItemsSource="{Binding TrackedMarkers}"/>
-		<ContentControl Name="IdSelection" Content="{Binding IdSelection.Value}"/>
+		<ContentControl Name="MarkerRegistration" Content="{Binding MarkerRegistration}"/>
 	</Canvas>
 </Window>

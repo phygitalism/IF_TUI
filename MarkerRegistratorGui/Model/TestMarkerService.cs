@@ -10,7 +10,9 @@ namespace MarkerRegistratorGui.Model
 		private readonly List<int> _registeredMarkers = new List<int>();
 
 		public IEnumerable<int> RegisteredMarkers { get; }
-		public int IdsCount => 10;
+
+		public IMarkerRegistrationService RegistrationService { get; }
+			= new DummyRegistrationService();
 
 		public event Action<int> OnMarkerDown;
 		public event Action<int> OnMarkerUp;
@@ -18,10 +20,10 @@ namespace MarkerRegistratorGui.Model
 
 		public void Start()
 		{
-			AddTestMarkerAsync(new Vector2(1.0f, 0.0f), 0.1f, -0.75f);
-			AddTestMarkerAsync(new Vector2(0.0f, 1.0f), 0.1f, 0.25f);
-			AddTestMarkerAsync(new Vector2(0.0f, 0.0f), 0.1f, 0.75f);
-			AddTestMarkerAsync(new Vector2(1.0f, 1.0f), 0.1f, -0.25f);
+			AddTestMarkerAsync(new Vector2(0.20f, 0.20f), 0.05f, -0.75f);
+			AddTestMarkerAsync(new Vector2(0.20f, 0.80f), 0.05f, 0.25f);
+			AddTestMarkerAsync(new Vector2(0.80f, 0.20f), 0.05f, 0.75f);
+			AddTestMarkerAsync(new Vector2(0.80f, 0.80f), 0.05f, -0.25f);
 		}
 
 		public void Stop()
@@ -45,7 +47,7 @@ namespace MarkerRegistratorGui.Model
 						i += 0.1f;
 
 						var newRotation = rotation + (float)Math.Sin(i) * 0.25f;
-						var newPosition = position;// + new Vector2((float)Math.Cos(i), (float)Math.Sin(i)) * radius;
+						var newPosition = position + new Vector2((float)Math.Cos(i), (float)Math.Sin(i)) * radius;
 
 						OnMarkerStateUpdate?.Invoke(new MarkerState(id, newPosition, newRotation, radius));
 						await Task.Delay(10);
@@ -53,6 +55,14 @@ namespace MarkerRegistratorGui.Model
 			});
 
 			OnMarkerUp?.Invoke(id);
+		}
+
+		private class DummyRegistrationService : IMarkerRegistrationService
+		{
+			public int IdsCount => 10;
+
+			public (Vector2 position, Vector2 size) RegistrationField
+				=> (new Vector2(0.1f, 0.1f), new Vector2(0.2f, 0.3f));
 		}
 	}
 }

@@ -28,7 +28,7 @@ namespace MarkerRegistratorGui.ViewModel
 		public ReactiveProperty<Vector2> ScaledPosition { get; }
 		public ReactiveProperty<float> ScaledRadius { get; }
 
-		public TrackedMarkerViewModel(int index, MainViewModel mainViewModel)
+		public TrackedMarkerViewModel(int index, ScaleAdapter scaleAdapter)
 		{
 			Index = index;
 			Color = _colors[index % _colors.Length];
@@ -39,18 +39,14 @@ namespace MarkerRegistratorGui.ViewModel
 
 			ScaledPosition = Observable.CombineLatest(
 				Position,
-				mainViewModel.WindowWidth,
-				mainViewModel.WindowHeight,
+				scaleAdapter.WindowWidth,
+				scaleAdapter.WindowHeight,
 				(position, width, height) => new Vector2(position.X * width, position.Y * height)
 			)
 			.ToReactiveProperty();
 
-			ScaledRadius = Observable.CombineLatest(
-				Radius,
-				mainViewModel.WindowWidth,
-				(radius, width) => radius * width
-			)
-			.ToReactiveProperty();
+			ScaledRadius = Radius.ScaleToScreenHeight(scaleAdapter)
+				.ToReactiveProperty();
 		}
 
 		public void UpdateValues(Vector2 position, float rotation, float radius)

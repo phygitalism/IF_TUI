@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Reactive.Linq;
 using MarkerRegistratorGui.Model;
-using Reactive.Bindings;
 
 namespace MarkerRegistratorGui.ViewModel
 {
@@ -15,35 +12,19 @@ namespace MarkerRegistratorGui.ViewModel
 		public ObservableCollection<TrackedMarkerViewModel> TrackedMarkers { get; }
 			= new ObservableCollection<TrackedMarkerViewModel>();
 
-		public ReactiveProperty<IdSelectionViewModel> IdSelection { get; }
-
-		public ReactiveProperty<float> WindowWidth { get; }
-		public ReactiveProperty<float> WindowHeight { get; }
+		public ScaleAdapter ScaleAdapter { get; }
+		public MarkerRegistrationViewModel MarkerRegistration { get; }
 
 		public MainViewModel()
 		{
-			WindowWidth = new ReactiveProperty<float>();
-			WindowHeight = new ReactiveProperty<float>();
-
-			IdSelection = new ReactiveProperty<IdSelectionViewModel>();
+			ScaleAdapter = new ScaleAdapter();
+			MarkerRegistration = new MarkerRegistrationViewModel(_markerService.RegistrationService, ScaleAdapter);
 
 			_markerService.OnMarkerDown += HandleMarkerDown;
 			_markerService.OnMarkerUp += HandleMarkerUp;
 			_markerService.OnMarkerStateUpdate += HandleMarkerUpdate;
 
 			_markerService.Start();
-
-			SelectIdAsync();
-		}
-
-		private async void SelectIdAsync()
-		{
-			IdSelection.Value = new IdSelectionViewModel(_markerService.IdsCount);
-
-			var selectedId = await IdSelection.Value.SelectedId.FirstAsync();
-			Debug.Print($"Selected id {selectedId}");
-
-			IdSelection.Value = null;
 		}
 
 		private void HandleMarkerDown(int id)
@@ -51,7 +32,7 @@ namespace MarkerRegistratorGui.ViewModel
 			if (_markers.ContainsKey(id))
 				HandleMarkerUp(id);
 
-			var marker = new TrackedMarkerViewModel(id, this);
+			var marker = new TrackedMarkerViewModel(id, ScaleAdapter);
 
 			_markers.Add(id, marker);
 			TrackedMarkers.Add(marker);

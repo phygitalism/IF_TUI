@@ -4,7 +4,7 @@ namespace MarkerRegistratorGui.Model
 {
 	public interface IMarkerService
 	{
-		int IdsCount { get; }
+		IMarkerRegistrationService RegistrationService { get; }
 
 		event Action<int> OnMarkerDown;
 		event Action<int> OnMarkerUp;
