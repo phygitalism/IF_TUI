@@ -4,8 +4,6 @@ namespace RecognitionService
 {
     class TouchOverlay : IDeviceController
     {
-        private System.Windows.Threading.DispatcherTimer _statusTimer;
-
         public string DeviceName { get; private set; }
         public DeviceState State { get; private set; }
         public delegate void StateChangedEvent();
@@ -13,26 +11,18 @@ namespace RecognitionService
 
         public TouchOverlay()
         {
+            DeviceName = "PQ LABS Touch Overlay";
             State = DeviceState.Uninitialized;
-        }
-
-        private void KillTimer()
-        {
-            if (_statusTimer != null)
-            {
-                _statusTimer.Stop();
-                _statusTimer = null;
-            }
         }
 
         public void Init()
         {
             if (State == DeviceState.Uninitialized)
             {
+                BindToTouchOverlayEvents();
                 State = DeviceState.Initialized;
             }
-
-            DeviceName = "PQ LABS Touch Overlay";
+            
         }
 
         public void Start()
@@ -40,19 +30,6 @@ namespace RecognitionService
             if (State == DeviceState.Initialized)
             {
                 State = DeviceState.Starting;
-                // Simulate a real device with a simple timer
-                _statusTimer = new System.Windows.Threading.DispatcherTimer(
-                    new TimeSpan(0, 0, 3),
-                    System.Windows.Threading.DispatcherPriority.Normal,
-                    delegate
-                    {
-                        KillTimer();
-                        State = DeviceState.Running;
-                        _statusTimer = null;
-                        OnStateChanged?.Invoke();
-                    },
-                    System.Windows.Threading.Dispatcher.CurrentDispatcher
-                );
             }
         }
 
@@ -67,9 +44,12 @@ namespace RecognitionService
 
         public void Terminate()
         {
-            KillTimer();
             Stop();
             State = DeviceState.Uninitialized;
+        }
+
+        private void BindToTouchOverlayEvents() {
+            
         }
     }
 }
