@@ -16,13 +16,13 @@ namespace MarkerRegistratorGui.ViewModel
 		public ObservableCollection<TrackedMarkerViewModel> TrackedMarkers { get; }
 			= new ObservableCollection<TrackedMarkerViewModel>();
 
-		public MarkerTrackingViewModel(IMarkerTrackingService markerTracking, ScaleAdapter scaleAdapter)
+		public MarkerTrackingViewModel(ITrackingService markerTracking, ScaleAdapter scaleAdapter)
 		{
 			_scaleAdapter = scaleAdapter;
 
 			_disposables = new List<IDisposable>()
 			{
-				Observable.FromEvent<MarkerEvent>(
+				Observable.FromEvent<TrackerEvent<MarkerState>>(
 					handler => markerTracking.OnMarkerEvent += handler,
 					handler => markerTracking.OnMarkerEvent -= handler
 				)
@@ -31,9 +31,9 @@ namespace MarkerRegistratorGui.ViewModel
 			};
 		}
 
-		private void HandleMarkerEvent(MarkerEvent e)
+		private void HandleMarkerEvent(TrackerEvent<MarkerState> e)
 		{
-			if (e.type == MarkerEventType.Down)
+			if (e.type == TrackerEventType.Down)
 			{
 				if (_markers.TryGetValue(e.id, out var marker))
 				{
@@ -47,7 +47,7 @@ namespace MarkerRegistratorGui.ViewModel
 				_markers.Add(e.id, marker);
 				TrackedMarkers.Add(marker);
 			}
-			else if (e.type == MarkerEventType.Up)
+			else if (e.type == TrackerEventType.Up)
 			{
 				if (_markers.TryGetValue(e.id, out var marker))
 				{
@@ -55,7 +55,7 @@ namespace MarkerRegistratorGui.ViewModel
 					TrackedMarkers.Remove(marker);
 				}
 			}
-			else if (e.type == MarkerEventType.Update)
+			else if (e.type == TrackerEventType.Update)
 			{
 				if (_markers.TryGetValue(e.id, out var marker))
 					marker.UpdateValues(e.state);

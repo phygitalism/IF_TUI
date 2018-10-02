@@ -2,13 +2,13 @@
 
 namespace MarkerRegistratorGui.Model
 {
-	public readonly struct MarkerEvent
+	public readonly struct TrackerEvent<TState>
 	{
 		public readonly int id;
-		public readonly MarkerEventType type;
-		public readonly MarkerState state;
+		public readonly TrackerEventType type;
+		public readonly TState state;
 
-		public MarkerEvent(int id, MarkerEventType type, MarkerState state)
+		public TrackerEvent(int id, TrackerEventType type, TState state)
 		{
 			this.id = id;
 			this.type = type;
@@ -16,11 +16,21 @@ namespace MarkerRegistratorGui.Model
 		}
 	}
 
-	public enum MarkerEventType
+	public enum TrackerEventType
 	{
 		Up,
 		Down,
 		Update
+	}
+
+	public readonly struct PointerState
+	{
+		public readonly Vector2 position;
+
+		public PointerState(Vector2 position)
+		{
+			this.position = position;
+		}
 	}
 
 	public readonly struct MarkerState

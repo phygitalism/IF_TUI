@@ -5,36 +5,48 @@ using TUIO;
 
 namespace MarkerRegistratorGui.Model
 {
-	public class TuioTrackingService : IMarkerTrackingService
+	public class TuioTrackingService : ITrackingService
 	{
 		private const float _markerRadius = 0.1f;
 
 		private readonly TuioClient _tuioClient = new TuioClient();
 		private readonly TuioListener _tuioListener = new TuioListener();
 
-		public event Action<MarkerEvent> OnMarkerEvent;
+		public event Action<TrackerEvent<PointerState>> OnPointerEvent;
+		public event Action<TrackerEvent<MarkerState>> OnMarkerEvent;
 
 		public TuioTrackingService()
 		{
-			_tuioListener.OnObjectAdd += obj => InvokeMarkerEvent(MarkerEventType.Down, obj);
-			_tuioListener.OnObjectUpdate += obj => InvokeMarkerEvent(MarkerEventType.Update, obj);
-			_tuioListener.OnObjectRemove += obj => InvokeMarkerEvent(MarkerEventType.Up, obj);
+			_tuioListener.OnCursorAdd += obj => InvokePointerEvent(TrackerEventType.Down, obj);
+			_tuioListener.OnCursorUpdate += obj => InvokePointerEvent(TrackerEventType.Update, obj);
+			_tuioListener.OnCursorRemove += obj => InvokePointerEvent(TrackerEventType.Up, obj);
+
+			_tuioListener.OnObjectAdd += obj => InvokeMarkerEvent(TrackerEventType.Down, obj);
+			_tuioListener.OnObjectUpdate += obj => InvokeMarkerEvent(TrackerEventType.Update, obj);
+			_tuioListener.OnObjectRemove += obj => InvokeMarkerEvent(TrackerEventType.Up, obj);
 
 			_tuioClient.addTuioListener(_tuioListener);
 		}
 
-		private void InvokeMarkerEvent(MarkerEventType type, TuioObject obj)
+		private void InvokePointerEvent(TrackerEventType type, TuioCursor obj)
+		{
+			Debug.WriteLine($"Pointer {type} {new Vector2(obj.X, obj.Y)}");
+
+			OnPointerEvent?.Invoke(new TrackerEvent<PointerState>(
+				obj.CursorID,
+				type,
+				new PointerState(new Vector2(obj.X, obj.Y))
+			));
+		}
+
+		private void InvokeMarkerEvent(TrackerEventType type, TuioObject obj)
 		{
 			Debug.WriteLine($"Marker {type} {new Vector2(obj.X, obj.Y)}");
 
-			OnMarkerEvent?.Invoke(new MarkerEvent(
+			OnMarkerEvent?.Invoke(new TrackerEvent<MarkerState>(
 				obj.SymbolID,
 				type,
-				new MarkerState(
-					new Vector2(obj.X, obj.Y),
-					obj.Angle,
-					_markerRadius
-				)
+				new MarkerState(new Vector2(obj.X, obj.Y), obj.Angle, _markerRadius)
 			));
 		}
 

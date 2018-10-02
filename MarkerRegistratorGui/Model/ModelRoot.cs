@@ -2,7 +2,7 @@
 {
 	public class ModelRoot
 	{
-		public IMarkerTrackingService TrackingService { get; set; }
+		public ITrackingService TrackingService { get; set; }
 		public IMarkerRegistrationService RegistrationService { get; set; }
 	}
 }

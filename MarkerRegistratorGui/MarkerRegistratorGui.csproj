@@ -130,8 +130,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Model\IMarkerTrackingService.cs" />
-    <Compile Include="Model\MarkerEvent.cs" />
+    <Compile Include="Model\ITrackingService.cs" />
+    <Compile Include="Model\TrackerEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
