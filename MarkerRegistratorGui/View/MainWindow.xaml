@@ -147,7 +147,7 @@
 		</DataTemplate>
 	</Window.Resources>
 	<Canvas>
-		<ItemsControl Name="Markers" ItemsSource="{Binding TrackedMarkers}"/>
+		<ItemsControl Name="Markers" ItemsSource="{Binding MarkerTracking.TrackedMarkers}"/>
 		<ContentControl Name="MarkerRegistration" Content="{Binding MarkerRegistration}"/>
 	</Canvas>
 </Window>

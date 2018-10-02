@@ -1,56 +1,36 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Diagnostics;
+using System.Windows.Threading;
 using MarkerRegistratorGui.Model;
 
 namespace MarkerRegistratorGui.ViewModel
 {
 	public class MainViewModel
 	{
-		private readonly Dictionary<int, TrackedMarkerViewModel> _markers = new Dictionary<int, TrackedMarkerViewModel>();
-		private readonly IMarkerService _markerService = new TestMarkerService();
-
-		public ObservableCollection<TrackedMarkerViewModel> TrackedMarkers { get; }
-			= new ObservableCollection<TrackedMarkerViewModel>();
+		private readonly ModelRoot _modelRoot = new ModelRoot()
+		{
+			TrackingService = new TuioTrackingService(),
+			RegistrationService = new DummyRegistrationService()
+		};
 
 		public ScaleAdapter ScaleAdapter { get; }
 		public MarkerRegistrationViewModel MarkerRegistration { get; }
+		public MarkerTrackingViewModel MarkerTracking { get; }
 
 		public MainViewModel()
 		{
 			ScaleAdapter = new ScaleAdapter();
-			MarkerRegistration = new MarkerRegistrationViewModel(_markerService.RegistrationService, ScaleAdapter);
+			MarkerRegistration = new MarkerRegistrationViewModel(_modelRoot.RegistrationService, ScaleAdapter);
+			MarkerTracking = new MarkerTrackingViewModel(_modelRoot.TrackingService, ScaleAdapter);
 
-			_markerService.OnMarkerDown += HandleMarkerDown;
-			_markerService.OnMarkerUp += HandleMarkerUp;
-			_markerService.OnMarkerStateUpdate += HandleMarkerUpdate;
+			Dispatcher.CurrentDispatcher.ShutdownStarted += (sender, e) => Dispose();
 
-			_markerService.Start();
+			_modelRoot.TrackingService.Start();
 		}
 
-		private void HandleMarkerDown(int id)
+		public void Dispose()
 		{
-			if (_markers.ContainsKey(id))
-				HandleMarkerUp(id);
-
-			var marker = new TrackedMarkerViewModel(id, ScaleAdapter);
-
-			_markers.Add(id, marker);
-			TrackedMarkers.Add(marker);
-		}
-
-		private void HandleMarkerUp(int id)
-		{
-			if (_markers.TryGetValue(id, out var marker))
-			{
-				_markers.Remove(id);
-				TrackedMarkers.Remove(marker);
-			}
-		}
-
-		private void HandleMarkerUpdate(MarkerState state)
-		{
-			if (_markers.TryGetValue(state.id, out var marker))
-				marker.UpdateValues(state.position, state.rotation, state.radius);
+			Debug.WriteLine("Disposing");
+			_modelRoot.TrackingService.Stop();
 		}
 	}
 }

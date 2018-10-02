@@ -5,18 +5,12 @@ using System.Threading.Tasks;
 
 namespace MarkerRegistratorGui.Model
 {
-	public class TestMarkerService : IMarkerService
+	public class TestMarkerService : ITrackingService
 	{
 		private readonly List<int> _registeredMarkers = new List<int>();
 
-		public IEnumerable<int> RegisteredMarkers { get; }
-
-		public IMarkerRegistrationService RegistrationService { get; }
-			= new DummyRegistrationService();
-
-		public event Action<int> OnMarkerDown;
-		public event Action<int> OnMarkerUp;
-		public event Action<MarkerState> OnMarkerStateUpdate;
+		public event Action<TrackerEvent<PointerState>> OnPointerEvent;
+		public event Action<TrackerEvent<MarkerState>> OnMarkerEvent;
 
 		public void Start()
 		{
@@ -36,7 +30,9 @@ namespace MarkerRegistratorGui.Model
 			var id = _registeredMarkers.Count;
 			_registeredMarkers.Add(id);
 
-			OnMarkerDown?.Invoke(id);
+			OnMarkerEvent?.Invoke(
+				new TrackerEvent<MarkerState>(id, TrackerEventType.Down, new MarkerState())
+			);
 
 			await Task.Run(async () =>
 			{
@@ -49,20 +45,18 @@ namespace MarkerRegistratorGui.Model
 						var newRotation = rotation + (float)Math.Sin(i) * 0.25f;
 						var newPosition = position + new Vector2((float)Math.Cos(i), (float)Math.Sin(i)) * radius;
 
-						OnMarkerStateUpdate?.Invoke(new MarkerState(id, newPosition, newRotation, radius));
+						OnMarkerEvent?.Invoke(new TrackerEvent<MarkerState>(
+							id,
+							TrackerEventType.Update,
+							new MarkerState(newPosition, newRotation, radius)
+						));
 						await Task.Delay(10);
 					}
 			});
 
-			OnMarkerUp?.Invoke(id);
-		}
-
-		private class DummyRegistrationService : IMarkerRegistrationService
-		{
-			public int IdsCount => 10;
-
-			public (Vector2 position, Vector2 size) RegistrationField
-				=> (new Vector2(0.1f, 0.1f), new Vector2(0.2f, 0.3f));
+			OnMarkerEvent?.Invoke(
+				new TrackerEvent<MarkerState>(id, TrackerEventType.Up, new MarkerState())
+			);
 		}
 	}
 }

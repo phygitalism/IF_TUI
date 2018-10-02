@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using System.Numerics;
 using Reactive.Bindings;
+using MarkerRegistratorGui.Model;
 
 namespace MarkerRegistratorGui.ViewModel
 {
@@ -49,11 +50,11 @@ namespace MarkerRegistratorGui.ViewModel
 				.ToReactiveProperty();
 		}
 
-		public void UpdateValues(Vector2 position, float rotation, float radius)
+		public void UpdateValues(MarkerState state)
 		{
-			Position.Value = position;
-			Rotation.Value = rotation;
-			Radius.Value = radius;
+			Position.Value = state.position;
+			Rotation.Value = state.rotation;
+			Radius.Value = state.radius;
 		}
 	}
 }
