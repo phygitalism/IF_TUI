@@ -30,7 +30,7 @@ namespace MarkerRegistratorGui.Model
 
 		private void InvokePointerEvent(TrackerEventType type, TuioCursor obj)
 		{
-			Debug.WriteLine($"Pointer {type} {new Vector2(obj.X, obj.Y)}");
+			Debug.WriteLine($"Pointer {type} id:{obj.CursorID} {new Vector2(obj.X, obj.Y)}");
 
 			OnPointerEvent?.Invoke(new TrackerEvent<PointerState>(
 				obj.CursorID,
@@ -41,7 +41,7 @@ namespace MarkerRegistratorGui.Model
 
 		private void InvokeMarkerEvent(TrackerEventType type, TuioObject obj)
 		{
-			Debug.WriteLine($"Marker {type} {new Vector2(obj.X, obj.Y)}");
+			Debug.WriteLine($"Marker {type} id:{obj.SymbolID} {new Vector2(obj.X, obj.Y)}");
 
 			OnMarkerEvent?.Invoke(new TrackerEvent<MarkerState>(
 				obj.SymbolID,
