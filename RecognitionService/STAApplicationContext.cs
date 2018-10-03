@@ -9,12 +9,12 @@ namespace RecognitionService
 {
     public class STAApplicationContext : ApplicationContext
     {
-        private DeviceMock _touchOverlay;
+        private TouchOverlay _touchOverlay;
         private MenuViewController _menuViewController;
 
         public STAApplicationContext()
         {
-            _touchOverlay = new DeviceMock();
+            _touchOverlay = new TouchOverlay();
             _menuViewController = new MenuViewController(_touchOverlay);
 
             _touchOverlay.OnStateChanged += _menuViewController.OnStateChanged;

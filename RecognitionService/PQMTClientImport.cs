@@ -2,7 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 
-namespace PQ_SDK_MultiTouch
+namespace PQMultiTouch
 {
     public class PQMTClientImport
     {
