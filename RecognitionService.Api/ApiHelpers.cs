@@ -4,7 +4,7 @@ namespace RecognitionService.Api
 {
 	public static class ApiHelpers
 	{
-		public static JObject CreateMessage(ApiEvent apiEvent, object payload)
+		public static JObject CreateMessage(ApiEvent apiEvent, object payload = null)
 			=> new JObject()
 			{
 				[ApiKeys.EventType] = apiEvent.ToString(),

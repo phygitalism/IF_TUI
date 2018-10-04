@@ -12,7 +12,7 @@ namespace Tests
 	public class ApiTest
 	{
 		private const int _serverPort = 12350;
-		private const string _clientUri = @"ws:\\localhost:12350";
+		private static readonly string _serverUri = $@"ws:\\localhost:{_serverPort}";
 
 		[Fact]
 		public void Connection()
@@ -33,9 +33,9 @@ namespace Tests
 			{
 				var list = new[] { 1, 2, 3 };
 
-				server.OnListRequested += () => list;
+				server.OnMarkerListRequested += () => list;
 
-				var receivedList = await client.GetIdListAsync();
+				var receivedList = await client.GetMarkerListAsync();
 
 				Assert.True(receivedList.SequenceEqual(list));
 			}
@@ -49,28 +49,28 @@ namespace Tests
 			{
 				var registerList = new[]
 				{
-					(1, new Rectangle(
+					(1, new Triangle(
 						new Vector2(0),
 						new Vector2(0),
 						new Vector2(0)
 					)),
-					(2, new Rectangle(
+					(2, new Triangle(
 						new Vector2(1),
 						new Vector2(2),
 						new Vector2(3)
 					)),
-					(3, new Rectangle(
+					(3, new Triangle(
 						new Vector2(3),
 						new Vector2(2),
 						new Vector2(1)
 					))
 				};
-				var registeredList = new List<(int, Rectangle)>();
+				var registeredList = new List<(int, Triangle)>();
 
-				var serverObservable = Observable.FromEvent<Action<int, Rectangle>, (int, Rectangle)>(
+				var serverObservable = Observable.FromEvent<Action<int, Triangle>, (int, Triangle)>(
 					handler => (arg1, arg2) => handler((arg1, arg2)),
-					handler => server.OnRegisterRequested += handler,
-					handler => server.OnRegisterRequested -= handler
+					handler => server.OnRegisterMarkerRequested += handler,
+					handler => server.OnRegisterMarkerRequested -= handler
 				);
 
 				var subscription = serverObservable
@@ -80,8 +80,8 @@ namespace Tests
 					.Take(registerList.Length)
 					.ToArray();
 
-				foreach ((var id, var rectangle) in registerList)
-					client.RegisterId(id, rectangle);
+				foreach ((var id, var triangle) in registerList)
+					client.RegisterMarker(id, triangle);
 
 				await resultAwaitable;
 
@@ -103,8 +103,8 @@ namespace Tests
 				var registered = initialData.ToList();
 
 				var serverObservable = Observable.FromEvent<int>(
-					h => server.OnUnregisterRequested += h,
-					h => server.OnUnregisterRequested -= h
+					h => server.OnUnregisterMarkerRequested += h,
+					h => server.OnUnregisterMarkerRequested -= h
 				);
 
 				var subscription = serverObservable
@@ -115,7 +115,7 @@ namespace Tests
 					.ToArray();
 
 				foreach (var id in initialData.Take(idsToUnregister))
-					client.UnregisterId(id);
+					client.UnregisterMarker(id);
 
 				await resultAwaitable;
 
@@ -129,6 +129,6 @@ namespace Tests
 			=> new RecognitionServiceServer(_serverPort);
 
 		private RecognitionServiceClient CreateClient()
-			=> new RecognitionServiceClient(_clientUri);
+			=> new RecognitionServiceClient(_serverUri);
 	}
 }

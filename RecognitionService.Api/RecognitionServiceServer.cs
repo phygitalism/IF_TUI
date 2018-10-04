@@ -11,9 +11,9 @@ namespace RecognitionService.Api
 		private readonly WebSocketServer _webSocketServer;
 		private readonly MessageResponder _messageResponder;
 
-		public event Func<int[]> OnListRequested;
-		public event Action<int, Rectangle> OnRegisterRequested;
-		public event Action<int> OnUnregisterRequested;
+		public event Func<int[]> OnMarkerListRequested;
+		public event Action<int, Triangle> OnRegisterMarkerRequested;
+		public event Action<int> OnUnregisterMarkerRequested;
 
 		public bool HasConnections => _webSocketServer.WebSocketServices.SessionCount > 0;
 
@@ -51,13 +51,13 @@ namespace RecognitionService.Api
 						switch (type)
 						{
 							case ApiEvent.RequestList:
-								HandleListRequest();
+								HandleMarkerListRequest();
 								break;
 							case ApiEvent.RegisterMarker:
-								HandleRegisterRequest(payload);
+								HandleMarkerRegisterRequest(payload);
 								break;
 							case ApiEvent.UnregisterMarker:
-								HandleUnregisterRequest(payload);
+								HandleMarkerUnregisterRequest(payload);
 								break;
 							default:
 								throw new NotSupportedException();
@@ -72,29 +72,29 @@ namespace RecognitionService.Api
 				}
 			}
 
-			private void HandleRegisterRequest(JToken payload)
+			private void HandleMarkerRegisterRequest(JToken payload)
 			{
 				Debug.WriteLine("Register requested");
 
-				var request = payload.ToObject<RegisterRequestArgs>();
+				var requestArgs = payload.ToObject<RegisterMarkerRequestArgs>();
 
-				_server?.OnRegisterRequested(request.id, request.rectangle);
+				_server?.OnRegisterMarkerRequested(requestArgs.id, requestArgs.triangle);
 			}
 
-			private void HandleUnregisterRequest(JToken payload)
+			private void HandleMarkerUnregisterRequest(JToken payload)
 			{
 				Debug.WriteLine("Unregister requested");
 
 				var id = payload.ToObject<int>();
 
-				_server.OnUnregisterRequested?.Invoke(id);
+				_server.OnUnregisterMarkerRequested?.Invoke(id);
 			}
 
-			private void HandleListRequest()
+			private void HandleMarkerListRequest()
 			{
 				Debug.WriteLine("List requested");
 
-				var list = _server.OnListRequested?.Invoke();
+				var list = _server.OnMarkerListRequested?.Invoke();
 
 				var message = ApiHelpers.CreateMessage(ApiEvent.ResponseList, list);
 

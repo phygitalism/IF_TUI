@@ -52,14 +52,14 @@ namespace RecognitionService.Api
 
 		public void Dispose() => _webSocket.Close();
 
-		public async Task<int[]> GetIdListAsync()
+		public async Task<int[]> GetMarkerListAsync()
 		{
 			var tcs = new TaskCompletionSource<int[]>();
 			_onResponseList += tcs.SetResult;
 
 			Debug.WriteLine("Sending list request");
 
-			var message = ApiHelpers.CreateMessage(ApiEvent.RequestList, null);
+			var message = ApiHelpers.CreateMessage(ApiEvent.RequestList);
 			_webSocket.Send(message.ToString());
 
 			Debug.WriteLine("Waiting for list response");
@@ -72,7 +72,7 @@ namespace RecognitionService.Api
 			return result;
 		}
 
-		public void RegisterId(int id, Rectangle rectangle)
+		public void RegisterMarker(int id, Triangle triangle)
 		{
 			Debug.WriteLine("Sending register request");
 
@@ -81,14 +81,14 @@ namespace RecognitionService.Api
 				new
 				{
 					Id = id,
-					Rectangle = rectangle
+					Trangle = triangle
 				}
 			);
 
 			_webSocket.Send(message.ToString());
 		}
 
-		public void UnregisterId(int id)
+		public void UnregisterMarker(int id)
 		{
 			Debug.WriteLine("Sending unregister request");
 

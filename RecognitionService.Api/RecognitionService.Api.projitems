@@ -14,7 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ApiEvent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RecognitionServiceClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RecognitionServiceServer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Rectangle.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)RegisterRequestArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RegisterMarkerRequestArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Triangle.cs" />
   </ItemGroup>
 </Project>
