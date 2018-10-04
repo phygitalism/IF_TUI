@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using RecognitionService.Api;
 using Xunit;
@@ -41,12 +42,12 @@ namespace Tests
 		}
 
 		[Fact]
-		public void RegisterRequest()
+		public async Task RegisterRequest()
 		{
 			using (var server = CreateServer())
 			using (var client = CreateClient())
 			{
-				var registerList = new []
+				var registerList = new[]
 				{
 					(1, new Rectangle(
 						new Vector2(0),
@@ -66,34 +67,57 @@ namespace Tests
 				};
 				var registeredList = new List<(int, Rectangle)>();
 
-				server.OnRegisterRequested += (id, rect) => registeredList.Add((id, rect));
+				var serverObservable = Observable.FromEvent<Action<int, Rectangle>, (int, Rectangle)>(
+					handler => (arg1, arg2) => handler((arg1, arg2)),
+					handler => server.OnRegisterRequested += handler,
+					handler => server.OnRegisterRequested -= handler
+				);
+
+				var subscription = serverObservable
+					.Subscribe(args => registeredList.Add(args));
+
+				var resultAwaitable = serverObservable
+					.Take(registerList.Length)
+					.ToArray();
 
 				foreach ((var id, var rectangle) in registerList)
 					client.RegisterId(id, rectangle);
 
-				Task.Delay(TimeSpan.FromSeconds(5)).Wait();
+				await resultAwaitable;
 
-				Assert.True(registeredList.SequenceEqual(registerList));
+				Assert.True(
+					registeredList.SequenceEqual(registerList)
+				);
 			}
 		}
 
 		[Fact]
-		public void UnregisterRequest()
+		public async Task UnregisterRequest()
 		{
 			using (var server = CreateServer())
 			using (var client = CreateClient())
 			{
 				var idsToUnregister = 2;
 
-				var initialData = new [] { 1, 2, 3 };
+				var initialData = new[] { 1, 2, 3 };
 				var registered = initialData.ToList();
 
-				server.OnUnregisterRequested += id => registered.Remove(id);
+				var serverObservable = Observable.FromEvent<int>(
+					h => server.OnUnregisterRequested += h,
+					h => server.OnUnregisterRequested -= h
+				);
+
+				var subscription = serverObservable
+					.Subscribe(id => registered.Remove(id));
+
+				var resultAwaitable = serverObservable
+					.Take(idsToUnregister)
+					.ToArray();
 
 				foreach (var id in initialData.Take(idsToUnregister))
 					client.UnregisterId(id);
 
-				Task.Delay(TimeSpan.FromSeconds(5)).Wait();
+				await resultAwaitable;
 
 				Assert.True(
 					registered.SequenceEqual(initialData.Skip(idsToUnregister))
