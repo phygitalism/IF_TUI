@@ -19,5 +19,23 @@ namespace RecognitionService.Api
 				message[ApiKeys.EventPayload]
 			);
 		}
+
+		public static class ApiKeys
+		{
+			public const string EventType = "event";
+			public const string EventPayload = "payload";
+		}
+
+		public readonly struct RegisterMarkerRequestArgs
+		{
+			public readonly int id;
+			public readonly Triangle triangle;
+
+			public RegisterMarkerRequestArgs(int id, Triangle triangle)
+			{
+				this.id = id;
+				this.triangle = triangle;
+			}
+		}
 	}
 }

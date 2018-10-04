@@ -10,11 +10,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)ApiHelpers.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ApiKeys.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiEvent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RecognitionServiceClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RecognitionServiceServer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)RegisterMarkerRequestArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Triangle.cs" />
   </ItemGroup>
 </Project>

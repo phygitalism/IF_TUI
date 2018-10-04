@@ -76,7 +76,7 @@ namespace RecognitionService.Api
 			{
 				Debug.WriteLine("Register requested");
 
-				var requestArgs = payload.ToObject<RegisterMarkerRequestArgs>();
+				var requestArgs = payload.ToObject<ApiHelpers.RegisterMarkerRequestArgs>();
 
 				_server?.OnRegisterMarkerRequested(requestArgs.id, requestArgs.triangle);
 			}

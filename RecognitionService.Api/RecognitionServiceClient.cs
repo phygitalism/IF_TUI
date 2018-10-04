@@ -78,7 +78,7 @@ namespace RecognitionService.Api
 
 			var message = ApiHelpers.CreateMessage(
 				ApiEvent.RegisterMarker,
-				new RegisterMarkerRequestArgs(id, triangle)
+				new ApiHelpers.RegisterMarkerRequestArgs(id, triangle)
 			);
 
 			_webSocket.Send(message.ToString());
