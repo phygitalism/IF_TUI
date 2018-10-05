@@ -74,6 +74,7 @@ namespace RecognitionService
                 case DeviceState.Uninitialized:
                     _notifyIcon.Text = _deviceController.DeviceName + ": Not Ready";
                     _notifyIcon.Icon = Properties.Resources.NotReadyIcon;
+                    PushNotification("Not initialized");
                     break;
                 case DeviceState.Error:
                     _notifyIcon.Text = _deviceController.DeviceName + ": Error Detected";

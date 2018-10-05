@@ -35,6 +35,7 @@ namespace RecognitionService
         {
             if (State == DeviceState.Uninitialized)
             {
+                streamWriter.WriteLine("INIT SESSION");
                 BindToTouchOverlayEvents();
 
                 try
@@ -47,6 +48,7 @@ namespace RecognitionService
                 {
                     Console.WriteLine("Unable connect to device.");
                     Console.WriteLine(ex);
+                    OnStateChanged?.Invoke(DeviceState.Uninitialized);
                 }
             }
         }
@@ -57,6 +59,7 @@ namespace RecognitionService
             {
                 State = DeviceState.Starting;
                 streamWriter.WriteLine("START SESSION");
+                State = DeviceState.Running;
                 OnStateChanged?.Invoke(State);
             }
         }
