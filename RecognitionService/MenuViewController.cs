@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,19 +37,6 @@ namespace RecognitionService
 
             _hiddenWindow = new System.Windows.Window();
             _hiddenWindow.Hide();
-        }
-
-        System.Windows.Media.ImageSource AppIcon
-        {
-            get
-            {
-                // System.Drawing.Icon icon = (_deviceController.Status == DeviceStatus.Running) ? Properties.Resources.ReadyIcon : Properties.Resources.NotReadyIcon;
-                System.Drawing.Icon icon = Properties.Resources.NotReadyIcon;
-                return System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
-                    icon.Handle,
-                    System.Windows.Int32Rect.Empty,
-                    System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
-            }
         }
 
         public void OnStateChanged(DeviceState state)
