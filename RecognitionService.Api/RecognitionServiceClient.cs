@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using WebSocketSharp;
 
@@ -9,7 +11,7 @@ namespace RecognitionService.Api
 	{
 		private readonly WebSocket _webSocket;
 
-		private Action<int[]> _onResponseList;
+		private readonly Subject<int[]> _listResponse = new Subject<int[]>();
 
 		public bool IsConnected => _webSocket.IsAlive;
 
@@ -35,7 +37,7 @@ namespace RecognitionService.Api
 					{
 						case ApiEvent.ResponseList:
 							var result = payload.ToObject<int[]>();
-							_onResponseList?.Invoke(result);
+							_listResponse.OnNext(result);
 							break;
 						default:
 							throw new NotSupportedException();
@@ -54,9 +56,6 @@ namespace RecognitionService.Api
 
 		public async Task<int[]> GetMarkerListAsync()
 		{
-			var tcs = new TaskCompletionSource<int[]>();
-			_onResponseList += tcs.SetResult;
-
 			Debug.WriteLine("Sending list request");
 
 			var message = ApiHelpers.CreateMessage(ApiEvent.RequestList);
@@ -64,8 +63,7 @@ namespace RecognitionService.Api
 
 			Debug.WriteLine("Waiting for list response");
 
-			var result = await tcs.Task;
-			_onResponseList -= tcs.SetResult;
+			var result = await _listResponse.FirstAsync();
 
 			Debug.WriteLine("Received list response");
 
