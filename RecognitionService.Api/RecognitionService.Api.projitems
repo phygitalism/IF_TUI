@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>bcb440f6-ce61-4e20-9d2b-78ea0ba35db7</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>RecognitionService.Api</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ApiHelpers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RecognitionServiceClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RecognitionServiceServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Triangle.cs" />
+  </ItemGroup>
+</Project>
