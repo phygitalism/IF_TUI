@@ -109,6 +109,7 @@
     <Compile Include="Model\DummyRegistrationService.cs" />
     <Compile Include="Model\IMarkerRegistrationService.cs" />
     <Compile Include="Model\ModelRoot.cs" />
+    <Compile Include="Model\PointerInjector.cs" />
     <Compile Include="Model\TestMarkerService.cs" />
     <Compile Include="Model\TouchInjector.cs" />
     <Compile Include="Model\TuioTrackingService.cs" />
