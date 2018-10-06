@@ -110,6 +110,7 @@
     <Compile Include="Model\IMarkerRegistrationService.cs" />
     <Compile Include="Model\ModelRoot.cs" />
     <Compile Include="Model\TestMarkerService.cs" />
+    <Compile Include="Model\TouchInjector.cs" />
     <Compile Include="Model\TuioTrackingService.cs" />
     <Compile Include="ViewModel\IdSelectionViewModel.cs" />
     <Compile Include="ViewModel\MarkerRegistrationViewModel.cs" />
