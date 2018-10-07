@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MarkerRegistratorGui.Model
+namespace MarkerRegistratorGui.View.PointerInjection
 {
 	public static class PointerInjector
 	{

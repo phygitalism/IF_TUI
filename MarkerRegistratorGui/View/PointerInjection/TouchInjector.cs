@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace MarkerRegistratorGui.Model
+namespace MarkerRegistratorGui.View.PointerInjection
 {
 	/// <summary>
 	/// Use this Classes static methods to initialize and inject touch input.
