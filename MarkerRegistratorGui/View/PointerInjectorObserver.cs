@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 using System.Windows;
 using MarkerRegistratorGui.Model;
+using MarkerRegistratorGui.View.PointerInjection;
 
 namespace MarkerRegistratorGui.View
 {
-	public class PointerInjectorObserver : IObserver<TrackerEvent<PointerState>>
+	public class PointerInjectorObserver : IObserver<IEnumerable<TrackerEvent<PointerState>>>
 	{
 		private readonly Window _window;
 
@@ -16,18 +20,28 @@ namespace MarkerRegistratorGui.View
 		public void OnCompleted() => throw new NotImplementedException();
 		public void OnError(Exception error) => throw new NotImplementedException();
 
-		public void OnNext(TrackerEvent<PointerState> e)
+		public void OnNext(IEnumerable<TrackerEvent<PointerState>> value)
 		{
-			var unscaledX = e.state.position.X;
-			var unscaledY = e.state.position.Y;
+			var updates = value.Select(e => new PointerInjector.PointerUpdate(
+				e.id,
+				ScaleAndSafePosition(e.state.position),
+				e.type
+			));
+
+			PointerInjector.InjectPointers(updates);
+		}
+
+		private System.Drawing.Point ScaleAndSafePosition(Vector2 position)
+		{
+			var unscaledX = position.X;
+			var unscaledY = position.Y;
 
 			var scaledX = unscaledX * _window.Width;
 			var scaledY = unscaledY * _window.Height;
 
 			var screenPoint = _window.PointToScreen(new Point(scaledX, scaledY));
 
-			GetInjectAction(e.type).Invoke(
-				e.id,
+			return new System.Drawing.Point(
 				SizeSafe((int)screenPoint.X, unscaledX),
 				SizeSafe((int)screenPoint.Y, unscaledY)
 			);
@@ -35,20 +49,5 @@ namespace MarkerRegistratorGui.View
 
 		private int SizeSafe(int position, float unscaled)
 			=> unscaled == 1.0f ? position - 1 : position;
-
-		private Action<int, int, int> GetInjectAction(TrackerEventType type)
-		{
-			switch (type)
-			{
-				case TrackerEventType.Up:
-					return PointerInjection.PointerInjector.InjectPointerUp;
-				case TrackerEventType.Down:
-					return PointerInjection.PointerInjector.InjectPointerDown;
-				case TrackerEventType.Update:
-					return PointerInjection.PointerInjector.InjectPointerUpdate;
-				default:
-					throw new NotSupportedException();
-			}
-		}
 	}
 }

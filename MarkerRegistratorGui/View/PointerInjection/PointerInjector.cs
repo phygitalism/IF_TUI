@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
+using System.Linq;
+using MarkerRegistratorGui.Model;
 
 namespace MarkerRegistratorGui.View.PointerInjection
 {
@@ -11,34 +15,59 @@ namespace MarkerRegistratorGui.View.PointerInjection
 				throw new Exception("Couldn't initialize touch injection");
 		}
 
-		public static void InjectPointerDown(int id, int x, int y)
-			=> InjectPointer(id, x, y, PointerFlags.INRANGE | PointerFlags.DOWN);
-
-		public static void InjectPointerUpdate(int id, int x, int y)
-			=> InjectPointer(id, x, y, PointerFlags.INRANGE | PointerFlags.UPDATE);
-
-		public static void InjectPointerUp(int id, int x, int y)
-			=> InjectPointer(id, x, y, PointerFlags.INRANGE | PointerFlags.UP);
-
-		private static void InjectPointer(int id, int x, int y, PointerFlags flags)
+		public static void InjectPointers(IEnumerable<PointerUpdate> updates)
 		{
-			var pointerInfo = new PointerTouchInfo()
+			var touchInfo = updates
+				.Select(CreatePointerTouchInfo)
+				.ToArray();
+
+			if (touchInfo.Length != 0 && !TouchInjector.InjectTouchInput(touchInfo.Length, touchInfo))
+				throw new Win32Exception();
+		}
+
+		private static PointerTouchInfo CreatePointerTouchInfo(PointerUpdate update)
+			=> new PointerTouchInfo()
 			{
 				PointerInfo =
-				{
-					PointerId = (uint)id,
-					PointerType = PointerInputType.TOUCH,
-					PointerFlags = flags,
-					PtPixelLocation =
 					{
-						X = x,
-						Y = y
+						PointerId = (uint)update.id,
+						PointerType = PointerInputType.TOUCH,
+						PointerFlags = GetFlags(update.e),
+						PtPixelLocation =
+						{
+							X = update.point.X,
+							Y = update.point.Y
+						}
 					}
-				}
 			};
 
-			if (!TouchInjector.InjectTouchInput(1, new[] { pointerInfo }))
-				throw new Win32Exception();
+		private static PointerFlags GetFlags(TrackerEventType e)
+		{
+			switch (e)
+			{
+				case TrackerEventType.Down:
+					return PointerFlags.INRANGE | PointerFlags.INCONTACT | PointerFlags.DOWN;
+				case TrackerEventType.Update:
+					return PointerFlags.INRANGE | PointerFlags.INCONTACT | PointerFlags.UPDATE;
+				case TrackerEventType.Up:
+					return PointerFlags.UP;
+				default:
+					throw new NotImplementedException();
+			}
+		}
+
+		public readonly struct PointerUpdate
+		{
+			public readonly int id;
+			public readonly Point point;
+			public readonly TrackerEventType e;
+
+			public PointerUpdate(int id, Point point, TrackerEventType e)
+			{
+				this.id = id;
+				this.point = point;
+				this.e = e;
+			}
 		}
 	}
 }

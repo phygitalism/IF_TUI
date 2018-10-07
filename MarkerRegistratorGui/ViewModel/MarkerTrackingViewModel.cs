@@ -22,10 +22,11 @@ namespace MarkerRegistratorGui.ViewModel
 
 			_disposables = new List<IDisposable>()
 			{
-				Observable.FromEvent<TrackerEvent<MarkerState>>(
-					handler => markerTracking.OnMarkerEvent += handler,
-					handler => markerTracking.OnMarkerEvent -= handler
+				Observable.FromEvent<TrackerEvents>(
+					handler => markerTracking.OnEvents += handler,
+					handler => markerTracking.OnEvents -= handler
 				)
+				.SelectMany(events => events.markerEvents)
 				.ObserveOn(SynchronizationContext.Current)
 				.Subscribe(HandleMarkerEvent)
 			};
