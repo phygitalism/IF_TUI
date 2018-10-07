@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace MarkerRegistratorGui.View.PointerInjection
 {
@@ -37,7 +38,7 @@ namespace MarkerRegistratorGui.View.PointerInjection
 			};
 
 			if (!TouchInjector.InjectTouchInput(1, new[] { pointerInfo }))
-				throw new Exception("Couldn't inject");
+				throw new Win32Exception();
 		}
 	}
 }

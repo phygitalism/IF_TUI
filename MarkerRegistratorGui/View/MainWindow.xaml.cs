@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MarkerRegistratorGui.View;
+using MarkerRegistratorGui.ViewModel;
 
 namespace MarkerRegistratorGui
 {
@@ -23,6 +25,10 @@ namespace MarkerRegistratorGui
 		public MainWindow()
 		{
 			InitializeComponent();
+
+			((MainViewModel)DataContext).Pointers.WhenPointerEvent.Subscribe(
+				new PointerInjectorObserver(this)
+			);
 		}
 	}
 }
