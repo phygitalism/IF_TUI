@@ -15,12 +15,14 @@ namespace MarkerRegistratorGui.ViewModel
 		public ScaleAdapter ScaleAdapter { get; }
 		public MarkerRegistrationViewModel MarkerRegistration { get; }
 		public MarkerTrackingViewModel MarkerTracking { get; }
+		public PointersViewModel Pointers { get; }
 
 		public MainViewModel()
 		{
 			ScaleAdapter = new ScaleAdapter();
 			MarkerRegistration = new MarkerRegistrationViewModel(_modelRoot.RegistrationService, ScaleAdapter);
 			MarkerTracking = new MarkerTrackingViewModel(_modelRoot.TrackingService, ScaleAdapter);
+			Pointers = new PointersViewModel(_modelRoot.TrackingService);
 
 			Dispatcher.CurrentDispatcher.ShutdownStarted += (sender, e) => Dispose();
 

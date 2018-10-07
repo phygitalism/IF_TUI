@@ -109,6 +109,7 @@
     <Compile Include="Model\DummyRegistrationService.cs" />
     <Compile Include="Model\IMarkerRegistrationService.cs" />
     <Compile Include="Model\ModelRoot.cs" />
+    <Compile Include="ViewModel\PointersViewModel.cs" />
     <Compile Include="View\PointerInjection\PointerInjector.cs" />
     <Compile Include="Model\TestMarkerService.cs" />
     <Compile Include="View\PointerInjection\TouchInjector.cs" />
@@ -120,6 +121,7 @@
     <Compile Include="ViewModel\SelectableIdViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\TrackedMarkerViewModel.cs" />
+    <Compile Include="View\PointerInjectorObserver.cs" />
     <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
