@@ -111,7 +111,6 @@
     <Compile Include="Model\ModelRoot.cs" />
     <Compile Include="ViewModel\PointersViewModel.cs" />
     <Compile Include="View\PointerInjection\PointerInjector.cs" />
-    <Compile Include="Model\TestMarkerService.cs" />
     <Compile Include="View\PointerInjection\TouchInjector.cs" />
     <Compile Include="Model\TuioTrackingService.cs" />
     <Compile Include="ViewModel\IdSelectionViewModel.cs" />
