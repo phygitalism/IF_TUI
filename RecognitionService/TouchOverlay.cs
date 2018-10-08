@@ -14,9 +14,9 @@ using EPQT_TRequest = PQMultiTouch.PQMTClientImport.EnumTouchClientRequestType;
 
 namespace RecognitionService
 {
-    class СonnectionServerFail : Exception
+    class СonnectionServerException : Exception
     {
-        public СonnectionServerFail(string message) : base(message) { }
+        public СonnectionServerException(string message) : base(message) { }
     }
 
     class TouchOverlay : IDeviceController
@@ -39,7 +39,7 @@ namespace RecognitionService
                     State = DeviceState.Initialized;
                     OnStateChanged?.Invoke(State);
                 }
-                catch (СonnectionServerFail ex)
+                catch (СonnectionServerException ex)
                 {
                     Console.WriteLine("Unable connect to device.");
                     Console.WriteLine(ex);
@@ -75,10 +75,10 @@ namespace RecognitionService
 
         private void BindToTouchOverlayEvents()
         {
-            PQ.SetOnReceivePointFrame(new PQ.PFuncOnReceivePointFrame(OnReceivePointFrame), IntPtr.Zero);
-            PQ.SetOnServerBreak(new PQ.PFuncOnServerBreak(OnServerBreak), IntPtr.Zero);
-            PQ.SetOnReceiveError(new PQ.PFuncOnReceiveError(OnReceiveError), IntPtr.Zero);
-            PQ.SetOnGetDeviceInfo(new PQ.PFuncOnGetDeviceInfo(OnGetDeviceInfo), IntPtr.Zero);
+            PQ.SetOnReceivePointFrame(OnReceivePointFrame, IntPtr.Zero);
+            PQ.SetOnServerBreak(OnServerBreak, IntPtr.Zero);
+            PQ.SetOnReceiveError(OnReceiveError, IntPtr.Zero);
+            PQ.SetOnGetDeviceInfo(OnGetDeviceInfo, IntPtr.Zero);
         }
 
         private static void ConnectToServer()
@@ -89,7 +89,7 @@ namespace RecognitionService
             Console.WriteLine("connect to server...");
             if ((err_code = PQ.ConnectServer(local_ip, PQ.PQMT_DEFAULT_CLIENT_PORT)) != (int)EPQT_Error.PQMTE_SUCCESS)
             {
-                throw new СonnectionServerFail($"connect server fail, socket errror code:{err_code}");
+                throw new СonnectionServerException($"connect server fail, socket errror code:{err_code}");
             }
 
             Console.WriteLine("connect success, send request.");
@@ -98,12 +98,12 @@ namespace RecognitionService
 
             if ((err_code = PQ.SendRequest(ref tcq)) != (int)EPQT_Error.PQMTE_SUCCESS)
             {
-                throw new СonnectionServerFail($"send request fail, errror code:{err_code}");
+                throw new СonnectionServerException($"send request fail, errror code:{err_code}");
             }
 
             if ((err_code = PQ.GetServerResolution(OnGetServerResolution, IntPtr.Zero)) != (int)EPQT_Error.PQMTE_SUCCESS)
             {
-                throw new СonnectionServerFail($"get server resolution fail, errror code:{err_code}");
+                throw new СonnectionServerException($"get server resolution fail, errror code:{err_code}");
             }
 
             Console.WriteLine("send request success, start recv.");
