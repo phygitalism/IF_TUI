@@ -52,9 +52,9 @@ namespace RecognitionService
             }
         }
 
-        public void OnStateChanged()
+        public void OnStateChanged(DeviceState state)
         {
-            switch (_deviceController.State)
+            switch (state)
             {
                 case DeviceState.Initialized:
                     _notifyIcon.Text = _deviceController.DeviceName + ": Initialized";
