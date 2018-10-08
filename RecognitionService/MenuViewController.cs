@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,19 +39,6 @@ namespace RecognitionService
             _hiddenWindow.Hide();
         }
 
-        System.Windows.Media.ImageSource AppIcon
-        {
-            get
-            {
-                // System.Drawing.Icon icon = (_deviceController.Status == DeviceStatus.Running) ? Properties.Resources.ReadyIcon : Properties.Resources.NotReadyIcon;
-                System.Drawing.Icon icon = Properties.Resources.NotReadyIcon;
-                return System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
-                    icon.Handle,
-                    System.Windows.Int32Rect.Empty,
-                    System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
-            }
-        }
-
         public void OnStateChanged(DeviceState state)
         {
             switch (state)
@@ -74,6 +61,7 @@ namespace RecognitionService
                 case DeviceState.Uninitialized:
                     _notifyIcon.Text = _deviceController.DeviceName + ": Not Ready";
                     _notifyIcon.Icon = Properties.Resources.NotReadyIcon;
+                    PushNotification("Not initialized");
                     break;
                 case DeviceState.Error:
                     _notifyIcon.Text = _deviceController.DeviceName + ": Error Detected";

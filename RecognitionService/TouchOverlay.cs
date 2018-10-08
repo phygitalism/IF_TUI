@@ -1,11 +1,15 @@
-﻿using System;
+using System;
+using System.IO;
+using System.Text;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using PQ = PQMultiTouch.PQMTClientImport;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 using EPQT_Error = PQMultiTouch.PQMTClientImport.EnumPQErrorType;
 using EPQT_TGesture = PQMultiTouch.PQMTClientImport.EnumPQTouchGestureType;
@@ -25,12 +29,15 @@ namespace RecognitionService
         public DeviceState State { get; private set; } = DeviceState.Uninitialized;
         public event Action<DeviceState> OnStateChanged;
 
+        private static StreamWriter streamWriter = new StreamWriter("touchpoints.txt") { AutoFlush = true };
+
         public TouchOverlay() { }
 
         public void Init()
         {
             if (State == DeviceState.Uninitialized)
             {
+                streamWriter.WriteLine("INIT SESSION");
                 BindToTouchOverlayEvents();
 
                 try
@@ -43,6 +50,7 @@ namespace RecognitionService
                 {
                     Console.WriteLine("Unable connect to device.");
                     Console.WriteLine(ex);
+                    OnStateChanged?.Invoke(DeviceState.Uninitialized);
                 }
             }
         }
@@ -52,6 +60,8 @@ namespace RecognitionService
             if (State == DeviceState.Initialized)
             {
                 State = DeviceState.Starting;
+                streamWriter.WriteLine("START SESSION");
+                State = DeviceState.Running;
                 OnStateChanged?.Invoke(State);
             }
         }
@@ -71,6 +81,9 @@ namespace RecognitionService
             Console.WriteLine("disconnect server...");
             PQ.DisconnectServer();
             State = DeviceState.Uninitialized;
+            streamWriter.WriteLine("END SESSION");
+            streamWriter.Close();
+            streamWriter.Dispose();
         }
 
         private void BindToTouchOverlayEvents()
@@ -112,13 +125,18 @@ namespace RecognitionService
         private static void OnReceivePointFrame(int frameId, int timestamp, int movingPointCount, IntPtr movingPointArray, IntPtr callbackObject)
         {
             Console.WriteLine($"frame_id:{frameId},time_stamp:{timestamp} ms,moving point count:{movingPointCount}");
+            var frameData = new JArray();
             for (int i = 0; i < movingPointCount; ++i)
             {
                 IntPtr p_tp = (IntPtr)(movingPointArray.ToInt64() + i * Marshal.SizeOf(typeof(PQ.TouchPoint)));
                 PQ.TouchPoint tp = (PQ.TouchPoint)Marshal.PtrToStructure(p_tp, typeof(PQ.TouchPoint));
 
                 OnTouchPoint(tp);
+                var touchPointData = JsonConvert.SerializeObject(tp);
+                frameData.Add(touchPointData);
             }
+
+            streamWriter.WriteLine($"{frameId},{timestamp},{movingPointCount},{frameData.ToString()}");
         }
 
         private static void OnTouchPoint(PQ.TouchPoint touchPoint)
@@ -167,9 +185,9 @@ namespace RecognitionService
             }
         }
 
-        private static void OnGetDeviceInfo(ref PQ.TouchDeviceInfo deviceInfo, IntPtr call_back_object)
+        private static void OnGetDeviceInfo(ref PQ.TouchDeviceInfo deviceInfo, IntPtr callbackObject)
         {
-            Console.WriteLine($" touch screen, SerialNumber:{deviceInfo.serial_number},({deviceInfo.screen_width},{deviceInfo.screen_height}). ");
+            Console.WriteLine($" touch screen, SerialNumber:{deviceInfo.serial_number},({deviceInfo.screen_width},{deviceInfo.screen_height}).");
         }
     }
 }
