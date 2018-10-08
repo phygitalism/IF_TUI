@@ -28,9 +28,9 @@ namespace MarkerRegistratorGui
 		{
 			InitializeComponent();
 
-			_pointerInjector = new PointerInjector(this, ((MainViewModel)DataContext).Pointers);
+			//_pointerInjector = new PointerInjector(this, ((MainViewModel)DataContext).Pointers);
 
-			Closed += (_, __) => _pointerInjector.Dispose();
+			//Closed += (_, __) => _pointerInjector.Dispose();
 		}
 	}
 }
