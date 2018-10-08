@@ -6,7 +6,7 @@ namespace RecognitionService
     {
         private System.Windows.Threading.DispatcherTimer _statusTimer;
 
-        public string DeviceName { get; private set; } = "Device Mock";
+        public string DeviceName { get; } = "Device Mock";
         public DeviceState State { get; private set; } = DeviceState.Uninitialized;
         public event Action<DeviceState> OnStateChanged;
 
