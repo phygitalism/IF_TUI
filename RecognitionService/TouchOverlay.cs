@@ -8,7 +8,9 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using PQ = PQMultiTouch.PQMTClientImport;
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+
 using EPQT_Error = PQMultiTouch.PQMTClientImport.EnumPQErrorType;
 using EPQT_TGesture = PQMultiTouch.PQMTClientImport.EnumPQTouchGestureType;
 using EPQT_TPoint = PQMultiTouch.PQMTClientImport.EnumPQTouchPointType;
@@ -130,15 +132,7 @@ namespace RecognitionService
                 PQ.TouchPoint tp = (PQ.TouchPoint)Marshal.PtrToStructure(p_tp, typeof(PQ.TouchPoint));
 
                 OnTouchPoint(tp);
-                var touchPointData = new JObject()
-                {
-                    ["id"] = tp.id,
-                    ["type"] = ((EPQT_TPoint)tp.point_event).ToString(),
-                    ["x"] = tp.x,
-                    ["y"] = tp.y,
-                    ["dx"] = tp.dx,
-                    ["dy"] = tp.dy
-                };
+                var touchPointData = JsonConvert.SerializeObject(tp);
                 frameData.Add(touchPointData);
             }
 
