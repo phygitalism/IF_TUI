@@ -22,13 +22,15 @@ namespace MarkerRegistratorGui
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+		private readonly PointerInjector _pointerInjector;
+
 		public MainWindow()
 		{
 			InitializeComponent();
 
-			((MainViewModel)DataContext).Pointers.WhenPointerEvent.Subscribe(
-				new PointerInjectorObserver(this)
-			);
+			_pointerInjector = new PointerInjector(this, ((MainViewModel)DataContext).Pointers);
+
+			Closed += (_, __) => _pointerInjector.Dispose();
 		}
 	}
 }
