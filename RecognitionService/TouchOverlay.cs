@@ -14,6 +14,11 @@ using EPQT_TRequest = PQMultiTouch.PQMTClientImport.EnumTouchClientRequestType;
 
 namespace RecognitionService
 {
+    class СonnectionServerFail : Exception
+    {
+        public СonnectionServerFail(string message) : base(message) { }
+    }
+
     class TouchOverlay : IDeviceController
     {
         public string DeviceName { get; private set; } = "PQ LABS Touch Overlay";
@@ -27,14 +32,18 @@ namespace RecognitionService
             if (State == DeviceState.Uninitialized)
             {
                 BindToTouchOverlayEvents();
-                int err_code = TouchOverlay.ConnectToServer();
-                if (err_code != (int)PQ.EnumPQErrorType.PQMTE_SUCCESS)
+
+                try
+                {
+                    TouchOverlay.ConnectToServer();
+                    State = DeviceState.Initialized;
+                    OnStateChanged?.Invoke(State);
+                }
+                catch (СonnectionServerFail ex)
                 {
                     Console.WriteLine("Unable connect to device.");
-                    return;
+                    Console.WriteLine(ex);
                 }
-                State = DeviceState.Initialized;
-                OnStateChanged?.Invoke(State);
             }
         }
 
@@ -72,45 +81,32 @@ namespace RecognitionService
             PQ.SetOnGetDeviceInfo(new PQ.PFuncOnGetDeviceInfo(OnGetDeviceInfo), IntPtr.Zero);
         }
 
-        private static int ConnectToServer()
+        private static void ConnectToServer()
         {
             int err_code = (int)EPQT_Error.PQMTE_SUCCESS;
-            try
+            string local_ip = "127.0.0.1";
+
+            Console.WriteLine("connect to server...");
+            if ((err_code = PQ.ConnectServer(local_ip, PQ.PQMT_DEFAULT_CLIENT_PORT)) != (int)EPQT_Error.PQMTE_SUCCESS)
             {
-                string local_ip = "127.0.0.1";
-
-                Console.WriteLine(" connect to server...");
-                if ((err_code = PQ.ConnectServer(local_ip, PQ.PQMT_DEFAULT_CLIENT_PORT)) != (int)EPQT_Error.PQMTE_SUCCESS)
-                {
-                    Console.WriteLine(" connect server fail, socket errror code:{0}", err_code);
-                    return err_code;
-                }
-
-                Console.WriteLine(" connect success, send request.");
-                PQ.TouchClientRequest tcq = new PQ.TouchClientRequest();
-                tcq.type = (int)EPQT_TRequest.RQST_RAWDATA_ALL |
-                    (int)EPQT_TRequest.RQST_GESTURE_ALL;
-
-                if ((err_code = PQ.SendRequest(ref tcq)) != (int)EPQT_Error.PQMTE_SUCCESS)
-                {
-                    Console.WriteLine(" send request fail, error code:{0}", err_code);
-                    return err_code;
-                }
-
-                if ((err_code = PQ.GetServerResolution(OnGetServerResolution, IntPtr.Zero)) != (int)EPQT_Error.PQMTE_SUCCESS)
-                {
-                    Console.WriteLine(" get server resolution fail,error code:{0}", err_code);
-                    return err_code;
-                }
-                // start receiving
-                Console.WriteLine(" send request success, start recv.");
-
+                throw new СonnectionServerFail($"connect server fail, socket errror code:{err_code}");
             }
-            catch (Exception ex)
+
+            Console.WriteLine("connect success, send request.");
+            PQ.TouchClientRequest tcq = new PQ.TouchClientRequest();
+            tcq.type = (int)EPQT_TRequest.RQST_RAWDATA_ALL | (int)EPQT_TRequest.RQST_GESTURE_ALL;
+
+            if ((err_code = PQ.SendRequest(ref tcq)) != (int)EPQT_Error.PQMTE_SUCCESS)
             {
-                Console.WriteLine(" exception: {0}", ex.Message);
+                throw new СonnectionServerFail($"send request fail, errror code:{err_code}");
             }
-            return err_code;
+
+            if ((err_code = PQ.GetServerResolution(OnGetServerResolution, IntPtr.Zero)) != (int)EPQT_Error.PQMTE_SUCCESS)
+            {
+                throw new СonnectionServerFail($"get server resolution fail, errror code:{err_code}");
+            }
+
+            Console.WriteLine("send request success, start recv.");
         }
 
         private static void OnReceivePointFrame(int frameId, int timestamp, int movingPointCount, IntPtr movingPointArray, IntPtr callbackObject)
