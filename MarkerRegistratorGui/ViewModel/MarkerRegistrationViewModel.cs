@@ -7,7 +7,7 @@ namespace MarkerRegistratorGui.ViewModel
 {
 	public class MarkerRegistrationViewModel
 	{
-		private readonly IMarkerRegistrationService _registrationService;
+		private readonly IMarkerRegistrationField _registrationField;
 
 		public ReactiveProperty<Vector2> FieldPosition { get; }
 		public ReactiveProperty<Vector2> FieldSize { get; }
@@ -15,17 +15,21 @@ namespace MarkerRegistratorGui.ViewModel
 		public IdSelectionViewModel IdSelectionPanel { get; }
 		public ReactiveProperty<bool> IsSelectingId { get; }
 
-		public MarkerRegistrationViewModel(IMarkerRegistrationService registrationService, ScaleAdapter scaleAdapter)
+		public MarkerRegistrationViewModel(
+			IMarkerRegistrationService registrationService,
+			IMarkerRegistrationField registrationField,
+			ScaleAdapter scaleAdapter
+		)
 		{
-			_registrationService = registrationService;
+			IdSelectionPanel = new IdSelectionViewModel(registrationService);
 
-			IdSelectionPanel = new IdSelectionViewModel(registrationService.IdsCount);
+			_registrationField = registrationField;
 
-			FieldPosition = Observable.Return(_registrationService.RegistrationField.position)
+			FieldPosition = Observable.Return(_registrationField.FieldPosition)
 				.ScaleToScreen(scaleAdapter)
 				.ToReactiveProperty();
 
-			FieldSize = Observable.Return(_registrationService.RegistrationField.size)
+			FieldSize = Observable.Return(_registrationField.FiledSize)
 				.ScaleToScreen(scaleAdapter)
 				.ToReactiveProperty();
 

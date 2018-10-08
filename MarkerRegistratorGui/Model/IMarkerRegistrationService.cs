@@ -1,11 +1,13 @@
-﻿using System.Numerics;
+﻿using System.Collections.Generic;
 
 namespace MarkerRegistratorGui.Model
 {
 	public interface IMarkerRegistrationService
 	{
-		int IdsCount { get; }
+		IEnumerable<int> AvailableIds { get; }
+		IEnumerable<int> RegisteredIds { get; }
 
-		(Vector2 position, Vector2 size) RegistrationField { get; }
+		void RegisterId(int id);
+		void UnregisterId(int id);
 	}
 }

@@ -1,12 +1,32 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 
 namespace MarkerRegistratorGui.Model
 {
 	public class DummyRegistrationService : IMarkerRegistrationService
 	{
-		public int IdsCount => 10;
+		private readonly HashSet<int> _availableIds = new HashSet<int>(Enumerable.Range(0, 10));
+		private readonly HashSet<int> _registeredIds = new HashSet<int>();
 
-		public (Vector2 position, Vector2 size) RegistrationField
-			=> (new Vector2(0.1f, 0.1f), new Vector2(0.2f, 0.3f));
+		public IEnumerable<int> AvailableIds => _availableIds.Where(id => !_registeredIds.Contains(id));
+		public IEnumerable<int> RegisteredIds => _registeredIds;
+
+		public void RegisterId(int id)
+		{
+			if (!AvailableIds.Contains(id))
+				throw new InvalidOperationException();
+
+			_registeredIds.Add(id);
+		}
+
+		public void UnregisterId(int id)
+		{
+			if (!RegisteredIds.Contains(id))
+				throw new InvalidOperationException();
+
+			_registeredIds.Remove(id);
+		}
 	}
 }

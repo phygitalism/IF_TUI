@@ -9,7 +9,8 @@ namespace MarkerRegistratorGui.ViewModel
 		private readonly ModelRoot _modelRoot = new ModelRoot()
 		{
 			TrackingService = new TuioTrackingService(),
-			RegistrationService = new DummyRegistrationService()
+			RegistrationService = new DummyRegistrationService(),
+			RegistrationField = new DummyRegistrationField()
 		};
 
 		public ScaleAdapter ScaleAdapter { get; }
@@ -20,7 +21,11 @@ namespace MarkerRegistratorGui.ViewModel
 		public MainViewModel()
 		{
 			ScaleAdapter = new ScaleAdapter();
-			MarkerRegistration = new MarkerRegistrationViewModel(_modelRoot.RegistrationService, ScaleAdapter);
+			MarkerRegistration = new MarkerRegistrationViewModel(
+				_modelRoot.RegistrationService,
+				_modelRoot.RegistrationField,
+				ScaleAdapter
+			);
 			MarkerTracking = new MarkerTrackingViewModel(_modelRoot.TrackingService, ScaleAdapter);
 			Pointers = new PointersViewModel(_modelRoot.TrackingService);
 
