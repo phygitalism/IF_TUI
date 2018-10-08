@@ -10,9 +10,11 @@ namespace RecognitionService
     {
         string DeviceName { get; }
         DeviceState State { get; }
+        event Action<DeviceState> OnStateChanged;
         
         void Init();
         void Start();
         void Stop();
+        void Terminate();
     }
 }

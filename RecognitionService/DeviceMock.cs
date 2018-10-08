@@ -6,10 +6,9 @@ namespace RecognitionService
     {
         private System.Windows.Threading.DispatcherTimer _statusTimer;
 
-        public string DeviceName { get; private set; }
+        public string DeviceName { get; private set; } = "Device Mock";
         public DeviceState State { get; private set; } = DeviceState.Uninitialized;
-        public delegate void StateChangedEvent();
-        public event StateChangedEvent OnStateChanged;
+        public event Action<DeviceState> OnStateChanged;
 
         public DeviceMock() { }
 
@@ -27,9 +26,8 @@ namespace RecognitionService
             if (State == DeviceState.Uninitialized)
             {
                 State = DeviceState.Initialized;
+                OnStateChanged?.Invoke(State);
             }
-
-            DeviceName = "PQ LABS Touch Overlay";
         }
 
         public void Start()
@@ -46,7 +44,7 @@ namespace RecognitionService
                         KillTimer();
                         State = DeviceState.Running;
                         _statusTimer = null;
-                        OnStateChanged?.Invoke();
+                        OnStateChanged?.Invoke(State);
                     },
                     System.Windows.Threading.Dispatcher.CurrentDispatcher
                 );
@@ -58,7 +56,7 @@ namespace RecognitionService
             if (State == DeviceState.Running)
             {
                 State = DeviceState.Initialized;
-                OnStateChanged?.Invoke();
+                OnStateChanged?.Invoke(State);
             }
         }
 
@@ -67,6 +65,7 @@ namespace RecognitionService
             KillTimer();
             Stop();
             State = DeviceState.Uninitialized;
+            OnStateChanged?.Invoke(State);
         }
     }
 }

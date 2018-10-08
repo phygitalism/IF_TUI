@@ -16,16 +16,11 @@ namespace RecognitionService
 {
     class TouchOverlay : IDeviceController
     {
-        public string DeviceName { get; private set; }
-        public DeviceState State { get; private set; }
-        public delegate void StateChangedEvent();
-        public event StateChangedEvent OnStateChanged;
+        public string DeviceName { get; private set; } = "PQ LABS Touch Overlay";
+        public DeviceState State { get; private set; } = DeviceState.Uninitialized;
+        public event Action<DeviceState> OnStateChanged;
 
-        public TouchOverlay()
-        {
-            DeviceName = "PQ LABS Touch Overlay";
-            State = DeviceState.Uninitialized;
-        }
+        public TouchOverlay() { }
 
         public void Init()
         {
@@ -39,7 +34,7 @@ namespace RecognitionService
                     return;
                 }
                 State = DeviceState.Initialized;
-                OnStateChanged?.Invoke();
+                OnStateChanged?.Invoke(State);
             }
         }
 
@@ -48,7 +43,7 @@ namespace RecognitionService
             if (State == DeviceState.Initialized)
             {
                 State = DeviceState.Starting;
-                OnStateChanged?.Invoke();
+                OnStateChanged?.Invoke(State);
             }
         }
 
@@ -57,7 +52,7 @@ namespace RecognitionService
             if (State == DeviceState.Running)
             {
                 State = DeviceState.Initialized;
-                OnStateChanged?.Invoke();
+                OnStateChanged?.Invoke(State);
             }
         }
 
@@ -118,48 +113,48 @@ namespace RecognitionService
             return err_code;
         }
 
-        private static void OnReceivePointFrame(int frame_id, int time_stamp, int moving_point_count, IntPtr moving_point_array, IntPtr call_back_object)
+        private static void OnReceivePointFrame(int frameId, int timestamp, int movingPointCount, IntPtr movingPointArray, IntPtr callbackObject)
         {
-            Console.WriteLine($"frame_id:{frame_id},time_stamp:{time_stamp} ms,moving point count:{moving_point_count}");
-            for (int i = 0; i < moving_point_count; ++i)
+            Console.WriteLine($"frame_id:{frameId},time_stamp:{timestamp} ms,moving point count:{movingPointCount}");
+            for (int i = 0; i < movingPointCount; ++i)
             {
-                IntPtr p_tp = (IntPtr)(moving_point_array.ToInt64() + i * Marshal.SizeOf(typeof(PQ.TouchPoint)));
+                IntPtr p_tp = (IntPtr)(movingPointArray.ToInt64() + i * Marshal.SizeOf(typeof(PQ.TouchPoint)));
                 PQ.TouchPoint tp = (PQ.TouchPoint)Marshal.PtrToStructure(p_tp, typeof(PQ.TouchPoint));
 
                 OnTouchPoint(tp);
             }
         }
 
-        private static void OnTouchPoint(PQ.TouchPoint tp)
+        private static void OnTouchPoint(PQ.TouchPoint touchPoint)
         {
-            switch ((EPQT_TPoint)tp.point_event)
+            switch ((EPQT_TPoint)touchPoint.point_event)
             {
                 case EPQT_TPoint.TP_DOWN:
-                    Console.WriteLine($"  point {tp.id} come at ({tp.x},{tp.y}) width:{tp.dx} height:{tp.dy}");
+                    Console.WriteLine($"  point {touchPoint.id} come at ({touchPoint.x},{touchPoint.y}) width:{touchPoint.dx} height:{touchPoint.dy}");
                     break;
                 case EPQT_TPoint.TP_MOVE:
-                    Console.WriteLine($"  point {tp.id} come at ({tp.x},{tp.y}) width:{tp.dx} height:{tp.dy}");
+                    Console.WriteLine($"  point {touchPoint.id} come at ({touchPoint.x},{touchPoint.y}) width:{touchPoint.dx} height:{touchPoint.dy}");
                     break;
                 case EPQT_TPoint.TP_UP:
-                    Console.WriteLine($"  point {tp.id} come at ({tp.x},{tp.y}) width:{tp.dx} height:{tp.dy}");
+                    Console.WriteLine($"  point {touchPoint.id} come at ({touchPoint.x},{touchPoint.y}) width:{touchPoint.dx} height:{touchPoint.dy}");
                     break;
             }
         }
 
-        private static void OnServerBreak(IntPtr param, IntPtr call_back_object)
+        private static void OnServerBreak(IntPtr param, IntPtr callbackObject)
         {
             Console.WriteLine("server break, disconnect here");
             PQ.DisconnectServer();
         }
 
-        private static void OnGetServerResolution(int x, int y, IntPtr call_back_object)
+        private static void OnGetServerResolution(int width, int height, IntPtr callbackObject)
         {
-            Console.WriteLine($"server resolution:{x},{y}");
+            Console.WriteLine($"server resolution:{width},{height}");
         }
 
-        private static void OnReceiveError(int err_code, IntPtr call_back_object)
+        private static void OnReceiveError(int errorCode, IntPtr callbackObject)
         {
-            switch (err_code)
+            switch (errorCode)
             {
                 case (int)EPQT_Error.PQMTE_RCV_INVALIDATE_DATA:
                     Console.WriteLine(" error: receive invalidate data.");
@@ -171,7 +166,7 @@ namespace RecognitionService
                     Console.WriteLine(" **** some exceptions thrown from the call back functions.");
                     break;
                 default:
-                    Console.WriteLine($" socket error, socket error code:{err_code}");
+                    Console.WriteLine($" socket error, socket error code:{errorCode}");
                     break;
             }
         }
