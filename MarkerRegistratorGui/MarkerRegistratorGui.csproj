@@ -106,7 +106,6 @@
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
-    <Compile Include="Model\DummyRegistrationField.cs" />
     <Compile Include="Model\DummyRegistrationService.cs" />
     <Compile Include="Model\IMarkerRegistrationService.cs" />
     <Compile Include="Model\IMarkerRegistrationField.cs" />

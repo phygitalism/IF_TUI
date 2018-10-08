@@ -135,6 +135,22 @@
 							Converter={StaticResource vectorConverter},
 							ConverterParameter='Y'}"/>
 				</Canvas.RenderTransform>
+				<Label
+					x:Name="registrationLabel"
+					FontSize="20">
+					<Label.Style>
+						<Style TargetType="Label">
+							<Setter Property="Content" Value="Place marker here"/>
+							<Style.Triggers>
+								<DataTrigger 
+									Binding="{Binding IsCandidatePlaced.Value}"
+									Value="true">
+									<Setter Property="Content" Value="Select id"/>
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</Label.Style>	
+				</Label>
 				<Popup
 					Name="IdSelection"
 					IsOpen="{Binding IsSelectingId.Value}"

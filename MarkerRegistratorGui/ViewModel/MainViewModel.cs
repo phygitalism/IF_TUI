@@ -8,9 +8,7 @@ namespace MarkerRegistratorGui.ViewModel
 	{
 		private readonly ModelRoot _modelRoot = new ModelRoot()
 		{
-			TrackingService = new TuioTrackingService(),
-			RegistrationService = new DummyRegistrationService(),
-			RegistrationField = new DummyRegistrationField()
+			TrackingService = new TuioTrackingService()
 		};
 
 		public ScaleAdapter ScaleAdapter { get; }
@@ -20,6 +18,10 @@ namespace MarkerRegistratorGui.ViewModel
 
 		public MainViewModel()
 		{
+			var dummyRegistration = new DummyRegistrationService();
+			_modelRoot.RegistrationField = dummyRegistration;
+			_modelRoot.RegistrationService = dummyRegistration;
+
 			ScaleAdapter = new ScaleAdapter();
 			MarkerRegistration = new MarkerRegistrationViewModel(
 				_modelRoot.RegistrationService,

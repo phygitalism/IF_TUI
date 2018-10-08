@@ -1,19 +1,23 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using System.Reactive.Linq;
 using MarkerRegistratorGui.Model;
 using Reactive.Bindings;
 
 namespace MarkerRegistratorGui.ViewModel
 {
-	public class MarkerRegistrationViewModel
+	public class MarkerRegistrationViewModel : IDisposable
 	{
 		private readonly IMarkerRegistrationField _registrationField;
+		private readonly IDisposable[] _disposables;
 
 		public ReactiveProperty<Vector2> FieldPosition { get; }
 		public ReactiveProperty<Vector2> FieldSize { get; }
 
 		public IdSelectionViewModel IdSelectionPanel { get; }
 		public ReactiveProperty<bool> IsSelectingId { get; }
+		public ReactiveProperty<bool> IsCandidatePlaced { get; }
+
 
 		public MarkerRegistrationViewModel(
 			IMarkerRegistrationService registrationService,
@@ -33,9 +37,33 @@ namespace MarkerRegistratorGui.ViewModel
 				.ScaleToScreen(scaleAdapter)
 				.ToReactiveProperty();
 
-			IsSelectingId = Observable.Return(true)
-				.Merge(IdSelectionPanel.SelectedId.Select(_ => false))
-				.ToReactiveProperty();
+			IsCandidatePlaced = Observable.Merge(
+				Observable.FromEvent(
+					h => _registrationField.OnMarkerCandidatePlaced += h,
+					h => _registrationField.OnMarkerCandidatePlaced -= h
+				)
+				.Select(_ => true),
+				Observable.FromEvent(
+					h => _registrationField.OnMarkerCandidateRemoved += h,
+					h => _registrationField.OnMarkerCandidateRemoved -= h
+				)
+				.Select(_ => false)
+			)
+			.ToReactiveProperty();
+
+			_disposables = new[]
+			{
+				IdSelectionPanel.SelectedId
+					.Subscribe(registrationService.RegisterId)
+			};
+
+			IsSelectingId = IsCandidatePlaced;
+		}
+
+		public void Dispose()
+		{
+			foreach (var disposable in _disposables)
+				disposable.Dispose();
 		}
 	}
 }
