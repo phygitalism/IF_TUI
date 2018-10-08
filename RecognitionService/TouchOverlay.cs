@@ -21,12 +21,6 @@ namespace RecognitionService
         public delegate void StateChangedEvent();
         public event StateChangedEvent OnStateChanged;
 
-        private static PQ.PFuncOnReceivePointFrame cur_rf_func = new PQ.PFuncOnReceivePointFrame(OnReceivePointFrame);
-        private static PQ.PFuncOnServerBreak cur_svr_break = new PQ.PFuncOnServerBreak(OnServerBreak);
-        private static PQ.PFuncOnReceiveError cur_rcv_err_func = new PQ.PFuncOnReceiveError(OnReceiveError);
-        private static PQ.PFuncOnGetServerResolution cur_get_resolution = new PQ.PFuncOnGetServerResolution(OnGetServerResolution);
-        private static PQ.PFuncOnGetDeviceInfo cur_fn_get_dev_info = new PQ.PFuncOnGetDeviceInfo(OnGetDeviceInfo);
-
         public TouchOverlay()
         {
             DeviceName = "PQ LABS Touch Overlay";
@@ -75,8 +69,15 @@ namespace RecognitionService
             State = DeviceState.Uninitialized;
         }
 
+        private void BindToTouchOverlayEvents()
+        {
+            PQ.SetOnReceivePointFrame(new PQ.PFuncOnReceivePointFrame(OnReceivePointFrame), IntPtr.Zero);
+            PQ.SetOnServerBreak(new PQ.PFuncOnServerBreak(OnServerBreak), IntPtr.Zero);
+            PQ.SetOnReceiveError(new PQ.PFuncOnReceiveError(OnReceiveError), IntPtr.Zero);
+            PQ.SetOnGetDeviceInfo(new PQ.PFuncOnGetDeviceInfo(OnGetDeviceInfo), IntPtr.Zero);
+        }
 
-        static private int ConnectToServer()
+        private static int ConnectToServer()
         {
             int err_code = (int)EPQT_Error.PQMTE_SUCCESS;
             try
@@ -117,60 +118,46 @@ namespace RecognitionService
             return err_code;
         }
 
-        private void BindToTouchOverlayEvents()
+        private static void OnReceivePointFrame(int frame_id, int time_stamp, int moving_point_count, IntPtr moving_point_array, IntPtr call_back_object)
         {
-            PQ.SetOnReceivePointFrame(cur_rf_func, IntPtr.Zero);
-            // PQ.SetOnReceiveGesture(cur_rg_func, IntPtr.Zero);
-            PQ.SetOnServerBreak(cur_svr_break, IntPtr.Zero);
-            PQ.SetOnReceiveError(cur_rcv_err_func, IntPtr.Zero);
-            PQ.SetOnGetDeviceInfo(cur_fn_get_dev_info, IntPtr.Zero);
-        }
-
-        static void OnReceivePointFrame(int frame_id, int time_stamp, int moving_point_count, IntPtr moving_point_array, IntPtr call_back_object)
-        {
-            string[] tp_event = new string[3]
-            {
-                "down",
-                "move",
-                "up"
-            };
-            Console.WriteLine("frame_id:{0},time_stamp:{1} ms,moving point count:{2}", frame_id, time_stamp, moving_point_count);
+            Console.WriteLine($"frame_id:{frame_id},time_stamp:{time_stamp} ms,moving point count:{moving_point_count}");
             for (int i = 0; i < moving_point_count; ++i)
             {
                 IntPtr p_tp = (IntPtr)(moving_point_array.ToInt64() + i * Marshal.SizeOf(typeof(PQ.TouchPoint)));
                 PQ.TouchPoint tp = (PQ.TouchPoint)Marshal.PtrToStructure(p_tp, typeof(PQ.TouchPoint));
 
-                OnTouchPoint(ref tp);
+                OnTouchPoint(tp);
             }
         }
 
-        static void OnTouchPoint(ref PQ.TouchPoint tp)
+        private static void OnTouchPoint(PQ.TouchPoint tp)
         {
             switch ((EPQT_TPoint)tp.point_event)
             {
                 case EPQT_TPoint.TP_DOWN:
-                    Console.WriteLine("  point {0} come at ({1},{2}) width:{3} height:{4}", tp.id, tp.x, tp.y, tp.dx, tp.dy);
+                    Console.WriteLine($"  point {tp.id} come at ({tp.x},{tp.y}) width:{tp.dx} height:{tp.dy}");
                     break;
                 case EPQT_TPoint.TP_MOVE:
-                    Console.WriteLine("  point {0} move at ({1},{2}) width:{3} height:{4}", tp.id, tp.x, tp.y, tp.dx, tp.dy);
+                    Console.WriteLine($"  point {tp.id} come at ({tp.x},{tp.y}) width:{tp.dx} height:{tp.dy}");
                     break;
                 case EPQT_TPoint.TP_UP:
-                    Console.WriteLine("  point {0} leave at ({1},{2}) width:{3} height:{4}", tp.id, tp.x, tp.y, tp.dx, tp.dy);
+                    Console.WriteLine($"  point {tp.id} come at ({tp.x},{tp.y}) width:{tp.dx} height:{tp.dy}");
                     break;
             }
         }
 
-        static void OnServerBreak(IntPtr param, IntPtr call_back_object)
+        private static void OnServerBreak(IntPtr param, IntPtr call_back_object)
         {
             Console.WriteLine("server break, disconnect here");
             PQ.DisconnectServer();
         }
-        static void OnGetServerResolution(int x, int y, IntPtr call_back_object)
+
+        private static void OnGetServerResolution(int x, int y, IntPtr call_back_object)
         {
-            Console.WriteLine("server resolution:{0},{1}", x, y);
+            Console.WriteLine($"server resolution:{x},{y}");
         }
 
-        static void OnReceiveError(int err_code, IntPtr call_back_object)
+        private static void OnReceiveError(int err_code, IntPtr call_back_object)
         {
             switch (err_code)
             {
@@ -184,13 +171,14 @@ namespace RecognitionService
                     Console.WriteLine(" **** some exceptions thrown from the call back functions.");
                     break;
                 default:
-                    Console.WriteLine(" socket error, socket error code:{0}", err_code);
+                    Console.WriteLine($" socket error, socket error code:{err_code}");
                     break;
             }
         }
-        static void OnGetDeviceInfo(ref PQ.TouchDeviceInfo deviceInfo, IntPtr call_back_object)
+
+        private static void OnGetDeviceInfo(ref PQ.TouchDeviceInfo deviceInfo, IntPtr call_back_object)
         {
-            Console.WriteLine(" touch screen, SerialNumber:{0},({1},{2}). ", deviceInfo.serial_number, deviceInfo.screen_width, deviceInfo.screen_height);
+            Console.WriteLine($" touch screen, SerialNumber:{deviceInfo.serial_number},({deviceInfo.screen_width},{deviceInfo.screen_height}). ");
         }
     }
 }

@@ -7,14 +7,11 @@ namespace RecognitionService
         private System.Windows.Threading.DispatcherTimer _statusTimer;
 
         public string DeviceName { get; private set; }
-        public DeviceState State { get; private set; }
+        public DeviceState State { get; private set; } = DeviceState.Uninitialized;
         public delegate void StateChangedEvent();
         public event StateChangedEvent OnStateChanged;
 
-        public DeviceMock()
-        {
-            State = DeviceState.Uninitialized;
-        }
+        public DeviceMock() { }
 
         private void KillTimer()
         {
@@ -44,7 +41,7 @@ namespace RecognitionService
                 _statusTimer = new System.Windows.Threading.DispatcherTimer(
                     new TimeSpan(0, 0, 3),
                     System.Windows.Threading.DispatcherPriority.Normal,
-                    delegate
+                    (sender, eventArgs) =>
                     {
                         KillTimer();
                         State = DeviceState.Running;
