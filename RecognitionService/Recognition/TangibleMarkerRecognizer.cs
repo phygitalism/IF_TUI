@@ -7,21 +7,21 @@ using System.Numerics;
 
 using RecognitionService.Models;
 
-namespace RecognitionService
+namespace RecognitionService.Recognition
 {
-    class TangibleMarkerDetector
+    class TangibleMarkerRecognizer : ITangibleMarkerRecognizer
     {
         private const float physicalMarkerDiameter = 9;
         private const double tolerance = 8e-3;
 
         private List<RegistredTangibleMarker> _knownMarkers;
 
-        public TangibleMarkerDetector(List<RegistredTangibleMarker> knownMarkers)
+        public TangibleMarkerRecognizer(List<RegistredTangibleMarker> knownMarkers)
         {
             this._knownMarkers = knownMarkers;
         }
 
-        public List<RecognizedTangibleMarker> DetectTangibleMarkers(List<TouchPoint> frame)
+        public List<RecognizedTangibleMarker> RecognizeTangibleMarkers(List<TouchPoint> frame)
         {
             var allPossibleTriangles = DistinguishTriangles(frame);
             var recognizedMarkers = new List<RecognizedTangibleMarker>();

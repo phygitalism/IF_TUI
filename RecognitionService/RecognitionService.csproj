@@ -121,7 +121,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
     <Compile Include="DeviceMock.cs" />
-    <Compile Include="TangibleMarkerDetector.cs" />
+    <Compile Include="Recognition\TangibleMarkerRecognizer.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
@@ -129,6 +129,7 @@
     <Compile Include="Models\Triangle.cs" />
     <Compile Include="Models\Segment.cs" />
     <Compile Include="Models\TangibleMarker.cs" />
+    <Compile Include="Recognition\ITangibleMarkerRecognizer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
