@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace RecognitionService
 {
- 
     public static class Extensions
     {
         /// <summary>
@@ -29,6 +28,25 @@ namespace RecognitionService
                 res[i] = source[i + start];
             }
             return res.ToList();
+        }
+
+        public static IEnumerable<IEnumerable<T>> GetCombinationsWithoutRepetition<T>(this IEnumerable<T> items, int count)
+        {
+            int i = 0;
+            foreach (var item in items)
+            {
+                if (count == 1)
+                    yield return new T[] { item };
+                else
+                {
+                    foreach (var result in GetCombinationsWithoutRepetition(items.Skip(i + 1), count - 1))
+                    {
+                        yield return new T[] { item }.Concat(result);
+                    }
+                }
+
+                ++i;
+            }
         }
     }
 }
