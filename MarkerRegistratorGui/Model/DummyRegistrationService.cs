@@ -15,8 +15,8 @@ namespace MarkerRegistratorGui.Model
 		public IEnumerable<int> AvailableIds => _availableIds;
 		public IEnumerable<int> RegisteredIds => _registeredIds;
 
-		public Vector2 FieldPosition { get; } = new Vector2(0.1f, 0.1f);
-		public Vector2 FiledSize { get; } = new Vector2(0.2f, 0.3f);
+		public Vector2 FieldPosition { get; } = new Vector2(0.4f, 0.4f);
+		public Vector2 FiledSize { get; } = new Vector2(0.2f, 0.2f);
 
 		public event Action OnMarkerCandidatePlaced;
 		public event Action OnMarkerCandidateRemoved;
@@ -26,7 +26,7 @@ namespace MarkerRegistratorGui.Model
 
 		private async void EmulateMarkerCandidate()
 		{
-			var time = TimeSpan.FromSeconds(5);
+			var time = TimeSpan.FromSeconds(2);
 
 			Debug.WriteLine($"Emulating marker candidate after {time}");
 			await Task.Delay(time);
@@ -40,13 +40,13 @@ namespace MarkerRegistratorGui.Model
 		{
 			Debug.WriteLine($"Register id {id}");
 
-			if (!AvailableIds.Contains(id) || RegisteredIds.Contains(id))
+			if (!AvailableIds.Contains(id))
 				throw new InvalidOperationException();
 
 			OnMarkerCandidateRemoved?.Invoke();
 
-			_registeredIds.Add(id);
-			OnRegisteredIdsChanged?.Invoke();
+			if (_registeredIds.Add(id))
+				OnRegisteredIdsChanged?.Invoke();
 
 			EmulateMarkerCandidate();
 		}
@@ -58,8 +58,8 @@ namespace MarkerRegistratorGui.Model
 			if (!RegisteredIds.Contains(id))
 				throw new InvalidOperationException();
 
-			_registeredIds.Remove(id);
-			OnRegisteredIdsChanged?.Invoke();
+			if (_registeredIds.Remove(id))
+				OnRegisteredIdsChanged?.Invoke();
 		}
 	}
 }

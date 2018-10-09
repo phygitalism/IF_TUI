@@ -45,7 +45,7 @@ namespace MarkerRegistratorGui.ViewModel
 		private void UpdateLockedIds()
 		{
 			foreach (var selectable in SelectableIds)
-				selectable.Enabled.Value = !IsRegistered(selectable);
+				selectable.IsSelected.Value = IsRegistered(selectable);
 		}
 
 		private bool IsRegistered(SelectableIdViewModel selectable)

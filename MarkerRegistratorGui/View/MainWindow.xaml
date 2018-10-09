@@ -16,6 +16,7 @@
 		<viewmodel:MainViewModel/>
 	</Window.DataContext>
 	<Window.Resources>
+		<Color x:Key="ControlDarkColor">#FF211AA9</Color>
 		<converters:VectorConverter x:Key="vectorConverter"/>
 		<converters:PiToDegreeConverter x:Key="angleConverter"/>
 		<converters:MultiplyConverter x:Key="multiplyConverter"/>
@@ -88,11 +89,6 @@
 				Background="Gray"
 				Opacity="0.8"
 				OpacityMask="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}">
-				<StackPanel.Resources>
-					<Style TargetType="{x:Type Button}">
-						<Setter Property="FontSize" Value="50"/>
-					</Style>
-				</StackPanel.Resources>
 				<Label Content="Select marker Id" FontSize="50" HorizontalAlignment="Center"/>
 				<ItemsControl ItemsSource="{Binding SelectableIds}">
 					<ItemsControl.ItemTemplate>
@@ -102,7 +98,18 @@
 								Command="{Binding SelectedCommand}"
 								IsEnabled="{Binding Enabled.Value}"
 								Height="100"
-								Width="100"/>
+								Width="100">
+								<Button.Style>
+									<Style TargetType="{x:Type Button}">
+										<Setter Property="FontSize" Value="50"/>
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding IsSelected.Value}" Value="True">
+												<Setter Property="Background" Value="LightSlateGray" />
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</Button.Style>
+							</Button>
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
 					<ItemsControl.ItemsPanel>
