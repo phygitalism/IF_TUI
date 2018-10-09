@@ -14,18 +14,35 @@ namespace RecognitionService
         private const float physicalMarkerDiameter = 9;
         private const double tolerance = 8e-3;
 
-        private List<TangibleMarker> _knownMarkers;
+        private List<RegistredTangibleMarker> _knownMarkers;
 
-        public TangibleMarkerDetector(List<TangibleMarker> knownMarkers)
+        public TangibleMarkerDetector(List<RegistredTangibleMarker> knownMarkers)
         {
             this._knownMarkers = knownMarkers;
         }
 
-        public void DetectTangibleMarkers(List<TouchPoint> frame)
+        public List<RecognizedTangibleMarker> DetectTangibleMarkers(List<TouchPoint> frame)
         {
             var allPossibleTriangles = DistinguishTriangles(frame);
+            var recognizedMarkers = new List<RecognizedTangibleMarker>();
 
-            // TODO - determine Ids for triangles
+            foreach (var triangle in allPossibleTriangles)
+            {
+                var knownTangibleMarker = FindTangibleMarkerForTriangle(triangle);
+                if (knownTangibleMarker.HasValue)
+                {
+                    var recognizedMarker = new RecognizedTangibleMarker(
+                        knownTangibleMarker.Value.Id,
+                        triangle,
+                        0.0f,
+                        triangle.ShortSide.origin
+                    );
+
+                    recognizedMarkers.Add(recognizedMarker);
+                }
+            }
+
+            return recognizedMarkers;
         }
 
         private List<Triangle> DistinguishTriangles(List<TouchPoint> frame)
@@ -85,6 +102,19 @@ namespace RecognitionService
             }
 
             return allPossibleSegments;
+        }
+
+        private RegistredTangibleMarker? FindTangibleMarkerForTriangle(Triangle triangle)
+        {
+            foreach (var tangibleMarker in _knownMarkers)
+            {
+                if (triangle.Equals(tangibleMarker.triangle))
+                {
+                    return tangibleMarker;
+                }
+            }
+
+            return null;
         }
     }
 }

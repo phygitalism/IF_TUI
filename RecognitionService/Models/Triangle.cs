@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace RecognitionService.Models
 {
-    public struct Triangle
+    public struct Triangle : IEquatable<Triangle>
     {
         public class NonExistentTriangle : Exception
         {
@@ -85,6 +85,37 @@ namespace RecognitionService.Models
                 }
             }
             return set.ToList();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Triangle))
+            {
+                return false;
+            }
+
+            var other = (Triangle)obj;
+            return this.Equals(other);
+        }
+
+        public bool Equals(Triangle other)
+        {
+            var areEqual = ShortSide.EqualSegmentExistInList(other.sides) &&
+                MiddleSide.EqualSegmentExistInList(other.sides) &&
+                LargeSide.EqualSegmentExistInList(other.sides);
+
+            return areEqual;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = ShortSide.GetHashCode();
+                hashCode = (hashCode * 397) ^ MiddleSide.GetHashCode();
+                hashCode = (hashCode * 397) ^ LargeSide.GetHashCode();
+                return hashCode;
+            }
         }
     }
 }
