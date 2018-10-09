@@ -5,89 +5,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 
+using RecognitionService.Models;
+
 namespace RecognitionService
 {
-    public enum TouchPointType
-    {
-        Down = 0,
-        Move = 1,
-        Up = 2
-    }
-    public struct TouchPoint
-    {
-        public TouchPointType type;
-        public int id;
-        public Vector2 Position;
-        public Vector2 Acceleration;
-    }
-
-    public struct Segment
-    {
-        public Vector2 origin;
-        public Vector2 destination;
-
-        public float length;
-
-        public Segment(Vector2 origin, Vector2 destination)
-        {
-            this.origin = origin;
-            this.destination = destination;
-            this.length = Vector2.Distance(origin, destination);
-        }
-    }
-
-    public struct Triangle
-    {
-        public Vector2 posA;
-        public Vector2 posB;
-        public Vector2 posC;
-
-        public List<Segment> segments;
-
-        public Segment Short
-        {
-            get { return segments[0]; }
-        }
-
-        public Segment Middle
-        {
-            get { return segments[1]; }
-        }
-
-        public Segment Large
-        {
-            get { return segments[2]; }
-        }
-
-        public Triangle(Vector2 posA, Vector2 posB, Vector2 posC)
-        {
-            this.posA = posA;
-            this.posB = posB;
-            this.posC = posC;
-
-            segments = new List<Segment>()
-            {
-                new Segment(posA, posB),
-                new Segment(posB, posC),
-                new Segment(posC, posA)
-            };
-            segments.Sort((v1, v2) => v2.length >= v1.length ? 1 : -1);
-        }
-    }
-
-    public struct TangibleMarker
-    {
-        public Triangle triangle;
-        public float rotationAngle;
-        public float initialAngle;
-        public float angleToCenter;
-
-        public List<Segment> Sides
-        {
-            get { return triangle.segments; }
-        }
-    }
-
     class TangibleMarkerDetector
     {
         private const float physicalMarkerDiameter = 9;
