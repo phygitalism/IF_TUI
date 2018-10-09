@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using MarkerRegistratorGui.Model;
 using Reactive.Bindings;
@@ -9,7 +10,7 @@ namespace MarkerRegistratorGui.ViewModel
 	public class MarkerRegistrationViewModel : IDisposable
 	{
 		private readonly IMarkerRegistrationField _registrationField;
-		private readonly IDisposable[] _disposables;
+		private readonly IDisposable _disposable;
 
 		public ReactiveProperty<Vector2> FieldPosition { get; }
 		public ReactiveProperty<Vector2> FieldSize { get; }
@@ -51,7 +52,7 @@ namespace MarkerRegistratorGui.ViewModel
 			)
 			.ToReactiveProperty();
 
-			_disposables = new[]
+			_disposable = new CompositeDisposable()
 			{
 				IdSelectionPanel.SelectedId
 					.Subscribe(registrationService.RegisterId)
@@ -60,10 +61,6 @@ namespace MarkerRegistratorGui.ViewModel
 			IsSelectingId = IsCandidatePlaced;
 		}
 
-		public void Dispose()
-		{
-			foreach (var disposable in _disposables)
-				disposable.Dispose();
-		}
+		public void Dispose() => _disposable.Dispose();
 	}
 }

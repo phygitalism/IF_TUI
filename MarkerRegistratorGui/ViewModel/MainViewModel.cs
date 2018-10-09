@@ -36,10 +36,13 @@ namespace MarkerRegistratorGui.ViewModel
 			_modelRoot.TrackingService.Start();
 		}
 
-		public void Dispose()
+		private void Dispose()
 		{
 			Debug.WriteLine("Disposing");
 			_modelRoot.TrackingService.Stop();
+
+			MarkerRegistration.Dispose();
+			MarkerTracking.Dispose();
 		}
 	}
 }
