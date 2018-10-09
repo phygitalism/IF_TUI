@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace MarkerRegistratorGui.Model
 {
@@ -6,6 +7,8 @@ namespace MarkerRegistratorGui.Model
 	{
 		IEnumerable<int> AvailableIds { get; }
 		IEnumerable<int> RegisteredIds { get; }
+
+		event Action OnRegisteredIdsChanged;
 
 		void RegisterId(int id);
 		void UnregisterId(int id);

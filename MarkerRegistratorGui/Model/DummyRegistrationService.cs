@@ -12,7 +12,7 @@ namespace MarkerRegistratorGui.Model
 		private readonly HashSet<int> _availableIds = new HashSet<int>(Enumerable.Range(0, 10));
 		private readonly HashSet<int> _registeredIds = new HashSet<int>();
 
-		public IEnumerable<int> AvailableIds => _availableIds.Where(id => !_registeredIds.Contains(id));
+		public IEnumerable<int> AvailableIds => _availableIds;
 		public IEnumerable<int> RegisteredIds => _registeredIds;
 
 		public Vector2 FieldPosition { get; } = new Vector2(0.1f, 0.1f);
@@ -20,6 +20,7 @@ namespace MarkerRegistratorGui.Model
 
 		public event Action OnMarkerCandidatePlaced;
 		public event Action OnMarkerCandidateRemoved;
+		public event Action OnRegisteredIdsChanged;
 
 		public DummyRegistrationService() => EmulateMarkerCandidate();
 
@@ -39,12 +40,14 @@ namespace MarkerRegistratorGui.Model
 		{
 			Debug.WriteLine($"Register id {id}");
 
-			if (!AvailableIds.Contains(id))
+			if (!AvailableIds.Contains(id) || RegisteredIds.Contains(id))
 				throw new InvalidOperationException();
 
-			_registeredIds.Add(id);
-
 			OnMarkerCandidateRemoved?.Invoke();
+
+			_registeredIds.Add(id);
+			OnRegisteredIdsChanged?.Invoke();
+
 			EmulateMarkerCandidate();
 		}
 
@@ -56,6 +59,7 @@ namespace MarkerRegistratorGui.Model
 				throw new InvalidOperationException();
 
 			_registeredIds.Remove(id);
+			OnRegisteredIdsChanged?.Invoke();
 		}
 	}
 }

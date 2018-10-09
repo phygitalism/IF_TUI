@@ -54,6 +54,7 @@ namespace MarkerRegistratorGui.ViewModel
 
 			_disposable = new CompositeDisposable()
 			{
+				IdSelectionPanel,
 				IdSelectionPanel.SelectedId
 					.Subscribe(registrationService.RegisterId)
 			};
