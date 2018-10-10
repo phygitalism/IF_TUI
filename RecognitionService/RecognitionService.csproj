@@ -149,6 +149,7 @@
     <Compile Include="IInputProvider.cs" />
     <Compile Include="Models\TouchPointFrame.cs" />
     <Compile Include="InputSerializer.cs" />
+    <Compile Include="InputLogger.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

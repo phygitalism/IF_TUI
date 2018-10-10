@@ -12,6 +12,7 @@ namespace RecognitionService
         private IDeviceController _deviceController;
         private MenuViewController _menuViewController;
         private InputSerializer _inputSerializer;
+        private InputLogger _inputLogger;
 
         public STAApplicationContext()
         {
@@ -21,6 +22,7 @@ namespace RecognitionService
                 var touchOverlay = new TouchOverlay();
                 _deviceController = (IDeviceController)touchOverlay;
                 _inputSerializer = new InputSerializer(touchOverlay);
+                _inputLogger = new InputLogger(touchOverlay);
             }
             else
             {
@@ -41,6 +43,11 @@ namespace RecognitionService
             {
                 _inputSerializer.Dispose();
                 _inputSerializer = null;
+            }
+            if (_inputLogger != null)
+            {
+                _inputLogger.Dispose();
+                _inputLogger = null;
             }
             if (_deviceController != null)
             {

@@ -119,35 +119,18 @@ namespace RecognitionService
         private void OnReceivePointFrame(int frameId, int timestamp, int movingPointCount, IntPtr movingPointArray, IntPtr callbackObject)
         {
             Console.WriteLine($"frame_id:{frameId},time_stamp:{timestamp} ms,moving point count:{movingPointCount}");
-            
+
             var touchPoints = new List<TouchPoint>();
             for (int i = 0; i < movingPointCount; ++i)
             {
                 IntPtr p_tp = (IntPtr)(movingPointArray.ToInt64() + i * Marshal.SizeOf(typeof(PQ.TouchPoint)));
                 PQ.TouchPoint tp = (PQ.TouchPoint)Marshal.PtrToStructure(p_tp, typeof(PQ.TouchPoint));
-                OnTouchPoint(tp);
 
                 var touchPoint = new TouchPoint(tp.id, new Vector2(tp.x, tp.y), new Vector2(tp.dx, tp.dy), (TouchPoint.ActionType)tp.point_event);
                 touchPoints.Add(touchPoint);
             }
 
             OnTouchesRecieved?.Invoke(new TouchPointFrame(frameId, timestamp, touchPoints));
-        }
-
-        private void OnTouchPoint(PQ.TouchPoint touchPoint)
-        {
-            switch ((EPQT_TPoint)touchPoint.point_event)
-            {
-                case EPQT_TPoint.TP_DOWN:
-                    Console.WriteLine($"  point {touchPoint.id} come at ({touchPoint.x},{touchPoint.y}) width:{touchPoint.dx} height:{touchPoint.dy}");
-                    break;
-                case EPQT_TPoint.TP_MOVE:
-                    Console.WriteLine($"  point {touchPoint.id} come at ({touchPoint.x},{touchPoint.y}) width:{touchPoint.dx} height:{touchPoint.dy}");
-                    break;
-                case EPQT_TPoint.TP_UP:
-                    Console.WriteLine($"  point {touchPoint.id} come at ({touchPoint.x},{touchPoint.y}) width:{touchPoint.dx} height:{touchPoint.dy}");
-                    break;
-            }
         }
 
         private void OnServerBreak(IntPtr param, IntPtr callbackObject)
