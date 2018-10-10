@@ -11,7 +11,8 @@
 		Title="MainWindow"
 		WindowState="Maximized" WindowStyle="None" ResizeMode="NoResize"
 		Height="{Binding ScaleAdapter.WindowHeight.Value, Mode=OneWayToSource}"
-		Width="{Binding ScaleAdapter.WindowWidth.Value, Mode=OneWayToSource}">
+		Width="{Binding ScaleAdapter.WindowWidth.Value, Mode=OneWayToSource}"
+		x:Name="mainWindow">
 	<Window.DataContext>
 		<viewmodel:MainViewModel/>
 	</Window.DataContext>
@@ -171,6 +172,17 @@
 		</DataTemplate>
 	</Window.Resources>
 	<Canvas>
+		<Button
+			Name="ExitButton"
+			Content="X"
+			Command="{Binding ExitCommand}"
+			CommandParameter="{x:Reference Name=mainWindow}"
+			Canvas.Right="0"
+			Height="100"
+			Width="100"
+			FontSize="24"
+			BorderThickness="0">
+		</Button>
 		<ItemsControl Name="Markers" ItemsSource="{Binding MarkerTracking.TrackedMarkers}"/>
 		<ContentControl Name="MarkerRegistration" Content="{Binding MarkerRegistration}"/>
 	</Canvas>

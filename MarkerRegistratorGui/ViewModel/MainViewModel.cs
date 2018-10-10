@@ -1,6 +1,9 @@
 ﻿using System.Diagnostics;
+using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
 using MarkerRegistratorGui.Model;
+using Reactive.Bindings;
 
 namespace MarkerRegistratorGui.ViewModel
 {
@@ -15,6 +18,10 @@ namespace MarkerRegistratorGui.ViewModel
 		public MarkerRegistrationViewModel MarkerRegistration { get; }
 		public MarkerTrackingViewModel MarkerTracking { get; }
 		public PointersViewModel Pointers { get; }
+
+		public ICommand ExitCommand { get; }
+			= new ReactiveCommand<Window>()
+				.WithSubscribe(window => window.Close());
 
 		public MainViewModel()
 		{
