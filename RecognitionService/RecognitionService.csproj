@@ -1,4 +1,4 @@
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -83,6 +83,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="STAApplicationContext.cs" />
     <Compile Include="TouchOverlay.cs" />
+    <Compile Include="Tuio\Entities\ITUIOEntity.cs" />
+    <Compile Include="Tuio\Entities\TUIOBlob.cs" />
+    <Compile Include="Tuio\Entities\TUIOCursor.cs" />
+    <Compile Include="Tuio\Entities\TUIOObject.cs" />
+    <Compile Include="Tuio\IPHelper.cs" />
+    <Compile Include="Tuio\TUIOTransmitter.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -130,6 +136,16 @@
     <Compile Include="Models\Segment.cs" />
     <Compile Include="Models\TangibleMarker.cs" />
     <Compile Include="Recognition\ITangibleMarkerRecognizer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TUIOsharp\OSCsharp\OSCsharp.csproj">
+      <Project>{0adb210d-0d25-4576-8868-9c47dc4762be}</Project>
+      <Name>OSCsharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TUIOsharp\TUIOsharp\TUIOsharp.csproj">
+      <Project>{6080ad8b-8acd-4c0e-abad-26db043e202b}</Project>
+      <Name>TUIOsharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
