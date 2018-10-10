@@ -13,6 +13,7 @@ namespace RecognitionService
         private MenuViewController _menuViewController;
         private InputSerializer _inputSerializer;
         private InputLogger _inputLogger;
+        private TuioServer _tuioServer;
 
         public STAApplicationContext()
         {
@@ -23,6 +24,7 @@ namespace RecognitionService
                 _deviceController = (IDeviceController)touchOverlay;
                 _inputSerializer = new InputSerializer(touchOverlay);
                 _inputLogger = new InputLogger(touchOverlay);
+                _tuioServer = new TuioServer(touchOverlay);
             }
             else
             {
