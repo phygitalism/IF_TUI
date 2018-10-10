@@ -16,7 +16,8 @@ namespace RecognitionService
         public InputSerializer(IInputProvider inputProvider)
         {
             _streamWriter.WriteLine("INIT SESSION");
-            inputProvider.OnTouchesRecieved += Serialize;
+            _inputProvider = inputProvider;
+            _inputProvider.OnTouchesRecieved += Serialize;
         }
 
         private void Serialize(TouchPointFrame frame)
