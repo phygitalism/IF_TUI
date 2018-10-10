@@ -30,6 +30,9 @@ namespace RecognitionService
 
         public event Action<TouchPointFrame> OnTouchesRecieved;
 
+        public int ScreenWidth { get; private set; }
+        public int ScreenHeight { get; private set; }
+
         public TouchOverlay() { }
 
         public void Init()
@@ -126,7 +129,9 @@ namespace RecognitionService
                 IntPtr p_tp = (IntPtr)(movingPointArray.ToInt64() + i * Marshal.SizeOf(typeof(PQ.TouchPoint)));
                 PQ.TouchPoint tp = (PQ.TouchPoint)Marshal.PtrToStructure(p_tp, typeof(PQ.TouchPoint));
 
-                var touchPoint = new TouchPoint(tp.id, new Vector2(tp.x, tp.y), new Vector2(tp.dx, tp.dy), (TouchPoint.ActionType)tp.point_event);
+                var relativePosition = new Vector2(tp.x / ScreenWidth, tp.y / ScreenHeight);
+                var relativeAcceleration = new Vector2(tp.dx / ScreenWidth, tp.dy / ScreenHeight);
+                var touchPoint = new TouchPoint(tp.id, relativePosition, relativeAcceleration, (TouchPoint.ActionType)tp.point_event);
                 touchPoints.Add(touchPoint);
             }
 
@@ -141,6 +146,8 @@ namespace RecognitionService
 
         private void OnGetServerResolution(int width, int height, IntPtr callbackObject)
         {
+            ScreenWidth = width;
+            ScreenHeight = height;
             Console.WriteLine($"server resolution:{width},{height}");
         }
 
