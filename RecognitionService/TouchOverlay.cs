@@ -4,6 +4,7 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using System.Numerics;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using PQ = PQMultiTouch.PQMTClientImport;
@@ -12,9 +13,10 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using EPQT_Error = PQMultiTouch.PQMTClientImport.EnumPQErrorType;
-using EPQT_TGesture = PQMultiTouch.PQMTClientImport.EnumPQTouchGestureType;
 using EPQT_TPoint = PQMultiTouch.PQMTClientImport.EnumPQTouchPointType;
 using EPQT_TRequest = PQMultiTouch.PQMTClientImport.EnumTouchClientRequestType;
+
+using RecognitionService.Models;
 
 namespace RecognitionService
 {
@@ -23,11 +25,13 @@ namespace RecognitionService
         public СonnectionServerException(string message) : base(message) { }
     }
 
-    class TouchOverlay : IDeviceController
+    class TouchOverlay : IDeviceController, IInputProvider
     {
         public string DeviceName { get; private set; } = "PQ LABS Touch Overlay";
         public DeviceState State { get; private set; } = DeviceState.Uninitialized;
         public event Action<DeviceState> OnStateChanged;
+
+        public event Action<TouchPointFrame> OnTouchesRecieved;
 
         private static StreamWriter streamWriter = new StreamWriter("touchpoints.txt") { AutoFlush = true };
 
@@ -42,7 +46,7 @@ namespace RecognitionService
 
                 try
                 {
-                    TouchOverlay.ConnectToServer();
+                    ConnectToServer();
                     State = DeviceState.Initialized;
                     OnStateChanged?.Invoke(State);
                 }
@@ -94,7 +98,7 @@ namespace RecognitionService
             PQ.SetOnGetDeviceInfo(OnGetDeviceInfo, IntPtr.Zero);
         }
 
-        private static void ConnectToServer()
+        private void ConnectToServer()
         {
             int err_code = (int)EPQT_Error.PQMTE_SUCCESS;
             string local_ip = "127.0.0.1";
@@ -122,24 +126,30 @@ namespace RecognitionService
             Console.WriteLine("send request success, start recv.");
         }
 
-        private static void OnReceivePointFrame(int frameId, int timestamp, int movingPointCount, IntPtr movingPointArray, IntPtr callbackObject)
+        private void OnReceivePointFrame(int frameId, int timestamp, int movingPointCount, IntPtr movingPointArray, IntPtr callbackObject)
         {
             Console.WriteLine($"frame_id:{frameId},time_stamp:{timestamp} ms,moving point count:{movingPointCount}");
             var frameData = new JArray();
+
+            var touchPoints = new List<TouchPoint>();
             for (int i = 0; i < movingPointCount; ++i)
             {
                 IntPtr p_tp = (IntPtr)(movingPointArray.ToInt64() + i * Marshal.SizeOf(typeof(PQ.TouchPoint)));
                 PQ.TouchPoint tp = (PQ.TouchPoint)Marshal.PtrToStructure(p_tp, typeof(PQ.TouchPoint));
-
                 OnTouchPoint(tp);
+
+                var touchPoint = new TouchPoint(tp.id, new Vector2(tp.x, tp.y), new Vector2(tp.dx, tp.dy), (TouchPoint.ActionType)tp.point_event);
+                touchPoints.Add(touchPoint);
+
                 var touchPointData = JsonConvert.SerializeObject(tp);
                 frameData.Add(touchPointData);
             }
 
+            OnTouchesRecieved?.Invoke(new TouchPointFrame(frameId, timestamp, touchPoints));
             streamWriter.WriteLine($"{frameId},{timestamp},{movingPointCount},{frameData.ToString()}");
         }
 
-        private static void OnTouchPoint(PQ.TouchPoint touchPoint)
+        private void OnTouchPoint(PQ.TouchPoint touchPoint)
         {
             switch ((EPQT_TPoint)touchPoint.point_event)
             {
@@ -155,18 +165,18 @@ namespace RecognitionService
             }
         }
 
-        private static void OnServerBreak(IntPtr param, IntPtr callbackObject)
+        private void OnServerBreak(IntPtr param, IntPtr callbackObject)
         {
             Console.WriteLine("server break, disconnect here");
             PQ.DisconnectServer();
         }
 
-        private static void OnGetServerResolution(int width, int height, IntPtr callbackObject)
+        private void OnGetServerResolution(int width, int height, IntPtr callbackObject)
         {
             Console.WriteLine($"server resolution:{width},{height}");
         }
 
-        private static void OnReceiveError(int errorCode, IntPtr callbackObject)
+        private void OnReceiveError(int errorCode, IntPtr callbackObject)
         {
             switch (errorCode)
             {
@@ -185,7 +195,7 @@ namespace RecognitionService
             }
         }
 
-        private static void OnGetDeviceInfo(ref PQ.TouchDeviceInfo deviceInfo, IntPtr callbackObject)
+        private void OnGetDeviceInfo(ref PQ.TouchDeviceInfo deviceInfo, IntPtr callbackObject)
         {
             Console.WriteLine($" touch screen, SerialNumber:{deviceInfo.serial_number},({deviceInfo.screen_width},{deviceInfo.screen_height}).");
         }
