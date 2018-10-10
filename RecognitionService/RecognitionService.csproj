@@ -1,4 +1,4 @@
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -7,7 +7,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>RecognitionService</RootNamespace>
     <AssemblyName>RecognitionService</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -138,11 +138,11 @@
     <Compile Include="Recognition\ITangibleMarkerRecognizer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TUIOsharp\OSCsharp\OSCsharp.csproj">
+    <ProjectReference Include="..\OSCsharp\OSCsharp.csproj">
       <Project>{0adb210d-0d25-4576-8868-9c47dc4762be}</Project>
       <Name>OSCsharp</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TUIOsharp\TUIOsharp\TUIOsharp.csproj">
+    <ProjectReference Include="..\TUIOsharp\TUIOsharp.csproj">
       <Project>{6080ad8b-8acd-4c0e-abad-26db043e202b}</Project>
       <Name>TUIOsharp</Name>
     </ProjectReference>
