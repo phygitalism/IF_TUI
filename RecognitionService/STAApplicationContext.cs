@@ -11,11 +11,22 @@ namespace RecognitionService
     {
         private IDeviceController _deviceController;
         private MenuViewController _menuViewController;
+        private InputSerializer _inputSerializer;
 
         public STAApplicationContext()
         {
             var isDeviceMocked = false;
-            _deviceController = isDeviceMocked ? (IDeviceController)new DeviceMock() : (IDeviceController)new TouchOverlay();
+            if (!isDeviceMocked)
+            {
+                var touchOverlay = new TouchOverlay();
+                _deviceController = (IDeviceController)touchOverlay;
+                _inputSerializer = new InputSerializer(touchOverlay);
+            }
+            else
+            {
+                _deviceController = (IDeviceController)new DeviceMock();
+            }
+
             _menuViewController = new MenuViewController(_deviceController);
 
             _deviceController.OnStateChanged += _menuViewController.OnStateChanged;
@@ -26,6 +37,11 @@ namespace RecognitionService
         // Called from the Dispose method of the base class
         protected override void Dispose(bool disposing)
         {
+            if (_inputSerializer != null)
+            {
+                _inputSerializer.Dispose();
+                _inputSerializer = null;
+            }
             if (_deviceController != null)
             {
                 _deviceController.Terminate();

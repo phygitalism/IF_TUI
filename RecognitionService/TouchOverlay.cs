@@ -9,9 +9,6 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using PQ = PQMultiTouch.PQMTClientImport;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
 using EPQT_Error = PQMultiTouch.PQMTClientImport.EnumPQErrorType;
 using EPQT_TPoint = PQMultiTouch.PQMTClientImport.EnumPQTouchPointType;
 using EPQT_TRequest = PQMultiTouch.PQMTClientImport.EnumTouchClientRequestType;
@@ -33,15 +30,12 @@ namespace RecognitionService
 
         public event Action<TouchPointFrame> OnTouchesRecieved;
 
-        private static StreamWriter streamWriter = new StreamWriter("touchpoints.txt") { AutoFlush = true };
-
         public TouchOverlay() { }
 
         public void Init()
         {
             if (State == DeviceState.Uninitialized)
             {
-                streamWriter.WriteLine("INIT SESSION");
                 BindToTouchOverlayEvents();
 
                 try
@@ -64,7 +58,6 @@ namespace RecognitionService
             if (State == DeviceState.Initialized)
             {
                 State = DeviceState.Starting;
-                streamWriter.WriteLine("START SESSION");
                 State = DeviceState.Running;
                 OnStateChanged?.Invoke(State);
             }
@@ -85,9 +78,6 @@ namespace RecognitionService
             Console.WriteLine("disconnect server...");
             PQ.DisconnectServer();
             State = DeviceState.Uninitialized;
-            streamWriter.WriteLine("END SESSION");
-            streamWriter.Close();
-            streamWriter.Dispose();
         }
 
         private void BindToTouchOverlayEvents()
@@ -129,8 +119,7 @@ namespace RecognitionService
         private void OnReceivePointFrame(int frameId, int timestamp, int movingPointCount, IntPtr movingPointArray, IntPtr callbackObject)
         {
             Console.WriteLine($"frame_id:{frameId},time_stamp:{timestamp} ms,moving point count:{movingPointCount}");
-            var frameData = new JArray();
-
+            
             var touchPoints = new List<TouchPoint>();
             for (int i = 0; i < movingPointCount; ++i)
             {
@@ -140,13 +129,9 @@ namespace RecognitionService
 
                 var touchPoint = new TouchPoint(tp.id, new Vector2(tp.x, tp.y), new Vector2(tp.dx, tp.dy), (TouchPoint.ActionType)tp.point_event);
                 touchPoints.Add(touchPoint);
-
-                var touchPointData = JsonConvert.SerializeObject(tp);
-                frameData.Add(touchPointData);
             }
 
             OnTouchesRecieved?.Invoke(new TouchPointFrame(frameId, timestamp, touchPoints));
-            streamWriter.WriteLine($"{frameId},{timestamp},{movingPointCount},{frameData.ToString()}");
         }
 
         private void OnTouchPoint(PQ.TouchPoint touchPoint)
