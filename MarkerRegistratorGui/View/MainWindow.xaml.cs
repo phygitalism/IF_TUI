@@ -26,11 +26,25 @@ namespace MarkerRegistratorGui
 
 		public MainWindow()
 		{
+			InitializeDataContext();
 			InitializeComponent();
 
 			//_pointerInjector = new PointerInjector(this, ((MainViewModel)DataContext).Pointers);
 
 			//Closed += (_, __) => _pointerInjector.Dispose();
+		}
+
+		private void InitializeDataContext()
+		{
+			try
+			{
+				DataContext = new MainViewModel();
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.Message, "Initialization error", MessageBoxButton.OK, MessageBoxImage.Error);
+				throw;
+			}
 		}
 	}
 }

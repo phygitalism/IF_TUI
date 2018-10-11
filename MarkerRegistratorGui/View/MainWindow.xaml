@@ -13,9 +13,6 @@
 		Height="{Binding ScaleAdapter.WindowHeight.Value, Mode=OneWayToSource}"
 		Width="{Binding ScaleAdapter.WindowWidth.Value, Mode=OneWayToSource}"
 		x:Name="mainWindow">
-	<Window.DataContext>
-		<viewmodel:MainViewModel/>
-	</Window.DataContext>
 	<Window.Resources>
 		<Color x:Key="ControlDarkColor">#FF211AA9</Color>
 		<converters:VectorConverter x:Key="vectorConverter"/>
