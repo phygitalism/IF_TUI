@@ -25,9 +25,9 @@ namespace RecognitionService
 
         public TouchPointFrameGenerator()
         {
-            var fileName = "test.txt";
+            var fileName = "TestInput.txt";
             var basePath = Environment.CurrentDirectory;
-            var filePath = Path.Combine(basePath, fileName);
+            var filePath = Path.Combine(basePath, "Resources", fileName);
 
             Console.WriteLine($"PATH {filePath}");
 
@@ -80,14 +80,13 @@ namespace RecognitionService
                 json += "," + splittedLine[i];
             }
 
-            var token = JToken.Parse(json); // Removes \" symbols
-            var touchesArray = JArray.FromObject(token);
+            var touchesArray = JToken.Parse(json).Value<JArray>(); // Removes \" symbols
 
             var touchPoints = new List<TouchPoint>();
             foreach (var touchData in touchesArray)
             {
-                var touchJson = JToken.Parse((string)touchData)[0];
-                var tp = JObject.Parse((string)touchJson).ToObject<PQMultiTouch.PQMTClientImport.TouchPoint>();
+                var touchObject = JToken.Parse((string)touchData).Value<JObject>();
+                var tp = touchObject.ToObject<PQMultiTouch.PQMTClientImport.TouchPoint>();
                 
                 var relativePosition = new Vector2(tp.x / ScreenWidth, tp.y / ScreenHeight);
                 var relativeAcceleration = new Vector2(tp.dx / ScreenWidth, tp.dy / ScreenHeight);
