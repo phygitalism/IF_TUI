@@ -21,8 +21,5 @@ namespace MarkerRegistratorGui.Model
 	public interface ITrackingService
 	{
 		event Action<TrackerEvents> OnEvents;
-
-		void Start();
-		void Stop();
 	}
 }

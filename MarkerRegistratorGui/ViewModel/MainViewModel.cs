@@ -9,10 +9,7 @@ namespace MarkerRegistratorGui.ViewModel
 {
 	public class MainViewModel
 	{
-		private readonly ModelRoot _modelRoot = new ModelRoot()
-		{
-			TrackingService = new TuioTrackingService()
-		};
+		private readonly ModelRoot _modelRoot = new ModelRoot();
 
 		public ScaleAdapter ScaleAdapter { get; }
 		public MarkerRegistrationViewModel MarkerRegistration { get; }
@@ -25,10 +22,6 @@ namespace MarkerRegistratorGui.ViewModel
 
 		public MainViewModel()
 		{
-			var dummyRegistration = new DummyRegistrationService();
-			_modelRoot.RegistrationField = dummyRegistration;
-			_modelRoot.RegistrationService = dummyRegistration;
-
 			ScaleAdapter = new ScaleAdapter();
 			MarkerRegistration = new MarkerRegistrationViewModel(
 				_modelRoot.RegistrationService,
@@ -40,13 +33,13 @@ namespace MarkerRegistratorGui.ViewModel
 
 			Dispatcher.CurrentDispatcher.ShutdownStarted += (sender, e) => Dispose();
 
-			_modelRoot.TrackingService.Start();
+			_modelRoot.Start();
 		}
 
 		private void Dispose()
 		{
 			Debug.WriteLine("Disposing");
-			_modelRoot.TrackingService.Stop();
+			_modelRoot.Stop();
 
 			MarkerRegistration.Dispose();
 			MarkerTracking.Dispose();

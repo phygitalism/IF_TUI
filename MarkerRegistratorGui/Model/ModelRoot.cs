@@ -2,8 +2,15 @@
 {
 	public class ModelRoot
 	{
-		public ITrackingService TrackingService { get; set; }
-		public IMarkerRegistrationService RegistrationService { get; set; }
-		public IMarkerRegistrationField RegistrationField { get; set; }
+		private readonly TuioTrackingService _trackingService = new TuioTrackingService();
+		private readonly DummyRegistrationService _registrationService = new DummyRegistrationService();
+
+		public ITrackingService TrackingService => _trackingService;
+		public IMarkerRegistrationService RegistrationService => _registrationService;
+		public IMarkerRegistrationField RegistrationField => _registrationService;
+
+		public void Start() => _trackingService.Start();
+
+		public void Stop() => _trackingService.Stop();
 	}
 }
