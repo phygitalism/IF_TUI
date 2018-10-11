@@ -7,7 +7,7 @@ namespace RecognitionService.Tuio.Entities
 
     public class TUIOBlob : TuioBlob, ITUIOEntity
     {
-        private const double precision = 1e-3;
+        private const double precision = 1e-5;
 
         public OscMessage oscMessage { get; private set; }
         public bool isSendRequired { get; set; }
