@@ -9,7 +9,7 @@ namespace MarkerRegistratorGui.Model
 {
 	public class RegistrationService : IMarkerRegistrationService
 	{
-		private readonly List<int> _registeredIds = new List<int>();
+		private readonly HashSet<int> _registeredIds = new HashSet<int>();
 
 		private readonly RecognitionServiceClient _serviceClient
 			= new RecognitionServiceClient("ws://localhost:8080");
@@ -49,6 +49,13 @@ namespace MarkerRegistratorGui.Model
 		public async Task UpdateRegisteredAsync()
 		{
 			var registered = await _serviceClient.GetMarkerListAsync();
+
+			_registeredIds.Clear();
+
+			foreach (var id in registered)
+				_registeredIds.Add(id);
+
+			OnRegisteredIdsChanged?.Invoke();
 		}
 
 		public void RegisterCandidate(int id)
@@ -61,6 +68,9 @@ namespace MarkerRegistratorGui.Model
 			var triangle = new Triangle(pointers[0], pointers[1], pointers[2]);
 
 			_serviceClient.RegisterMarker(id, triangle);
+
+			if (_registeredIds.Add(id))
+				OnRegisteredIdsChanged?.Invoke();
 		}
 	}
 }
