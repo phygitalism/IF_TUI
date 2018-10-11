@@ -12,9 +12,17 @@ namespace RecognitionService.Models
             Up = 2
         }
 
-        public ActionType type;
         public int id;
         public Vector2 Position;
         public Vector2 Acceleration;
+        public ActionType type;
+
+        public TouchPoint(int id, Vector2 position, Vector2 acceleration, ActionType type)
+        {
+            this.id = id;
+            this.Position = position;
+            this.Acceleration = acceleration;
+            this.type = type;
+        }
     }
 }

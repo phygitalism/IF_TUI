@@ -11,11 +11,32 @@ namespace RecognitionService
     {
         private IDeviceController _deviceController;
         private MenuViewController _menuViewController;
+        private InputSerializer _inputSerializer;
+        private InputLogger _inputLogger;
+        private TuioServer _tuioServer;
+
+        private TouchPointFrameGenerator _touchPointFrameGenerator;
 
         public STAApplicationContext()
         {
             var isDeviceMocked = false;
-            _deviceController = isDeviceMocked ? (IDeviceController)new DeviceMock() : (IDeviceController)new TouchOverlay();
+            if (!isDeviceMocked)
+            {
+                var touchOverlay = new TouchOverlay();
+                _deviceController = (IDeviceController)touchOverlay;
+
+                _inputSerializer = new InputSerializer(touchOverlay);
+                _inputLogger = new InputLogger(touchOverlay);
+
+                _touchPointFrameGenerator = new TouchPointFrameGenerator();                
+                _tuioServer = new TuioServer(touchOverlay);
+                // _tuioServer = new TuioServer(_touchPointFrameGenerator);
+            }
+            else
+            {
+                _deviceController = (IDeviceController)new DeviceMock();
+            }
+
             _menuViewController = new MenuViewController(_deviceController);
 
             _deviceController.OnStateChanged += _menuViewController.OnStateChanged;
@@ -26,6 +47,21 @@ namespace RecognitionService
         // Called from the Dispose method of the base class
         protected override void Dispose(bool disposing)
         {
+            if (_touchPointFrameGenerator != null)
+            {
+                _touchPointFrameGenerator.Dispose();
+                _touchPointFrameGenerator = null;
+            }
+            if (_inputSerializer != null)
+            {
+                _inputSerializer.Dispose();
+                _inputSerializer = null;
+            }
+            if (_inputLogger != null)
+            {
+                _inputLogger.Dispose();
+                _inputLogger = null;
+            }
             if (_deviceController != null)
             {
                 _deviceController.Terminate();
