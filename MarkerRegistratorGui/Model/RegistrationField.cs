@@ -6,23 +6,18 @@ namespace MarkerRegistratorGui.Model
 {
 	public class RegistrationField : IMarkerRegistrationField
 	{
-		private const int _pointersPerMarker = 3;
-
 		private readonly ITrackingService _trackingService;
 		private readonly Dictionary<int, Vector2> _pointersInside
 			= new Dictionary<int, Vector2>();
-
-		private readonly bool _hasCandidate;
 
 		private Vector2 _center = new Vector2(0.5f, 0.5f);
 
 		public Vector2 FieldPosition => _center - FieldSize / 2;
 		public Vector2 FieldSize { get; } = new Vector2(0.2f, 0.3f);
 
-		public IEnumerable<Vector2> PointersInside => _pointersInside.Values;
+		public IEnumerable<Vector2> Pointers => _pointersInside.Values;
 
-		public event Action OnMarkerCandidatePlaced;
-		public event Action OnMarkerCandidateRemoved;
+		public event Action<int> OnPointersCountChanged;
 
 		public RegistrationField(ITrackingService trackingService)
 		{
@@ -33,6 +28,8 @@ namespace MarkerRegistratorGui.Model
 
 		private void HandleTrackerEvents(TrackerEvents events)
 		{
+			var pointersCount = _pointersInside.Count;
+
 			foreach (var e in events.pointerEvents)
 			{
 				if (e.type == TrackerEventType.Up || IsInside(e.state.position))
@@ -41,19 +38,8 @@ namespace MarkerRegistratorGui.Model
 					_pointersInside.Remove(e.id);
 			}
 
-			HasCandidate = _pointersInside.Count == _pointersPerMarker;
-		}
-
-		private bool HasCandidate
-		{
-			get => _hasCandidate;
-			set
-			{
-				if (!_hasCandidate && value)
-					OnMarkerCandidatePlaced?.Invoke();
-				if (_hasCandidate && !value)
-					OnMarkerCandidateRemoved?.Invoke();
-			}
+			if (pointersCount != _pointersInside.Count)
+				OnPointersCountChanged?.Invoke(_pointersInside.Count);
 		}
 
 		private bool IsInside(Vector2 position)

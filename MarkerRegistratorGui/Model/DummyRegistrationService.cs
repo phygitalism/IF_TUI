@@ -17,11 +17,11 @@ namespace MarkerRegistratorGui.Model
 
 		public Vector2 FieldPosition { get; } = new Vector2(0.4f, 0.4f);
 		public Vector2 FieldSize { get; } = new Vector2(0.2f, 0.2f);
-		public IEnumerable<Vector2> PointersInside { get; } = Array.Empty<Vector2>();
+		public IEnumerable<Vector2> Pointers { get; } = Array.Empty<Vector2>();
 
-		public event Action OnMarkerCandidatePlaced;
-		public event Action OnMarkerCandidateRemoved;
 		public event Action OnRegisteredIdsChanged;
+		public event Action<MarkerCandidateState> OnMarkerCandidateUpdated;
+		public event Action<int> OnPointersCountChanged;
 
 		public DummyRegistrationService() => EmulateMarkerCandidate();
 
@@ -34,17 +34,17 @@ namespace MarkerRegistratorGui.Model
 
 			Debug.WriteLine($"Emulating marker candidate");
 
-			OnMarkerCandidatePlaced?.Invoke();
+			OnMarkerCandidateUpdated?.Invoke(MarkerCandidateState.Detected);
 		}
 
-		public void RegisterId(int id)
+		public void RegisterCandidate(int id)
 		{
 			Debug.WriteLine($"Register id {id}");
 
 			if (!AvailableIds.Contains(id))
 				throw new InvalidOperationException();
 
-			OnMarkerCandidateRemoved?.Invoke();
+			OnMarkerCandidateUpdated?.Invoke(MarkerCandidateState.NotDetected);
 
 			if (_registeredIds.Add(id))
 				OnRegisteredIdsChanged?.Invoke();

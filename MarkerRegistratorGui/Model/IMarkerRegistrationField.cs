@@ -9,9 +9,8 @@ namespace MarkerRegistratorGui.Model
 		Vector2 FieldPosition { get; }
 		Vector2 FieldSize { get; }
 
-		IEnumerable<Vector2> PointersInside { get; }
+		IEnumerable<Vector2> Pointers { get; }
 
-		event Action OnMarkerCandidatePlaced;
-		event Action OnMarkerCandidateRemoved;
+		event Action<int> OnPointersCountChanged;
 	}
 }

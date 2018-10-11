@@ -9,8 +9,14 @@ namespace MarkerRegistratorGui.Model
 		IEnumerable<int> RegisteredIds { get; }
 
 		event Action OnRegisteredIdsChanged;
+		event Action<MarkerCandidateState> OnMarkerCandidateUpdated;
 
-		void RegisterId(int id);
-		void UnregisterId(int id);
+		void RegisterCandidate(int id);
+	}
+
+	public enum MarkerCandidateState
+	{
+		NotDetected,
+		Detected
 	}
 }

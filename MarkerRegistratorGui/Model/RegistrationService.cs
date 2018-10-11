@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using RecognitionService.Api;
@@ -13,16 +14,36 @@ namespace MarkerRegistratorGui.Model
 		private readonly RecognitionServiceClient _serviceClient
 			= new RecognitionServiceClient("ws://localhost:8080");
 
+		private MarkerCandidateState _candidateState = MarkerCandidateState.NotDetected;
+
 		private readonly IMarkerRegistrationField _registrationField;
 
 		public IEnumerable<int> AvailableIds { get; } = Enumerable.Range(0, 20);
 		public IEnumerable<int> RegisteredIds => _registeredIds;
 
 		public event Action OnRegisteredIdsChanged;
+		public event Action<MarkerCandidateState> OnMarkerCandidateUpdated;
 
 		public RegistrationService(IMarkerRegistrationField registrationField)
 		{
 			_registrationField = registrationField;
+
+			_registrationField.OnPointersCountChanged += UpdateCandidateState;
+		}
+
+		private void UpdateCandidateState(int count)
+		{
+			var newState = count == 3
+				? MarkerCandidateState.Detected
+				: MarkerCandidateState.NotDetected;
+
+			if (_candidateState != newState)
+			{
+				Debug.WriteLine($"{nameof(MarkerCandidateState)} - {newState}");
+
+				_candidateState = newState;
+				OnMarkerCandidateUpdated?.Invoke(newState);
+			}
 		}
 
 		public async Task UpdateRegisteredAsync()
@@ -30,9 +51,9 @@ namespace MarkerRegistratorGui.Model
 			var registered = await _serviceClient.GetMarkerListAsync();
 		}
 
-		public void RegisterId(int id)
+		public void RegisterCandidate(int id)
 		{
-			var pointers = _registrationField.PointersInside.ToArray();
+			var pointers = _registrationField.Pointers.ToArray();
 
 			if (pointers.Length != 3)
 				throw new InvalidOperationException("Not 3 pointers");
@@ -40,14 +61,6 @@ namespace MarkerRegistratorGui.Model
 			var triangle = new Triangle(pointers[0], pointers[1], pointers[2]);
 
 			_serviceClient.RegisterMarker(id, triangle);
-		}
-
-		public void UnregisterId(int id)
-		{
-			if (!RegisteredIds.Contains(id))
-				throw new InvalidOperationException($"Id {id} is not registered");
-
-			_serviceClient.UnregisterMarker(id);
 		}
 	}
 }
