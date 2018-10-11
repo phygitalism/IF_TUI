@@ -45,7 +45,7 @@ namespace RecognitionService
         private void StartTimer()
         {
             _statusTimer = new DispatcherTimer(
-                TimeSpan.FromSeconds(1),
+                TimeSpan.FromMilliseconds(100),
                 DispatcherPriority.Normal,
                 (sender, eventArgs) =>
                 {
@@ -60,6 +60,7 @@ namespace RecognitionService
                     }
                     else
                     {
+                        KillTimer();
                         file.Close();
                         Console.WriteLine("There were {0} lines.", counter);
                     }
@@ -97,8 +98,18 @@ namespace RecognitionService
             return new TouchPointFrame(frameId, timestamp, touchPoints);
         }
 
+        private void KillTimer()
+        {
+            if (_statusTimer != null)
+            {
+                _statusTimer.Stop();
+                _statusTimer = null;
+            }
+        }
+
         public void Dispose()
         {
+            KillTimer();
             file.Close();
             Console.WriteLine("There were {0} lines.", counter);
         }
