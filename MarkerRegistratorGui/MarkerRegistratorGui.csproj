@@ -104,6 +104,7 @@
     <Compile Include="Model\IMarkerRegistrationService.cs" />
     <Compile Include="Model\IMarkerRegistrationField.cs" />
     <Compile Include="Model\ModelRoot.cs" />
+    <Compile Include="Model\RegistrationService.cs" />
     <Compile Include="Model\RegistrationField.cs" />
     <Compile Include="ViewModel\PointersViewModel.cs" />
     <Compile Include="View\PointerInjection\TouchInjector.cs" />
