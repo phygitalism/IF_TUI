@@ -16,7 +16,8 @@ namespace MarkerRegistratorGui.Model
 		public IEnumerable<int> RegisteredIds => _registeredIds;
 
 		public Vector2 FieldPosition { get; } = new Vector2(0.4f, 0.4f);
-		public Vector2 FiledSize { get; } = new Vector2(0.2f, 0.2f);
+		public Vector2 FieldSize { get; } = new Vector2(0.2f, 0.2f);
+		public IEnumerable<Vector2> PointersInside { get; } = Array.Empty<Vector2>();
 
 		public event Action OnMarkerCandidatePlaced;
 		public event Action OnMarkerCandidateRemoved;

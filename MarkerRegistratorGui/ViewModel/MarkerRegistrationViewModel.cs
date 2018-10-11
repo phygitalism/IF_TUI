@@ -34,7 +34,7 @@ namespace MarkerRegistratorGui.ViewModel
 				.ScaleToScreen(scaleAdapter)
 				.ToReactiveProperty();
 
-			FieldSize = Observable.Return(_registrationField.FiledSize)
+			FieldSize = Observable.Return(_registrationField.FieldSize)
 				.ScaleToScreen(scaleAdapter)
 				.ToReactiveProperty();
 
