@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace MarkerRegistratorGui.Model
@@ -32,7 +33,7 @@ namespace MarkerRegistratorGui.Model
 
 			foreach (var e in events.pointerEvents)
 			{
-				if (e.type == TrackerEventType.Up || IsInside(e.state.position))
+				if (IsInside(e.state.position) && e.type != TrackerEventType.Up)
 					_pointersInside[e.id] = e.state.position;
 				else
 					_pointersInside.Remove(e.id);
