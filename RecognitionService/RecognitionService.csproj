@@ -151,6 +151,7 @@
     <Compile Include="InputSerializer.cs" />
     <Compile Include="InputLogger.cs" />
     <Compile Include="TuioServer.cs" />
+    <Compile Include="TouchPointFrameGenerator.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

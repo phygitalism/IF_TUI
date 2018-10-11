@@ -15,6 +15,8 @@ namespace RecognitionService
         private InputLogger _inputLogger;
         private TuioServer _tuioServer;
 
+        private TouchPointFrameGenerator _touchPointFrameGenerator;
+
         public STAApplicationContext()
         {
             var isDeviceMocked = false;
@@ -22,9 +24,13 @@ namespace RecognitionService
             {
                 var touchOverlay = new TouchOverlay();
                 _deviceController = (IDeviceController)touchOverlay;
+
                 _inputSerializer = new InputSerializer(touchOverlay);
                 _inputLogger = new InputLogger(touchOverlay);
+
+                _touchPointFrameGenerator = new TouchPointFrameGenerator();                
                 _tuioServer = new TuioServer(touchOverlay);
+                // _tuioServer = new TuioServer(_touchPointFrameGenerator);
             }
             else
             {
@@ -41,6 +47,11 @@ namespace RecognitionService
         // Called from the Dispose method of the base class
         protected override void Dispose(bool disposing)
         {
+            if (_touchPointFrameGenerator != null)
+            {
+                _touchPointFrameGenerator.Dispose();
+                _touchPointFrameGenerator = null;
+            }
             if (_inputSerializer != null)
             {
                 _inputSerializer.Dispose();

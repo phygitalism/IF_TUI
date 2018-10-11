@@ -14,7 +14,7 @@ namespace RecognitionService
         public const string defaultIPAddress = "127.0.0.1";
         public const int defaultPort = 3333;
 
-        private TUIOTransmitter tuioTransmitter { get; private set; }
+        private TUIOTransmitter _tuioTransmitter;
         private Dictionary<int, TUIOCursor> cursors = new Dictionary<int, TUIOCursor>();
 
         public TuioServer(IInputProvider inputProvider)
@@ -22,8 +22,8 @@ namespace RecognitionService
             _inputProvider = inputProvider;
             _inputProvider.OnTouchesRecieved += Send;
 
-            tuioTransmitter = new TUIOTransmitter(defaultIPAddress, defaultPort);
-            tuioTransmitter.Connect();
+            _tuioTransmitter = new TUIOTransmitter(defaultIPAddress, defaultPort);
+            _tuioTransmitter.Connect();
         }
 
         private void Send(TouchPointFrame frame)
@@ -33,16 +33,16 @@ namespace RecognitionService
                 switch (tp.type)
                 {
                     case TouchPoint.ActionType.Down:
-                        var cursorToAdd = new TUIOCursor(tuioTransmitter.NextSessionId(), tp.Position.X, tp.Position.Y, 0f, 0f, 0f);
+                        var cursorToAdd = new TUIOCursor(_tuioTransmitter.NextSessionId(), tp.Position.X, tp.Position.Y, 0f, 0f, 0f);
                         cursors[tp.id] = cursorToAdd;
-                        tuioTransmitter.Add(cursorToAdd);
+                        _tuioTransmitter.Add(cursorToAdd);
                         break;
                     case TouchPoint.ActionType.Move:
                         cursors[tp.id]?.Update(tp.Position.X, tp.Position.Y, 0f, 0f, 0f);
                         break;
                     case TouchPoint.ActionType.Up:
                         var cursorToRemove = cursors[tp.id];
-                        tuioTransmitter.Remove(cursorToRemove);
+                        _tuioTransmitter.Remove(cursorToRemove);
                         cursors.Remove(tp.id);
                         break;
                     default:
@@ -53,7 +53,8 @@ namespace RecognitionService
 
             try
             {
-                tuioTransmitter.Send();
+                Console.WriteLine("SEND");
+                _tuioTransmitter.Send();
             }
             catch (SendTuioBundleException ex)
             {
@@ -63,7 +64,7 @@ namespace RecognitionService
 
         public void Dispose()
         {
-            tuioTransmitter.Close();
+            _tuioTransmitter.Close();
             _inputProvider.OnTouchesRecieved -= Send;
         }
     }
