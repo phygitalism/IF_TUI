@@ -30,8 +30,8 @@ namespace RecognitionService
 
         public event Action<TouchPointFrame> OnTouchesRecieved;
 
-        public int ScreenWidth { get; private set; }
-        public int ScreenHeight { get; private set; }
+        public float ScreenWidth { get; private set; }
+        public float ScreenHeight { get; private set; }
 
         public TouchOverlay() { }
 

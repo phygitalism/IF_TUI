@@ -13,8 +13,8 @@ namespace RecognitionService
 {
     public class TouchPointFrameGenerator : IInputProvider, IDisposable
     {
-        private const int ScreenWidth = 3840;
-        private const int ScreenHeight = 2160;
+        private const float ScreenWidth = 3840;
+        private const float ScreenHeight = 2160;
 
         private DispatcherTimer _statusTimer;
 
