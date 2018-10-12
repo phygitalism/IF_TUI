@@ -34,7 +34,8 @@ namespace RecognitionService
 
 		public void Save(MarkerConfig config)
 		{
-			_storage.Store(tangiblesKey, config);
+			var json = config.Serialize();
+			_storage.Store(tangiblesKey, json);
 			_storage.Persist();
 		}
 
@@ -43,7 +44,9 @@ namespace RecognitionService
 			MarkerConfig result;
 			try
 			{
-				result = _storage.Get<MarkerConfig>(tangiblesKey);
+				var json = _storage.Get<string>(tangiblesKey);
+				result = MarkerConfig.Deserialize(json);
+
 			}
 			catch (ArgumentNullException ex)
 			{

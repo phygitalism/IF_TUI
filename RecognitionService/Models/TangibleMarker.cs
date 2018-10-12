@@ -2,6 +2,9 @@ using System;
 using System.Numerics;
 using System.Collections.Generic;
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 namespace RecognitionService.Models
 {
     public struct RegistredTangibleMarker
@@ -22,6 +25,30 @@ namespace RecognitionService.Models
             this.triangle = triangle;
             this.initialAngle = initialAngle;
             this.angleToCenter = angleToCenter;
+        }
+
+        public JObject Serialize()
+        {
+            return new JObject()
+            {
+                ["id"] = Id,
+                ["triangle"] = triangle.Serialize()
+                ["initialAngle"] = initialAngle,
+                ["angleToCenter"] = angleToCenter
+            };
+        }
+
+        public static RegistredTangibleMarker Deserialize(string json)
+        {
+            var obj = JToken.Parse(json).Value<JObject>();
+            var tangible = new RegistredTangibleMarker(
+                obj.Value<int>("id"),
+                Triangle.Deserialize(obj.Value<JObject>("triangle")),
+                obj.Value<float>("initialAngle"),
+                obj.Value<float>("angleToCenter")
+            );
+
+            return tangible;
         }
     }
 

@@ -3,6 +3,9 @@ using System.Linq;
 using System.Numerics;
 using System.Collections.Generic;
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 namespace RecognitionService.Models
 {
     public struct Triangle : IEquatable<Triangle>
@@ -116,6 +119,27 @@ namespace RecognitionService.Models
                 hashCode = (hashCode * 397) ^ LargeSide.GetHashCode();
                 return hashCode;
             }
+        }
+
+        public JObject Serialize()
+        {
+            return new JObject()
+            {
+                ["posA"] = JsonConvert.SerializeObject(posA, Formatting.None),
+                ["posB"] = JsonConvert.SerializeObject(posB, Formatting.None),
+                ["posC"] = JsonConvert.SerializeObject(posC, Formatting.None),
+            };
+        }
+
+        public static Triangle Deserialize(JObject obj)
+        {
+            var tangible = new Triangle(
+                obj.Value<Vector2>("posA"),
+                obj.Value<Vector2>("posB"),
+                obj.Value<Vector2>("posC")
+            );
+
+            return tangible;
         }
     }
 }
