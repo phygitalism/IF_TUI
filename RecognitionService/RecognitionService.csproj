@@ -48,6 +48,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="LocalStorage, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LocalStorage.1.1.0\lib\net46\LocalStorage.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -78,10 +81,12 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="IDeviceController.cs" />
     <Compile Include="MenuViewController.cs" />
+    <Compile Include="Models\MarkerConfig.cs" />
     <Compile Include="PQMTClientImport.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="STAApplicationContext.cs" />
+    <Compile Include="Storage.cs" />
     <Compile Include="TouchOverlay.cs" />
     <Compile Include="Tuio\Entities\ITUIOEntity.cs" />
     <Compile Include="Tuio\Entities\TUIOBlob.cs" />
