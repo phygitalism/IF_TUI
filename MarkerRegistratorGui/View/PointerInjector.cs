@@ -99,6 +99,8 @@ namespace MarkerRegistratorGui.View
 		{
 			Debug.WriteLine("Event update");
 
+			var updatedIds = new List<int>();
+
 			CancelAutoUpdate();
 			var i = 0;
 			foreach (var e in value)
@@ -114,6 +116,19 @@ namespace MarkerRegistratorGui.View
 				else
 					_injectedPointers[e.id] = position;
 
+				updatedIds.Add(e.id);
+				i++;
+			}
+
+			foreach (var pair in _injectedPointers)
+			{
+				var id = pair.Key;
+				var position = pair.Value;
+
+				if (updatedIds.Contains(id))
+					continue;
+
+				_pointersBuffer[i] = CreatePointerTouchInfo(id, position, TrackerEventType.Update);
 				i++;
 			}
 
@@ -140,6 +155,10 @@ namespace MarkerRegistratorGui.View
 			catch (OperationCanceledException)
 			{
 				Debug.WriteLine("AutoUpdate canceled");
+			}
+			catch (ObjectDisposedException)
+			{
+
 			}
 		}
 
