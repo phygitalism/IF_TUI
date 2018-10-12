@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using MarkerRegistratorGui.Model;
 
 namespace MarkerRegistratorGui.ViewModel
 {
-	public class IdSelectionViewModel : IDisposable
+	public class IdSelectionViewModel
 	{
 		private readonly IMarkerRegistrationService _registrationService;
-		private readonly IDisposable _disposable;
 
 		public ObservableCollection<SelectableIdViewModel> SelectableIds { get; }
 
@@ -29,28 +28,14 @@ namespace MarkerRegistratorGui.ViewModel
 				selectable => selectable.SelectedCommand.Select(_ => selectable.Id)
 			)
 			.Merge();
-
-			_disposable = new CompositeDisposable()
-			{
-				Observable.FromEvent(
-					h => _registrationService.OnRegisteredIdsChanged += h,
-					h => _registrationService.OnRegisteredIdsChanged -= h
-				)
-				.Subscribe(_ => UpdateLockedIds())
-			};
-
-			UpdateLockedIds();
 		}
 
-		private void UpdateLockedIds()
+		public async Task UpdateRegisteredIdsAsync()
 		{
-			foreach (var selectable in SelectableIds)
-				selectable.IsSelected.Value = IsRegistered(selectable);
+			var selected = await _registrationService.GetRegisteredIdsAsync();
+
+			foreach (var selectabe in SelectableIds)
+				selectabe.IsSelected.Value = selected.Contains(selectabe.Id);
 		}
-
-		private bool IsRegistered(SelectableIdViewModel selectable)
-			=> _registrationService.RegisteredIds.Contains(selectable.Id);
-
-		public void Dispose() => _disposable.Dispose();
 	}
 }

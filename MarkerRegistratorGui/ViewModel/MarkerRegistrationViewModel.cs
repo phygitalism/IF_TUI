@@ -18,7 +18,6 @@ namespace MarkerRegistratorGui.ViewModel
 		public ReactiveProperty<bool> IsSelectingId { get; }
 		public ReactiveProperty<bool> IsCandidatePlaced { get; }
 
-
 		public MarkerRegistrationViewModel(
 			IMarkerRegistrationService registrationService,
 			IMarkerRegistrationField registrationField,
@@ -39,12 +38,21 @@ namespace MarkerRegistratorGui.ViewModel
 				h => registrationService.OnMarkerCandidateUpdated += h,
 				h => registrationService.OnMarkerCandidateUpdated -= h
 			)
-			.Select(state => state == MarkerCandidateState.Detected)
+			.SelectMany(state =>
+			{
+				if (state == MarkerCandidateState.Detected)
+					return Observable.FromAsync(async () =>
+					{
+						await IdSelectionPanel.UpdateRegisteredIdsAsync();
+						return true;
+					});
+				else
+					return Observable.Return(false);
+			})
 			.ToReactiveProperty();
 
 			_disposable = new CompositeDisposable()
 			{
-				IdSelectionPanel,
 				IdSelectionPanel.SelectedId
 					.Subscribe(registrationService.RegisterCandidate)
 			};

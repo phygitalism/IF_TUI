@@ -19,7 +19,6 @@ namespace MarkerRegistratorGui.Model
 		public Vector2 FieldSize { get; } = new Vector2(0.2f, 0.2f);
 		public IEnumerable<Vector2> Pointers { get; } = Array.Empty<Vector2>();
 
-		public event Action OnRegisteredIdsChanged;
 		public event Action<MarkerCandidateState> OnMarkerCandidateUpdated;
 		public event Action<int> OnPointersCountChanged;
 
@@ -46,8 +45,7 @@ namespace MarkerRegistratorGui.Model
 
 			OnMarkerCandidateUpdated?.Invoke(MarkerCandidateState.NotDetected);
 
-			if (_registeredIds.Add(id))
-				OnRegisteredIdsChanged?.Invoke();
+			_registeredIds.Add(id);
 
 			EmulateMarkerCandidate();
 		}
@@ -59,8 +57,14 @@ namespace MarkerRegistratorGui.Model
 			if (!RegisteredIds.Contains(id))
 				throw new InvalidOperationException();
 
-			if (_registeredIds.Remove(id))
-				OnRegisteredIdsChanged?.Invoke();
+			_registeredIds.Remove(id);
+		}
+
+		public async Task<IEnumerable<int>> GetRegisteredIdsAsync()
+		{
+			await Task.Delay(TimeSpan.FromSeconds(1));
+
+			return _registeredIds;
 		}
 	}
 }
