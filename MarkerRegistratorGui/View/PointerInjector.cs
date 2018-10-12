@@ -32,7 +32,7 @@ namespace MarkerRegistratorGui.View
 			LogInjection(touchInfo, count);
 
 			if (!TouchInjector.InjectTouchInput(count, touchInfo))
-				throw new Win32Exception();
+				Debug.WriteLine($"Error while injecting: {new Win32Exception().Message}");
 		}
 
 		[Conditional("DEBUG")]
