@@ -58,7 +58,7 @@ namespace RecognitionService.Models
         public static MarkerConfig Deserialize(string json)
         {
             var tangibles = JToken.Parse(json).Value<JArray>();
-            var registredTangibles = tangibles.Select(token => RegistredTangibleMarker.Deserialize((string)token)).ToList();
+            var registredTangibles = tangibles.Select(token => RegistredTangibleMarker.Deserialize(token.Value<JObject>())).ToList();
             return new MarkerConfig(registredTangibles);
         }
     }

@@ -29,18 +29,20 @@ namespace RecognitionService.Models
 
         public JObject Serialize()
         {
-            return new JObject()
+			var triangleObj = triangle.Serialize();
+			var obj = new JObject()
             {
                 ["id"] = Id,
-                ["triangle"] = triangle.Serialize()
-                ["initialAngle"] = initialAngle,
+                ["triangle"] = triangleObj,
+				["initialAngle"] = initialAngle,
                 ["angleToCenter"] = angleToCenter
             };
-        }
+			return obj;
 
-        public static RegistredTangibleMarker Deserialize(string json)
+		}
+
+        public static RegistredTangibleMarker Deserialize(JObject obj)
         {
-            var obj = JToken.Parse(json).Value<JObject>();
             var tangible = new RegistredTangibleMarker(
                 obj.Value<int>("id"),
                 Triangle.Deserialize(obj.Value<JObject>("triangle")),
