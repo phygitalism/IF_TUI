@@ -41,11 +41,8 @@ namespace MarkerRegistratorGui.ViewModel
 			.SelectMany(state =>
 			{
 				if (state == MarkerCandidateState.Detected)
-					return Observable.FromAsync(async () =>
-					{
-						await IdSelectionPanel.UpdateRegisteredIdsAsync();
-						return true;
-					});
+					return Observable.FromAsync(IdSelectionPanel.UpdateRegisteredIdsAsync)
+						.Select(_ => true);
 				else
 					return Observable.Return(false);
 			})
@@ -54,6 +51,10 @@ namespace MarkerRegistratorGui.ViewModel
 			_disposable = new CompositeDisposable()
 			{
 				IdSelectionPanel.SelectedId
+					.SelectMany(id =>
+						Observable.FromAsync(IdSelectionPanel.UpdateRegisteredIdsAsync)
+							.Select(_ => id)
+					)
 					.Subscribe(registrationService.RegisterCandidate)
 			};
 
