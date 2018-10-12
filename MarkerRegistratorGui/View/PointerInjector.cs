@@ -15,141 +15,95 @@ namespace MarkerRegistratorGui.View
 {
 	public class PointerInjector : IDisposable
 	{
+		private const int _maxPointers = 255;
+
 		private static readonly TimeSpan _injectionDelay = TimeSpan.FromMilliseconds(125);
 
 		static PointerInjector()
 		{
-			if (!TouchInjector.InitializeTouchInjection(255, TouchFeedback.INDIRECT))
+			if (!TouchInjector.InitializeTouchInjection(_maxPointers, TouchFeedback.INDIRECT))
 				throw new Exception("Couldn't initialize touch injection");
 		}
 
-		public static void InjectPointers(IEnumerable<InjectedPointerState> updates)
+		public static void InjectPointers(PointerTouchInfo[] touchInfo, int count)
 		{
-			var touchInfo = updates
-				.Select(CreatePointerTouchInfo)
-				.ToArray();
+			LogInjection(touchInfo, count);
 
-			foreach (var touch in touchInfo)
-				Debug.WriteLine($"Injecting {touch.PointerInfo.PointerId} {touch.PointerInfo.PointerFlags}");
-
-			if (touchInfo.Length != 0 && !TouchInjector.InjectTouchInput(touchInfo.Length, touchInfo))
-				throw new Win32Exception();
+			if (count > 0 && !TouchInjector.InjectTouchInput(count, touchInfo))
+				 throw new Win32Exception();
 		}
 
-		private static PointerTouchInfo CreatePointerTouchInfo(InjectedPointerState state)
+		[Conditional("DEBUG")]
+		private static void LogInjection(PointerTouchInfo[] touchInfo, int count)
+		{
+			Debug.WriteLine("Injection start");
+			for (int i = 0; i < count; i++)
+			{
+				var touch = touchInfo[i];
+				Debug.WriteLine($"Injecting {touch.PointerInfo.PointerId} {touch.PointerInfo.PointerFlags} {touch.PointerInfo.PtPixelLocation.X}:{touch.PointerInfo.PtPixelLocation.Y}");
+			}
+			Debug.WriteLine("Injection end");
+		}
+
+		private static PointerTouchInfo CreatePointerTouchInfo(int id, TrackerEventType eventType, (int x, int y) position)
 			=> new PointerTouchInfo()
 			{
 				PointerInfo =
+				{
+					PointerId = (uint)id,
+					PointerType = PointerInputType.TOUCH,
+					PointerFlags = GetFlagsForEvent(eventType),
+					PtPixelLocation =
 					{
-						PointerId = (uint)state.Id,
-						PointerType = PointerInputType.TOUCH,
-						PointerFlags = GetFlags(state),
-						PtPixelLocation =
-						{
-							X = state.PosX,
-							Y = state.PosY
-						}
+						X = position.x,
+						Y = position.y
 					}
+				}
 			};
 
-		private static PointerFlags GetFlags(InjectedPointerState state)
+		private static PointerFlags GetFlagsForEvent(TrackerEventType eventType)
 		{
-			var result = PointerFlags.NONE;
-
-			if (state.IsAlive)
+			switch (eventType)
 			{
-				result |= PointerFlags.INRANGE | PointerFlags.INCONTACT;
-
-				if (state.IsNew)
-					result |= PointerFlags.DOWN;
-				else
-					result |= PointerFlags.UPDATE;
+				case TrackerEventType.Down:
+					return PointerFlags.INRANGE | PointerFlags.INCONTACT | PointerFlags.DOWN;
+				case TrackerEventType.Update:
+					return PointerFlags.INRANGE | PointerFlags.INCONTACT | PointerFlags.UPDATE;
+				case TrackerEventType.Up:
+					return PointerFlags.UP;
+				default:
+					throw new NotSupportedException();
 			}
-			else
-				result |= PointerFlags.UPDATE | PointerFlags.UP;
-
-			return result;
 		}
 
 		private readonly Window _window;
 		private readonly PointersViewModel _pointersViewModel;
 
-		private readonly IDisposable _subscription;
-
-		private readonly Dictionary<int, InjectedPointerState> _pointerStates
-			= new Dictionary<int, InjectedPointerState>();
-
-		private readonly Task _injectionTask;
-		private readonly CancellationTokenSource _injectionCancellation
-			= new CancellationTokenSource();
+		private readonly PointerTouchInfo[] _pointersBuffer = new PointerTouchInfo[_maxPointers];
 
 		public PointerInjector(Window window, PointersViewModel pointersViewModel)
 		{
 			_window = window;
 			_pointersViewModel = pointersViewModel;
 
-			_subscription = _pointersViewModel.WhenPointerEvent.Subscribe(HandlePointerUpdates);
-
-			_injectionTask = Task.Run(() => InjectionCycle(_injectionCancellation.Token));
-		}
-
-		private async Task InjectionCycle(CancellationToken cancellationToken)
-		{
-			try
-			{
-				while (!cancellationToken.IsCancellationRequested)
-				{
-					lock(_pointerStates)
-					if (_pointerStates.Count > 0)
-					{
-						InjectPointers(_pointerStates.Values);
-						UpdateState();
-					}
-
-					await Task.Delay(_injectionDelay);
-				}
-			}
-			catch (Exception e)
-			{
-				Debug.WriteLine($"Error in injection cycle: {e.Message}");
-			}
-		}
-
-		private void UpdateState()
-		{
-			foreach (var state in _pointerStates.Values)
-			{
-				if (!state.IsAlive)
-					_pointerStates.Remove(state.Id);
-				else if (state.IsNew)
-					state.IsNew = false;
-			}
+			_pointersViewModel.WhenPointerEvent.Subscribe(HandlePointerUpdates);
 		}
 
 		public void HandlePointerUpdates(IEnumerable<TrackerEvent<PointerState>> value)
 		{
-			lock(_pointerStates)
+			var i = 0;
 			foreach (var e in value)
 			{
 				Debug.WriteLine($"Pointer id {e.id} event {e.type} pos {e.state.position}");
 
-				if (!_pointerStates.TryGetValue(e.id, out var state))
-						_pointerStates.Add(
-						e.id,
-						state = new InjectedPointerState()
-						{
-							Id = e.id,
-							IsNew = true
-						}
-					);
+				var position = ScaleAndSafePosition(e.state.position);
 
-				if (e.type == TrackerEventType.Down)
-					state.IsAlive = true;
-				else if (e.type == TrackerEventType.Up)
-					state.IsAlive = false;
+				_pointersBuffer[i] = CreatePointerTouchInfo(e.id, e.type, position);
 
-				(state.PosX, state.PosY) = ScaleAndSafePosition(e.state.position);
+				i++;
 			}
+
+			InjectPointers(_pointersBuffer, i);
 		}
 
 		private (int x, int y) ScaleAndSafePosition(Vector2 position)
@@ -173,19 +127,6 @@ namespace MarkerRegistratorGui.View
 
 		public void Dispose()
 		{
-			_subscription.Dispose();
-
-			_injectionCancellation.Cancel();
-			_injectionTask.Wait();
-		}
-
-		public class InjectedPointerState
-		{
-			public int Id { get; set; }
-			public int PosX { get; set; }
-			public int PosY { get; set; }
-			public bool IsNew { get; set; }
-			public bool IsAlive { get; set; }
 		}
 	}
 }
