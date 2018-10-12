@@ -158,14 +158,18 @@
 						</Style>
 					</Label.Style>	
 				</Label>
-				<Popup
-					Name="IdSelection"
-					IsOpen="{Binding IsSelectingId.Value}"
-					PopupAnimation="Slide"
-					AllowsTransparency="True"
-					Placement="Right">
-					<ContentControl Content="{Binding IdSelectionPanel}"/>
-				</Popup>
+				<ContentControl Content="{Binding IdSelectionPanel}">
+					<ContentControl.Style>
+						<Style TargetType="ContentControl">
+							<Setter Property="Visibility" Value="Collapsed"/>
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding IsSelectingId.Value}" Value="True">
+									<Setter Property="Visibility" Value="Visible"/>
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</ContentControl.Style>
+				</ContentControl>
 			</Canvas>
 		</DataTemplate>
 	</Window.Resources>
