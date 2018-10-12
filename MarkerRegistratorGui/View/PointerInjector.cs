@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,10 +26,13 @@ namespace MarkerRegistratorGui.View
 
 		public static void InjectPointers(PointerTouchInfo[] touchInfo, int count)
 		{
+			if (count <= 0)
+				return;
+
 			LogInjection(touchInfo, count);
 
-			if (count > 0 && !TouchInjector.InjectTouchInput(count, touchInfo))
-				 throw new Win32Exception();
+			if (!TouchInjector.InjectTouchInput(count, touchInfo))
+				throw new Win32Exception();
 		}
 
 		[Conditional("DEBUG")]
@@ -45,7 +47,7 @@ namespace MarkerRegistratorGui.View
 			Debug.WriteLine("Injection end");
 		}
 
-		private static PointerTouchInfo CreatePointerTouchInfo(int id, TrackerEventType eventType, (int x, int y) position)
+		private static PointerTouchInfo CreatePointerTouchInfo(int id, (int x, int y) position, TrackerEventType eventType)
 			=> new PointerTouchInfo()
 			{
 				PointerInfo =
@@ -80,6 +82,10 @@ namespace MarkerRegistratorGui.View
 		private readonly PointersViewModel _pointersViewModel;
 
 		private readonly PointerTouchInfo[] _pointersBuffer = new PointerTouchInfo[_maxPointers];
+		private readonly Dictionary<int, (int x, int y)> _injectedPointers
+			= new Dictionary<int, (int x, int y)>();
+
+		private CancellationTokenSource _autoUpdateCancellation;
 
 		public PointerInjector(Window window, PointersViewModel pointersViewModel)
 		{
@@ -91,6 +97,9 @@ namespace MarkerRegistratorGui.View
 
 		public void HandlePointerUpdates(IEnumerable<TrackerEvent<PointerState>> value)
 		{
+			Debug.WriteLine("Event update");
+
+			CancelAutoUpdate();
 			var i = 0;
 			foreach (var e in value)
 			{
@@ -98,8 +107,50 @@ namespace MarkerRegistratorGui.View
 
 				var position = ScaleAndSafePosition(e.state.position);
 
-				_pointersBuffer[i] = CreatePointerTouchInfo(e.id, e.type, position);
+				_pointersBuffer[i] = CreatePointerTouchInfo(e.id, position, e.type);
 
+				if (e.type == TrackerEventType.Up)
+					_injectedPointers.Remove(e.id);
+				else
+					_injectedPointers[e.id] = position;
+
+				i++;
+			}
+
+			InjectPointers(_pointersBuffer, i);
+			SheduleAutoUpdate();
+		}
+
+		private void CancelAutoUpdate()
+			=> _autoUpdateCancellation?.Cancel();
+
+		private async void SheduleAutoUpdate()
+		{
+			try
+			{
+				_autoUpdateCancellation = new CancellationTokenSource();
+
+				while (true)
+				{
+					await Task.Delay(_injectionDelay, _autoUpdateCancellation.Token);
+					AutoUpdate();
+				}
+
+			}
+			catch (OperationCanceledException)
+			{
+				Debug.WriteLine("AutoUpdate canceled");
+			}
+		}
+
+		private void AutoUpdate()
+		{
+			Debug.WriteLine("AutoUpdate");
+
+			var i = 0;
+			foreach (var pair in _injectedPointers)
+			{
+				_pointersBuffer[i] = CreatePointerTouchInfo(pair.Key, pair.Value, TrackerEventType.Update);
 				i++;
 			}
 
@@ -127,6 +178,7 @@ namespace MarkerRegistratorGui.View
 
 		public void Dispose()
 		{
+			_autoUpdateCancellation?.Dispose();
 		}
 	}
 }
