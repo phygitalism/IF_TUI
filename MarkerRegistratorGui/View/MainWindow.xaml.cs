@@ -46,5 +46,11 @@ namespace MarkerRegistratorGui
 				throw;
 			}
 		}
+
+		private void CallButtonCommand(object sender, TouchEventArgs e)
+		{
+			var button = sender as Button;
+			button.Command.Execute(button.CommandParameter);
+		}
 	}
 }
