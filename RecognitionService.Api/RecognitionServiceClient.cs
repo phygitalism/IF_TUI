@@ -24,6 +24,12 @@ namespace RecognitionService.Api
 
 			_webSocket.Connect();
 
+			ThrowIfNotConnected();
+		}
+
+		[Conditional("RELEASE")]
+		private void ThrowIfNotConnected()
+		{
 			if (_webSocket.ReadyState != WebSocketState.Open)
 				throw new RecognitionServiceApiException("Couldn't connect to service");
 		}
