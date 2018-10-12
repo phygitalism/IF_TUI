@@ -9,7 +9,6 @@ namespace RecognitionService.Api
 	public class RecognitionServiceServer : IDisposable
 	{
 		private readonly WebSocketServer _webSocketServer;
-		private readonly MessageResponder _messageResponder;
 
 		public event Func<int[]> OnMarkerListRequested;
 		public event Action<int, Triangle> OnRegisterMarkerRequested;
@@ -20,9 +19,8 @@ namespace RecognitionService.Api
 		public RecognitionServiceServer(int port)
 		{
 			_webSocketServer = new WebSocketServer(port);
-			_messageResponder = new MessageResponder(this);
 
-			_webSocketServer.AddWebSocketService("/", () => _messageResponder);
+			_webSocketServer.AddWebSocketService("/", () => new MessageResponder(this));
 
 			_webSocketServer.Start();
 		}
