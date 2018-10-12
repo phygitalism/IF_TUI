@@ -29,6 +29,8 @@ namespace MarkerRegistratorGui.Model
 			_registrationField = registrationField;
 
 			_registrationField.OnPointersCountChanged += UpdateCandidateState;
+
+			Task.Run(UpdateRegisteredAsync).Wait();
 		}
 
 		private void UpdateCandidateState(int count)
