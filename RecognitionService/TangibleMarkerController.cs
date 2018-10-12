@@ -9,9 +9,8 @@ using RecognitionService.Models;
 
 namespace RecognitionService
 {
-	class TangibleMarkerController
+	class TangibleMarkerController : IDisposable
 	{
-
 		public MarkerConfig Config { get; private set; }
 
 		private Storage _storage = new Storage();
@@ -23,14 +22,25 @@ namespace RecognitionService
 
 		public void RegisterMarkerWithId(Triangle triangle, int id)
 		{
+			Console.WriteLine("RegisterMarkerWithId");
 			var tangible = new RegistredTangibleMarker(id, triangle, 0.0f, 0.0f);
-			Config.Add(tangible);
+			if (!Config.IsRegistredWithId(tangible.Id))
+			{
+				Config.Add(tangible);
+			}
+			else
+			{
+				Config.Update(tangible);
+			}
 			_storage.Save(Config);
 		}
 
 		public void UnregisterMarkerWithId(int id)
 		{
-			var tangible = Config.registredTangibles.Find(marker => marker.Id == id);
+			Console.WriteLine("UnregisterMarkerWithId");
+			if (!Config.IsRegistredWithId(id)) { return; }
+
+			var tangible = Config.GetTangibleWithId(id);
 			Config.Remove(tangible);
 			_storage.Save(Config);
 		}
@@ -39,6 +49,11 @@ namespace RecognitionService
 		{
 			Console.WriteLine("OnMarkerListRequested");
 			return Config.registredTangibles.Select(marker => marker.Id).ToArray();
+		}
+
+		public void Dispose()
+		{
+			_storage.Dispose();
 		}
 	}
 }

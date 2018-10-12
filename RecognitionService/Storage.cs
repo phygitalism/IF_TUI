@@ -11,7 +11,7 @@ using RecognitionService.Models;
 
 namespace RecognitionService
 {
-	class Storage
+	class Storage : IDisposable
 	{
 		private const string tangiblesKey = "tangibles";
 		private const string storageName = "config" + ".localstorage";
@@ -52,6 +52,11 @@ namespace RecognitionService
 				Save(result);
 			}
 			return result;
+		}
+
+		public void Dispose()
+		{
+			_storage.Dispose();
 		}
 	}
 }

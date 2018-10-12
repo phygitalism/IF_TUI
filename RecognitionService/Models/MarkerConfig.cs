@@ -22,12 +22,28 @@ namespace RecognitionService.Models
 
 		public void Add(RegistredTangibleMarker tangible)
 		{
-			// TODO
+			registredTangibles.Add(tangible);
 		}
 
+		public void Update(RegistredTangibleMarker tangible)
+		{
+			var registredTangibleIndex = registredTangibles.FindIndex(marker => marker.Id == tangible.Id);
+			registredTangibles[registredTangibleIndex] = tangible;
+		}
 		public void Remove(RegistredTangibleMarker tangible)
 		{
-			// TODO
+			registredTangibles.Remove(tangible);
+		}
+
+		public RegistredTangibleMarker GetTangibleWithId(int id)
+		{
+			var tangible = registredTangibles.Find(marker => marker.Id == id);
+			return tangible;
+		}
+
+		public bool IsRegistredWithId(int id)
+		{
+			return registredTangibles.Any(registredTangible => registredTangible.Id == id);
 		}
 	}
 }
