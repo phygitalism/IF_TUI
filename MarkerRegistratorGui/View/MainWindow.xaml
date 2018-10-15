@@ -95,7 +95,6 @@
 								Content="{Binding Id}"
 								Command="{Binding SelectedCommand}"
 								TouchDown="CallButtonCommand"
-								IsEnabled="{Binding Enabled.Value}"
 								Height="100"
 								Width="100">
 								<Button.Style>
