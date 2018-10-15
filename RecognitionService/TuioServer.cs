@@ -9,26 +9,26 @@ namespace RecognitionService
 {
     public class TuioServer : IDisposable
     {
-        private IInputProvider _inputProvider;
-
         public const string defaultIPAddress = "127.0.0.1";
         public const int defaultPort = 3333;
 
+        private ITuioInputProvider _tuioInputProvider;
         private TUIOTransmitter _tuioTransmitter;
         private Dictionary<int, TUIOCursor> cursors = new Dictionary<int, TUIOCursor>();
+        private Dictionary<int, TUIOObject> objects = new Dictionary<int, TUIOObject>();
 
-        public TuioServer(IInputProvider inputProvider)
+        public TuioServer(ITuioInputProvider tuioInputProvider)
         {
-            _inputProvider = inputProvider;
-            _inputProvider.OnTouchesRecieved += Send;
+            _tuioInputProvider = tuioInputProvider;
+            _tuioInputProvider.OnTuioInput += Send;
 
             _tuioTransmitter = new TUIOTransmitter(defaultIPAddress, defaultPort);
             _tuioTransmitter.Connect();
         }
 
-        private void Send(TouchPointFrame frame)
+        private void Send(List<TouchPoint> touches, List<RecognizedTangibleMarker> markers)
         {
-            foreach (var tp in frame.touches)
+            foreach (var tp in touches)
             {
                 switch (tp.type)
                 {
@@ -64,8 +64,8 @@ namespace RecognitionService
 
         public void Dispose()
         {
+            _tuioInputProvider.OnTuioInput -= Send;
             _tuioTransmitter.Close();
-            _inputProvider.OnTouchesRecieved -= Send;
         }
     }
 }

@@ -9,7 +9,7 @@ using RecognitionService.Models;
 
 namespace RecognitionService
 {
-	class TangibleMarkerController : IDisposable
+	public class TangibleMarkerController : IDisposable
 	{
 		public MarkerConfig Config { get; private set; }
 
