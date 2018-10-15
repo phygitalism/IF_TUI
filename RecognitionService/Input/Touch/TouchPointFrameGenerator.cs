@@ -18,6 +18,7 @@ namespace RecognitionService.Input.Touch
 
         private DispatcherTimer _statusTimer;
 
+        private string filePath;
         private StreamReader file;
         private int counter = 0;
 
@@ -25,9 +26,9 @@ namespace RecognitionService.Input.Touch
 
         public TouchPointFrameGenerator()
         {
-            var fileName = "TestInput2.txt";
+            var fileName = "TestInput3.txt";
             var basePath = Environment.CurrentDirectory;
-            var filePath = Path.Combine(basePath, "Resources", fileName);
+            this.filePath = Path.Combine(basePath, "Resources", fileName);
 
             Console.WriteLine($"PATH {filePath}");
 
@@ -60,9 +61,11 @@ namespace RecognitionService.Input.Touch
                     }
                     else
                     {
-                        KillTimer();
                         file.Close();
                         Console.WriteLine("There were {0} lines.", counter);
+                        file = new StreamReader(filePath);
+                        counter = 0;
+                        Console.WriteLine("Start again");
                     }
                 },
                 Dispatcher.CurrentDispatcher
