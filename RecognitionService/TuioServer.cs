@@ -26,7 +26,23 @@ namespace RecognitionService
             _tuioTransmitter.Connect();
         }
 
-        private void Send(List<TouchPoint> touches, List<RecognizedTangibleMarker> markers)
+        private void Send(List<TouchPoint> touches, List<RecognizedTangibleMarker> tangibles)
+        {
+            ProcessCursors(touches);
+            ProcessObjects(tangibles);
+
+            try
+            {
+                Console.WriteLine("SEND");
+                _tuioTransmitter.Send();
+            }
+            catch (SendTuioBundleException ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        private void ProcessCursors(List<TouchPoint> touches)
         {
             foreach (var tp in touches)
             {
@@ -50,15 +66,31 @@ namespace RecognitionService
                         break;
                 }
             }
+        }
 
-            try
+        private void ProcessObjects(List<RecognizedTangibleMarker> tangibles)
+        {
+            foreach (var tangible in tangibles)
             {
-                Console.WriteLine("SEND");
-                _tuioTransmitter.Send();
-            }
-            catch (SendTuioBundleException ex)
-            {
-                Console.WriteLine(ex);
+                switch (tangible.Type)
+                {
+                    case RecognizedTangibleMarker.ActionType.Added:
+                        var objectToAdd = new TUIOObject(_tuioTransmitter.NextSessionId(), tangible.Id, tangible.center.X, tangible.center.Y, 0.0f, 0f, 0f, 0f, 0f, 0f);
+                        objects[tangible.Id] = objectToAdd;
+                        _tuioTransmitter.Add(objectToAdd);
+                        break;
+                    case RecognizedTangibleMarker.ActionType.Updated:
+                        objects[tangible.Id]?.Update(tangible.center.X, tangible.center.Y, 0.0f, 0f, 0f, 0f, 0f, 0f);
+                        break;
+                    case RecognizedTangibleMarker.ActionType.Removed:
+                        var objectToRemove = cursors[tangible.Id];
+                        _tuioTransmitter.Remove(objectToRemove);
+                        objects.Remove(tangible.Id);
+                        break;
+                    default:
+                        Console.WriteLine($"ERROR: unkown tangible action type");
+                        break;
+                }
             }
         }
 
