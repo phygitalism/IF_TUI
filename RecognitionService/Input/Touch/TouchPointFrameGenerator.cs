@@ -25,7 +25,7 @@ namespace RecognitionService.Input.Touch
 
         public TouchPointFrameGenerator()
         {
-            var fileName = "TestInput.txt";
+            var fileName = "TestInput2.txt";
             var basePath = Environment.CurrentDirectory;
             var filePath = Path.Combine(basePath, "Resources", fileName);
 

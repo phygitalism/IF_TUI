@@ -45,7 +45,7 @@ namespace RecognitionService
 
         private readonly Dictionary<string, bool> featureToggles = new Dictionary<string, bool>()
         {
-            [isDeviceMockedKey] = false,
+            [isDeviceMockedKey] = true,
             [inputLoggingKey] = true
         };
 
