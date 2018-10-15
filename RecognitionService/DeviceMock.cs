@@ -2,7 +2,7 @@ using System;
 
 namespace RecognitionService
 {
-    public class DeviceMock : IDeviceController
+    public class DeviceMock : IDeviceController, IDisposable
     {
         private System.Windows.Threading.DispatcherTimer _statusTimer;
 
@@ -66,6 +66,11 @@ namespace RecognitionService
             Stop();
             State = DeviceState.Uninitialized;
             OnStateChanged?.Invoke(State);
+        }
+
+        public void Dispose()
+        {
+            Terminate();
         }
     }
 }

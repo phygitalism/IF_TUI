@@ -10,21 +10,35 @@ using RecognitionService.Api;
 
 namespace RecognitionService
 {
+    public static class DisposebleExtensions
+    {
+        public static T AddToDisposeBag<T>(this T disposable, List<IDisposable> disposeBag) where T : IDisposable
+        {
+            disposeBag.Add(disposable);
+            return disposable;
+        }
+    }
+
     public class STAApplicationContext : ApplicationContext
     {
         private const int _serverPort = 8080;
 
         private IDeviceController _deviceController;
         private MenuViewController _menuViewController;
+
+        private IInputProvider _touchInputProvider;
         private InputSerializer _inputSerializer;
         private InputLogger _inputLogger;
+
+        private ITuioInputProvider _tuioInputProvider;
         private TuioServer _tuioServer;
 
         private TouchPointFrameGenerator _touchPointFrameGenerator;
 
         private RecognitionServiceServer _wsServer;
-
         private TangibleMarkerController _tangibleMarkerController = new TangibleMarkerController();
+
+        private List<IDisposable> _disposeBag = new List<IDisposable>();
 
 
         public STAApplicationContext()
@@ -34,18 +48,26 @@ namespace RecognitionService
             var isDeviceMocked = false;
             if (!isDeviceMocked)
             {
-                var touchOverlay = new TouchOverlay();
+                var touchOverlay = (new TouchOverlay()).AddToDisposeBag(_disposeBag);
                 _deviceController = (IDeviceController)touchOverlay;
+                _touchInputProvider = (IInputProvider)touchOverlay;
 
-                _inputSerializer = new InputSerializer(touchOverlay);
-                _inputLogger = new InputLogger(touchOverlay);
-                _tuioServer = new TuioServer(touchOverlay);
-                //_touchPointFrameGenerator = new TouchPointFrameGenerator();
-                //_tuioServer = new TuioServer(_touchPointFrameGenerator);
+                _inputSerializer = (new InputSerializer(_touchInputProvider))
+                    .AddToDisposeBag(_disposeBag);
+
+                _inputLogger = (new InputLogger(_touchInputProvider))
+                    .AddToDisposeBag(_disposeBag);
+
+                _tuioInputProvider = (new TuioObjectController(_touchInputProvider, _tangibleMarkerController))
+                    .AddToDisposeBag(_disposeBag);
+
+                _tuioServer = (new TuioServer(_tuioInputProvider))
+                    .AddToDisposeBag(_disposeBag);
             }
             else
             {
-                _deviceController = (IDeviceController)new DeviceMock();
+                var deviceMock = (new DeviceMock()).AddToDisposeBag(_disposeBag);
+                _deviceController = (IDeviceController)deviceMock;
             }
 
             _menuViewController = new MenuViewController(_deviceController);
@@ -57,7 +79,9 @@ namespace RecognitionService
 
         private void SetupServer()
         {
-            _wsServer = new RecognitionServiceServer(_serverPort);
+            _wsServer = (new RecognitionServiceServer(_serverPort))
+                .AddToDisposeBag(_disposeBag);
+
             _wsServer.OnMarkerListRequested += _tangibleMarkerController.GetAllRegistredIds;
             _wsServer.OnRegisterMarkerRequested += (id, triangleInfo) =>
             {
@@ -70,35 +94,8 @@ namespace RecognitionService
         // Called from the Dispose method of the base class
         protected override void Dispose(bool disposing)
         {
-            if (_wsServer != null)
-            {
-                _wsServer.Dispose();
-                _wsServer = null;
-            }
-            if (_tangibleMarkerController != null)
-            {
-                _tangibleMarkerController.Dispose();
-                _tangibleMarkerController = null;
-            }
-            if (_touchPointFrameGenerator != null)
-            {
-                _touchPointFrameGenerator.Dispose();
-                _touchPointFrameGenerator = null;
-            }
-            if (_inputSerializer != null)
-            {
-                _inputSerializer.Dispose();
-                _inputSerializer = null;
-            }
-            if (_inputLogger != null)
-            {
-                _inputLogger.Dispose();
-                _inputLogger = null;
-            }
-            if (_deviceController != null)
-            {
-                _deviceController.Terminate();
-            }
+            _disposeBag.ForEach(disposable => disposable.Dispose());
+
             if ((_deviceController != null) && (_menuViewController != null))
             {
                 _deviceController.OnStateChanged -= _menuViewController.OnStateChanged;
