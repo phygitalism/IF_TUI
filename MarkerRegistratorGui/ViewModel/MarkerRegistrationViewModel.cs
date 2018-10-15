@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Numerics;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using MarkerRegistratorGui.Model;
 using Reactive.Bindings;
@@ -15,8 +15,8 @@ namespace MarkerRegistratorGui.ViewModel
 		public ReactiveProperty<Vector2> FieldSize { get; }
 
 		public IdSelectionViewModel IdSelectionPanel { get; }
-		public ReactiveProperty<bool> IsSelectingId { get; }
 		public ReactiveProperty<bool> IsCandidatePlaced { get; }
+		public ReactiveProperty<bool> IsSelectingId { get; }
 
 		public MarkerRegistrationViewModel(
 			IMarkerRegistrationService registrationService,
@@ -38,27 +38,29 @@ namespace MarkerRegistratorGui.ViewModel
 				h => registrationService.OnMarkerCandidateUpdated += h,
 				h => registrationService.OnMarkerCandidateUpdated -= h
 			)
-			.SelectMany(state =>
-			{
-				if (state == MarkerCandidateState.Detected)
-					return Observable.FromAsync(IdSelectionPanel.UpdateRegisteredIdsAsync)
-						.Select(_ => true);
-				else
-					return Observable.Return(false);
-			})
-			.ToReactiveProperty();
+				.Do(value => Debug.WriteLine($"-> Candidate update = {value}"))
+				.Select(state => state == MarkerCandidateState.Detected)
+				.ToReactiveProperty();
 
-			_disposable = new CompositeDisposable()
-			{
-				IdSelectionPanel.SelectedId
-					.SelectMany(id =>
-						Observable.FromAsync(IdSelectionPanel.UpdateRegisteredIdsAsync)
-							.Select(_ => id)
-					)
-					.Subscribe(registrationService.RegisterCandidate)
-			};
+			IsSelectingId = IsCandidatePlaced
+				.SelectMany(async isSelecting =>
+				{
+					if (isSelecting)
+					{
+						await IdSelectionPanel.UpdateRegisteredIdsAsync();
+						return IsCandidatePlaced.Value;
+					}
+					return false;
+				})
+				.ToReactiveProperty();
 
-			IsSelectingId = IsCandidatePlaced;
+			_disposable = IdSelectionPanel.SelectedId
+				.Subscribe(id =>
+				{
+					registrationService.RegisterCandidate(id);
+					IsSelectingId.Value = false;
+					IsCandidatePlaced.ForceNotify();
+				});
 		}
 
 		public void Dispose() => _disposable.Dispose();
