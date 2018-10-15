@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RecognitionService
+namespace RecognitionService.Input.Touch
 {
     public interface IDeviceController
     {

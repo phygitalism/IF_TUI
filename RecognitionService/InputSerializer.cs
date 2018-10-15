@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using RecognitionService.Models;
+using RecognitionService.Input.Touch;
 
 namespace RecognitionService
 {

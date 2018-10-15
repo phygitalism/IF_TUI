@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 
 using RecognitionService.Models;
+using RecognitionService.Input.Tuio;
 using RecognitionService.Tuio;
 using RecognitionService.Tuio.Entities;
 

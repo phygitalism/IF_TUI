@@ -77,9 +77,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DeviceState.cs" />
+    <Compile Include="Input\Touch\DeviceState.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="IDeviceController.cs" />
+    <Compile Include="Input\Touch\IDeviceController.cs" />
     <Compile Include="MenuViewController.cs" />
     <Compile Include="Models\MarkerConfig.cs" />
     <Compile Include="PQMTClientImport.cs" />
@@ -88,7 +88,7 @@
     <Compile Include="STAApplicationContext.cs" />
     <Compile Include="Storage.cs" />
     <Compile Include="TangibleMarkerController.cs" />
-    <Compile Include="TouchOverlay.cs" />
+    <Compile Include="Input\Touch\TouchOverlay.cs" />
     <Compile Include="Tuio\Entities\ITUIOEntity.cs" />
     <Compile Include="Tuio\Entities\TUIOBlob.cs" />
     <Compile Include="Tuio\Entities\TUIOCursor.cs" />
@@ -135,7 +135,7 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
-    <Compile Include="DeviceMock.cs" />
+    <Compile Include="Input\Touch\DeviceMock.cs" />
     <Compile Include="Recognition\TangibleMarkerRecognizer.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -159,14 +159,15 @@
       <Project>{6080ad8b-8acd-4c0e-abad-26db043e202b}</Project>
       <Name>TUIOsharp</Name>
     </ProjectReference>
-    <Compile Include="IInputProvider.cs" />
+    <Compile Include="Input\Touch\IInputProvider.cs" />
     <Compile Include="Models\TouchPointFrame.cs" />
     <Compile Include="InputSerializer.cs" />
     <Compile Include="InputLogger.cs" />
-    <Compile Include="TuioServer.cs" />
-    <Compile Include="TouchPointFrameGenerator.cs" />
-    <Compile Include="TuioObjectController.cs" />
-    <Compile Include="ITuioInputProvider.cs" />
+    <Compile Include="Tuio\TuioServer.cs" />
+    <Compile Include="Input\Touch\TouchPointFrameGenerator.cs" />
+    <Compile Include="Input\Tuio\TuioObjectController.cs" />
+    <Compile Include="Input\Tuio\ITuioInputProvider.cs" />
+    <Folder Include="Input\Tuio\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

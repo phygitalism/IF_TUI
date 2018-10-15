@@ -15,7 +15,7 @@ using EPQT_TRequest = PQMultiTouch.PQMTClientImport.EnumTouchClientRequestType;
 
 using RecognitionService.Models;
 
-namespace RecognitionService
+namespace RecognitionService.Input.Touch
 {
     class СonnectionServerException : Exception
     {

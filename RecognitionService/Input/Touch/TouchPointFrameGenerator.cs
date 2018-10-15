@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 
 using RecognitionService.Models;
 
-namespace RecognitionService
+namespace RecognitionService.Input.Touch
 {
     public class TouchPointFrameGenerator : IInputProvider, IDisposable
     {

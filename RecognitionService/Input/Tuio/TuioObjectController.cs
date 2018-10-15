@@ -3,8 +3,9 @@ using System.Collections.Generic;
 
 using RecognitionService.Models;
 using RecognitionService.Recognition;
+using RecognitionService.Input.Touch;
 
-namespace RecognitionService
+namespace RecognitionService.Input.Tuio
 {
 	public class TuioObjectController : ITuioInputProvider, IDisposable
 	{
@@ -25,8 +26,11 @@ namespace RecognitionService
 		{
 			var registredTangibles = _tangibleMarkerController.Config.registredTangibles;
 			var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(frame.touches, registredTangibles);
+			
+			// TODO - detect previously recognized tangibles and tangibles that disappeared
 
 			// TODO - split touches from objects
+
 			OnTuioInput?.Invoke(frame.touches, recognizedTangibles);
 		}
 

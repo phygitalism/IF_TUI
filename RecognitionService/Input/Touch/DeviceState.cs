@@ -1,5 +1,5 @@
 ﻿
-namespace RecognitionService
+namespace RecognitionService.Input.Touch
 {
     public enum DeviceState
     {

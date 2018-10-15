@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using RecognitionService.Models;
 
-namespace RecognitionService
+namespace RecognitionService.Input.Tuio
 {
     public interface ITuioInputProvider
     {

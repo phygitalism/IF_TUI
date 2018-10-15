@@ -1,14 +1,20 @@
 using System;
 
-namespace RecognitionService
+using RecognitionService.Models;
+
+namespace RecognitionService.Input.Touch
 {
-    public class DeviceMock : IDeviceController, IDisposable
+    public class DeviceMock : IDeviceController, IInputProvider, IDisposable
     {
         private System.Windows.Threading.DispatcherTimer _statusTimer;
+
+        private TouchPointFrameGenerator _touchPointFrameGenerator;
 
         public string DeviceName { get; } = "Device Mock";
         public DeviceState State { get; private set; } = DeviceState.Uninitialized;
         public event Action<DeviceState> OnStateChanged;
+
+        public event Action<TouchPointFrame> OnTouchesRecieved;
 
         public DeviceMock() { }
 
