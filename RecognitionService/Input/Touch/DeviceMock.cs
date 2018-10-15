@@ -1,82 +1,90 @@
 using System;
+using System.Windows.Threading;
 
 using RecognitionService.Models;
 
 namespace RecognitionService.Input.Touch
 {
-    public class DeviceMock : IDeviceController, IInputProvider, IDisposable
-    {
-        private System.Windows.Threading.DispatcherTimer _statusTimer;
+	public class DeviceMock : IDeviceController, IInputProvider, IDisposable
+	{
+		private DispatcherTimer _statusTimer;
 
-        private TouchPointFrameGenerator _touchPointFrameGenerator;
+		private TouchPointFrameGenerator _touchPointFrameGenerator;
 
-        public string DeviceName { get; } = "Device Mock";
-        public DeviceState State { get; private set; } = DeviceState.Uninitialized;
-        public event Action<DeviceState> OnStateChanged;
+		public string DeviceName { get; } = "Device Mock";
+		public DeviceState State { get; private set; } = DeviceState.Uninitialized;
+		public event Action<DeviceState> OnStateChanged;
 
-        public event Action<TouchPointFrame> OnTouchesRecieved;
+		public event Action<TouchPointFrame> OnTouchesRecieved;
 
-        public DeviceMock() { }
+		public DeviceMock() { }
 
-        private void KillTimer()
-        {
-            if (_statusTimer != null)
-            {
-                _statusTimer.Stop();
-                _statusTimer = null;
-            }
-        }
+		public void Init()
+		{
+			if (State == DeviceState.Uninitialized)
+			{
+				State = DeviceState.Initialized;
+				OnStateChanged?.Invoke(State);
+			}
+		}
 
-        public void Init()
-        {
-            if (State == DeviceState.Uninitialized)
-            {
-                State = DeviceState.Initialized;
-                OnStateChanged?.Invoke(State);
-            }
-        }
+		public void Start()
+		{
+			if (State == DeviceState.Initialized)
+			{
+				State = DeviceState.Starting;
+				OnStateChanged?.Invoke(State);
 
-        public void Start()
-        {
-            if (State == DeviceState.Initialized)
-            {
-                State = DeviceState.Starting;
-                // Simulate a real device with a simple timer
-                _statusTimer = new System.Windows.Threading.DispatcherTimer(
-                    new TimeSpan(0, 0, 3),
-                    System.Windows.Threading.DispatcherPriority.Normal,
-                    (sender, eventArgs) =>
-                    {
-                        KillTimer();
-                        State = DeviceState.Running;
-                        _statusTimer = null;
-                        OnStateChanged?.Invoke(State);
-                    },
-                    System.Windows.Threading.Dispatcher.CurrentDispatcher
-                );
-            }
-        }
+				_statusTimer = new DispatcherTimer(
+					TimeSpan.FromSeconds(3),
+					DispatcherPriority.Normal,
+					(sender, eventArgs) =>
+					{
+						KillTimer();
+						State = DeviceState.Running;
+						OnStateChanged?.Invoke(State);
+						_touchPointFrameGenerator = new TouchPointFrameGenerator();
+						_touchPointFrameGenerator.OnTouchesRecieved += OnTouchesRecieved;
+					},
+					Dispatcher.CurrentDispatcher
+				);
+			}
+		}
 
-        public void Stop()
-        {
-            if (State == DeviceState.Running)
-            {
-                State = DeviceState.Initialized;
-                OnStateChanged?.Invoke(State);
-            }
-        }
+		public void Stop()
+		{
+			if (State == DeviceState.Running)
+			{
+				State = DeviceState.Initialized;
+				OnStateChanged?.Invoke(State);
+			}
+		}
 
-        public void Terminate()
-        {
-            KillTimer();
-            Stop();
-            State = DeviceState.Uninitialized;
-            OnStateChanged?.Invoke(State);
-        }
+		public void Terminate()
+		{
+			KillTimer();
+			Stop();
+			State = DeviceState.Uninitialized;
+			OnStateChanged?.Invoke(State);
+		}
 
-        public void Dispose()
-        {
-            Terminate();
-        }
-    }
+		private void KillTimer()
+		{
+			if (_statusTimer != null)
+			{
+				_statusTimer.Stop();
+				_statusTimer = null;
+			}
+		}
+
+		public void Dispose()
+		{
+			Terminate();
+			
+			if (_touchPointFrameGenerator != null) 
+			{
+				_touchPointFrameGenerator.OnTouchesRecieved -= OnTouchesRecieved;
+			}
+		}
+	}
 }
