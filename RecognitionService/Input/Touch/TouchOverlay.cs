@@ -15,14 +15,14 @@ using EPQT_TRequest = PQMultiTouch.PQMTClientImport.EnumTouchClientRequestType;
 
 using RecognitionService.Models;
 
-namespace RecognitionService
+namespace RecognitionService.Input.Touch
 {
     class СonnectionServerException : Exception
     {
         public СonnectionServerException(string message) : base(message) { }
     }
 
-    class TouchOverlay : IDeviceController, IInputProvider
+    class TouchOverlay : IDeviceController, IInputProvider, IDisposable
     {
         public string DeviceName { get; private set; } = "PQ LABS Touch Overlay";
         public DeviceState State { get; private set; } = DeviceState.Uninitialized;
@@ -81,6 +81,11 @@ namespace RecognitionService
             Console.WriteLine("disconnect server...");
             PQ.DisconnectServer();
             State = DeviceState.Uninitialized;
+        }
+
+        public void Dispose()
+        {
+            Terminate();
         }
 
         private void BindToTouchOverlayEvents()

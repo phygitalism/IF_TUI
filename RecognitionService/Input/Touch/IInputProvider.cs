@@ -1,7 +1,7 @@
 using System;
 using RecognitionService.Models;
 
-namespace RecognitionService
+namespace RecognitionService.Input.Touch
 {
     public interface IInputProvider
     {
