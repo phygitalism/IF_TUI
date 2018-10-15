@@ -9,6 +9,8 @@ namespace MarkerRegistratorGui.Model
 {
 	public class DummyRegistrationService : IMarkerRegistrationService, IMarkerRegistrationField
 	{
+		private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
+
 		private readonly HashSet<int> _availableIds = new HashSet<int>(Enumerable.Range(0, 10));
 		private readonly HashSet<int> _registeredIds = new HashSet<int>();
 
@@ -22,18 +24,20 @@ namespace MarkerRegistratorGui.Model
 		public event Action<MarkerCandidateState> OnMarkerCandidateUpdated;
 		public event Action<int> OnPointersCountChanged;
 
-		public DummyRegistrationService() => EmulateMarkerCandidate();
+		public DummyRegistrationService() => ResetMarkerCandidateAsync();
 
-		private async void EmulateMarkerCandidate()
+		private async void ResetMarkerCandidateAsync()
 		{
-			var time = TimeSpan.FromSeconds(2);
+			await DoWithDelay(
+				"Removing marker candidate",
+				() => OnMarkerCandidateUpdated?.Invoke(MarkerCandidateState.NotDetected)
+			);
 
-			Debug.WriteLine($"Emulating marker candidate after {time}");
-			await Task.Delay(time);
-
-			Debug.WriteLine($"Emulating marker candidate");
-
-			OnMarkerCandidateUpdated?.Invoke(MarkerCandidateState.Detected);
+			await Task.Delay(5000);
+			await DoWithDelay(
+				"Emulating marker candidate",
+				() => OnMarkerCandidateUpdated?.Invoke(MarkerCandidateState.Detected)
+			);
 		}
 
 		public void RegisterCandidate(int id)
@@ -43,11 +47,9 @@ namespace MarkerRegistratorGui.Model
 			if (!AvailableIds.Contains(id))
 				throw new InvalidOperationException();
 
-			OnMarkerCandidateUpdated?.Invoke(MarkerCandidateState.NotDetected);
-
 			_registeredIds.Add(id);
 
-			EmulateMarkerCandidate();
+			ResetMarkerCandidateAsync();
 		}
 
 		public void UnregisterId(int id)
@@ -60,11 +62,30 @@ namespace MarkerRegistratorGui.Model
 			_registeredIds.Remove(id);
 		}
 
-		public async Task<IEnumerable<int>> GetRegisteredIdsAsync()
-		{
-			await Task.Delay(TimeSpan.FromSeconds(1));
+		public Task<IEnumerable<int>> GetRegisteredIdsAsync()
+			=> DoWithDelay("Requesting ids", () => Task.FromResult((IEnumerable<int>)_registeredIds));
 
-			return _registeredIds;
+
+		private Task DoWithDelay(string actionText, Action action)
+			=> DoWithDelay(actionText, () =>
+			{
+				action();
+				return Task.FromResult(false);
+			});
+
+		private Task DoWithDelay(string actionText, Func<Task> action)
+			=> DoWithDelay(actionText, async () => {
+				await action();
+				return false;
+			});
+
+		private async Task<T> DoWithDelay<T>(string actionText, Func<Task<T>> action)
+		{
+			Debug.WriteLine($"{actionText} after {_delay}");
+			await Task.Delay(_delay);
+
+			Debug.WriteLine(actionText);
+			return await action();
 		}
 	}
 }
