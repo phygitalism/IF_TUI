@@ -123,23 +123,23 @@ namespace RecognitionService.Models
 
         public JObject Serialize()
         {
-			var obj = new JObject()
+            var obj = new JObject()
             {
                 ["posA"] = JsonConvert.SerializeObject(posA, Formatting.None),
                 ["posB"] = JsonConvert.SerializeObject(posB, Formatting.None),
                 ["posC"] = JsonConvert.SerializeObject(posC, Formatting.None),
             };
 
-			return obj;
+            return obj;
 
-		}
+        }
 
         public static Triangle Deserialize(JObject obj)
         {
-			var tangible = new Triangle(
-				JObject.Parse(obj.Value<string>("posA")).ToObject<Vector2>(),
-				JObject.Parse(obj.Value<string>("posB")).ToObject<Vector2>(),
-				JObject.Parse(obj.Value<string>("posC")).ToObject<Vector2>()
+            var tangible = new Triangle(
+                JObject.Parse(obj.Value<string>("posA")).ToObject<Vector2>(),
+                JObject.Parse(obj.Value<string>("posB")).ToObject<Vector2>(),
+                JObject.Parse(obj.Value<string>("posC")).ToObject<Vector2>()
             );
 
             return tangible;
