@@ -1,37 +1,68 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Diagnostics;
+using System.Numerics;
 using System.Reactive.Linq;
 using MarkerRegistratorGui.Model;
 using Reactive.Bindings;
 
 namespace MarkerRegistratorGui.ViewModel
 {
-	public class MarkerRegistrationViewModel
+	public class MarkerRegistrationViewModel : IDisposable
 	{
-		private readonly IMarkerRegistrationService _registrationService;
+		private readonly IDisposable _disposable;
 
 		public ReactiveProperty<Vector2> FieldPosition { get; }
 		public ReactiveProperty<Vector2> FieldSize { get; }
 
 		public IdSelectionViewModel IdSelectionPanel { get; }
+		public ReactiveProperty<bool> IsCandidatePlaced { get; }
 		public ReactiveProperty<bool> IsSelectingId { get; }
 
-		public MarkerRegistrationViewModel(IMarkerRegistrationService registrationService, ScaleAdapter scaleAdapter)
+		public MarkerRegistrationViewModel(
+			IMarkerRegistrationService registrationService,
+			IMarkerRegistrationField registrationField,
+			ScaleAdapter scaleAdapter
+		)
 		{
-			_registrationService = registrationService;
+			IdSelectionPanel = new IdSelectionViewModel(registrationService);
 
-			IdSelectionPanel = new IdSelectionViewModel(registrationService.IdsCount);
-
-			FieldPosition = Observable.Return(_registrationService.RegistrationField.position)
+			FieldPosition = Observable.Return(registrationField.FieldPosition)
 				.ScaleToScreen(scaleAdapter)
 				.ToReactiveProperty();
 
-			FieldSize = Observable.Return(_registrationService.RegistrationField.size)
+			FieldSize = Observable.Return(registrationField.FieldSize)
 				.ScaleToScreen(scaleAdapter)
 				.ToReactiveProperty();
 
-			IsSelectingId = Observable.Return(true)
-				.Merge(IdSelectionPanel.SelectedId.Select(_ => false))
+			IsCandidatePlaced = Observable.FromEvent<MarkerCandidateState>(
+				h => registrationService.OnMarkerCandidateUpdated += h,
+				h => registrationService.OnMarkerCandidateUpdated -= h
+			)
+				.Do(value => Debug.WriteLine($"-> Candidate update = {value}"))
+				.Select(state => state == MarkerCandidateState.Detected)
 				.ToReactiveProperty();
+
+			IsSelectingId = IsCandidatePlaced
+				.SelectMany(async isSelecting =>
+				{
+					if (isSelecting)
+					{
+						await IdSelectionPanel.UpdateRegisteredIdsAsync();
+						return IsCandidatePlaced.Value;
+					}
+					return false;
+				})
+				.ToReactiveProperty();
+
+			_disposable = IdSelectionPanel.SelectedId
+				.Subscribe(id =>
+				{
+					registrationService.RegisterCandidate(id);
+					IsSelectingId.Value = false;
+					IsCandidatePlaced.ForceNotify();
+				});
 		}
+
+		public void Dispose() => _disposable.Dispose();
 	}
 }

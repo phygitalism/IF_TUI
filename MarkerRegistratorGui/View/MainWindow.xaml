@@ -11,11 +11,10 @@
 		Title="MainWindow"
 		WindowState="Maximized" WindowStyle="None" ResizeMode="NoResize"
 		Height="{Binding ScaleAdapter.WindowHeight.Value, Mode=OneWayToSource}"
-		Width="{Binding ScaleAdapter.WindowWidth.Value, Mode=OneWayToSource}">
-	<Window.DataContext>
-		<viewmodel:MainViewModel/>
-	</Window.DataContext>
+		Width="{Binding ScaleAdapter.WindowWidth.Value, Mode=OneWayToSource}"
+		x:Name="mainWindow">
 	<Window.Resources>
+		<Color x:Key="ControlDarkColor">#FF211AA9</Color>
 		<converters:VectorConverter x:Key="vectorConverter"/>
 		<converters:PiToDegreeConverter x:Key="angleConverter"/>
 		<converters:MultiplyConverter x:Key="multiplyConverter"/>
@@ -88,11 +87,6 @@
 				Background="Gray"
 				Opacity="0.8"
 				OpacityMask="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}">
-				<StackPanel.Resources>
-					<Style TargetType="{x:Type Button}">
-						<Setter Property="FontSize" Value="50"/>
-					</Style>
-				</StackPanel.Resources>
 				<Label Content="Select marker Id" FontSize="50" HorizontalAlignment="Center"/>
 				<ItemsControl ItemsSource="{Binding SelectableIds}">
 					<ItemsControl.ItemTemplate>
@@ -100,8 +94,20 @@
 							<Button
 								Content="{Binding Id}"
 								Command="{Binding SelectedCommand}"
+								TouchDown="CallButtonCommand"
 								Height="100"
-								Width="100"/>
+								Width="100">
+								<Button.Style>
+									<Style TargetType="{x:Type Button}">
+										<Setter Property="FontSize" Value="50"/>
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding IsSelected.Value}" Value="True">
+												<Setter Property="Background" Value="LightSlateGray" />
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</Button.Style>
+							</Button>
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
 					<ItemsControl.ItemsPanel>
@@ -113,18 +119,9 @@
 			</StackPanel>
 		</DataTemplate>
 		<DataTemplate DataType="{x:Type viewmodel:MarkerRegistrationViewModel}">
-			<Canvas
-				Width="{Binding
-					FieldSize.Value,
-					Converter={StaticResource vectorConverter},
-					ConverterParameter='X'}"
-				Height="{Binding
-					FieldSize.Value,
-					Converter={StaticResource vectorConverter},
-					ConverterParameter='Y'}"
-				Background="LightGray"
-				Opacity="0.8">
-				<Canvas.RenderTransform>
+			<StackPanel
+				Orientation="Horizontal">
+				<StackPanel.RenderTransform>
 					<TranslateTransform
 						X="{Binding
 							FieldPosition.Value,
@@ -134,19 +131,65 @@
 							FieldPosition.Value,
 							Converter={StaticResource vectorConverter},
 							ConverterParameter='Y'}"/>
-				</Canvas.RenderTransform>
-				<Popup
-					Name="IdSelection"
-					IsOpen="{Binding IsSelectingId.Value}"
-					PopupAnimation="Slide"
-					AllowsTransparency="True"
-					Placement="Right">
-					<ContentControl Content="{Binding IdSelectionPanel}"/>
-				</Popup>
-			</Canvas>
+				</StackPanel.RenderTransform>
+				<Canvas
+					HorizontalAlignment="Left"
+					VerticalAlignment="Top"
+					Width="{Binding
+						FieldSize.Value,
+						Converter={StaticResource vectorConverter},
+						ConverterParameter='X'}"
+					Height="{Binding
+						FieldSize.Value,
+						Converter={StaticResource vectorConverter},
+						ConverterParameter='Y'}"
+					Background="LightGray"
+					Opacity="0.8">
+					<Label
+						x:Name="registrationLabel"
+						FontSize="20">
+						<Label.Style>
+							<Style TargetType="Label">
+								<Setter Property="Content" Value="Place marker here"/>
+								<Style.Triggers>
+									<DataTrigger 
+										Binding="{Binding IsCandidatePlaced.Value}"
+										Value="true">
+										<Setter Property="Content" Value="Select id"/>
+									</DataTrigger>
+								</Style.Triggers>
+							</Style>
+						</Label.Style>
+					</Label>
+				</Canvas>
+				<ContentControl Content="{Binding IdSelectionPanel}">
+					<ContentControl.Style>
+						<Style TargetType="ContentControl">
+							<Setter Property="Visibility" Value="Collapsed"/>
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding IsSelectingId.Value}" Value="True">
+									<Setter Property="Visibility" Value="Visible"/>
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</ContentControl.Style>
+				</ContentControl>
+			</StackPanel>
 		</DataTemplate>
 	</Window.Resources>
 	<Canvas>
+		<Button
+			Name="ExitButton"
+			Content="X"
+			Command="{Binding ExitCommand}"
+			TouchDown="CallButtonCommand"
+			CommandParameter="{x:Reference Name=mainWindow}"
+			Canvas.Right="0"
+			Height="100"
+			Width="100"
+			FontSize="24"
+			BorderThickness="0">
+		</Button>
 		<ItemsControl Name="Markers" ItemsSource="{Binding MarkerTracking.TrackedMarkers}"/>
 		<ContentControl Name="MarkerRegistration" Content="{Binding MarkerRegistration}"/>
 	</Canvas>

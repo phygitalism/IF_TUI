@@ -20,9 +20,22 @@ namespace RecognitionService.Api
 			_webSocket = new WebSocket(uri);
 
 			_webSocket.OnMessage += HandleMessage;
+			_webSocket.OnError += HandleError;
 
 			_webSocket.Connect();
+
+			ThrowIfNotConnected();
 		}
+
+		[Conditional("RELEASE")]
+		private void ThrowIfNotConnected()
+		{
+			if (_webSocket.ReadyState != WebSocketState.Open)
+				throw new RecognitionServiceApiException("Couldn't connect to service");
+		}
+
+		private void HandleError(object sender, ErrorEventArgs e)
+			=> throw new RecognitionServiceApiException(e.Message, e.Exception);
 
 		private void HandleMessage(object sender, MessageEventArgs e)
 		{
@@ -89,6 +102,17 @@ namespace RecognitionService.Api
 			var message = ApiHelpers.CreateMessage(ApiEvent.UnregisterMarker, id);
 
 			_webSocket.Send(message.ToString());
+		}
+	}
+
+	public class RecognitionServiceApiException : Exception
+	{
+		public RecognitionServiceApiException(string message) : base(message)
+		{
+		}
+
+		public RecognitionServiceApiException(string message, Exception innerException) : base(message, innerException)
+		{
 		}
 	}
 }

@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MarkerRegistratorGui.View;
+using MarkerRegistratorGui.ViewModel;
 
 namespace MarkerRegistratorGui
 {
@@ -20,9 +22,35 @@ namespace MarkerRegistratorGui
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+		private readonly PointerInjector _pointerInjector;
+
 		public MainWindow()
 		{
+			InitializeDataContext();
 			InitializeComponent();
+
+			_pointerInjector = new PointerInjector(this, ((MainViewModel)DataContext).Pointers);
+
+			Closed += (_, __) => _pointerInjector.Dispose();
+		}
+
+		private void InitializeDataContext()
+		{
+			try
+			{
+				DataContext = new MainViewModel();
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.Message, "Initialization error", MessageBoxButton.OK, MessageBoxImage.Error);
+				throw;
+			}
+		}
+
+		private void CallButtonCommand(object sender, TouchEventArgs e)
+		{
+			var button = sender as Button;
+			button.Command.Execute(button.CommandParameter);
 		}
 	}
 }

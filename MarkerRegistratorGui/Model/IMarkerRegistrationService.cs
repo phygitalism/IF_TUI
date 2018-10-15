@@ -1,11 +1,22 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MarkerRegistratorGui.Model
 {
 	public interface IMarkerRegistrationService
 	{
-		int IdsCount { get; }
+		IEnumerable<int> AvailableIds { get; }
 
-		(Vector2 position, Vector2 size) RegistrationField { get; }
+		event Action<MarkerCandidateState> OnMarkerCandidateUpdated;
+
+		void RegisterCandidate(int id);
+		Task<IEnumerable<int>> GetRegisteredIdsAsync();
+	}
+
+	public enum MarkerCandidateState
+	{
+		NotDetected,
+		Detected
 	}
 }

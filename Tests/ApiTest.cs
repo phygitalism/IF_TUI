@@ -26,6 +26,25 @@ namespace Tests
 		}
 
 		[Fact]
+		public void Reconnection()
+		{
+			using (var server = CreateServer())
+			{
+				using (var client = CreateClient())
+				{
+					Assert.True(client.IsConnected);
+					Assert.True(server.HasConnections);
+				}
+
+				using (var client = CreateClient())
+				{
+					Assert.True(client.IsConnected);
+					Assert.True(server.HasConnections);
+				}
+			}
+		}
+
+		[Fact]
 		public async Task ListRequest()
 		{
 			using (var server = CreateServer())
