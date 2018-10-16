@@ -27,15 +27,24 @@ namespace RecognitionService.Input.Tuio
 
 		private void ProcessFrame(TouchPointFrame frame)
 		{
-			var registredTangibles = _tangibleMarkerController.Config.registredTangibles;
-			var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(frame.touches, registredTangibles);
+			try
+			{
+				var registredTangibles = _tangibleMarkerController.Config.registredTangibles;
+				var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(frame.touches, registredTangibles);
 
-			var currentRecognizedTangibles = DetermineMarkerState(recognizedTangibles);
-			previouslyRecognizedTangibles = currentRecognizedTangibles;
+				Console.WriteLine($"Recognized markers{recognizedTangibles.Count}");
+				var currentRecognizedTangibles = DetermineMarkerState(recognizedTangibles);
+				previouslyRecognizedTangibles = currentRecognizedTangibles;
 
-			// TODO - split touches from objects
+				// TODO - split touches from objects
 
-			OnTuioInput?.Invoke(frame.touches, currentRecognizedTangibles.Values.ToList());
+				OnTuioInput?.Invoke(frame.touches, currentRecognizedTangibles.Values.ToList());
+			}
+			catch (System.Exception ex)
+			{
+				Console.WriteLine(ex);
+			}
+
 		}
 
 		private Dictionary<int, RecognizedTangibleMarker> DetermineMarkerState(List<RecognizedTangibleMarker> recognizedTangibles)
@@ -62,10 +71,10 @@ namespace RecognitionService.Input.Tuio
 			var lookup = recognizedTangibles.ToDictionary(o => o.Id);
 			foreach (var tangibleId in previouslyRecognizedTangibles.Keys)
 			{
-				if (!lookup.ContainsKey(tangibleId))
+				if (!lookup.ContainsKey(tangibleId) && previouslyRecognizedTangibles[tangibleId].Type != RecognizedTangibleMarker.ActionType.Removed)
 				{
 					// Removed
-					var tuioObj = lookup[tangibleId];
+					var tuioObj = previouslyRecognizedTangibles[tangibleId];
 					tuioObj.Type = RecognizedTangibleMarker.ActionType.Removed;
 					currentRecognizedTangibles[tuioObj.Id] = tuioObj;
 				}

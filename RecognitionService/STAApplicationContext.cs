@@ -46,7 +46,7 @@ namespace RecognitionService
         private readonly Dictionary<string, bool> featureToggles = new Dictionary<string, bool>()
         {
             [isDeviceMockedKey] = true,
-            [inputLoggingKey] = true
+            [inputLoggingKey] = false
         };
 
         public STAApplicationContext()
