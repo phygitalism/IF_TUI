@@ -20,16 +20,19 @@ namespace RecognitionService.Models
 
         public List<Segment> sides;
 
+		[JsonIgnore]
         public Segment ShortSide
         {
             get { return sides[0]; }
         }
 
+        [JsonIgnore]
         public Segment MiddleSide
         {
             get { return sides[1]; }
         }
 
+        [JsonIgnore]
         public Segment LargeSide
         {
             get { return sides[2]; }

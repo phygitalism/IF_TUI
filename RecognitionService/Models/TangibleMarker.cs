@@ -1,5 +1,6 @@
 using System.Numerics;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace RecognitionService.Models
 {
@@ -10,6 +11,7 @@ namespace RecognitionService.Models
 		public float initialAngle;
 		public float angleToCenter;
 
+		[JsonIgnore]
 		public List<Segment> Sides
 		{
 			get { return triangle.sides; }
