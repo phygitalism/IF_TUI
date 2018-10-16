@@ -2,7 +2,7 @@
 using System.IO;
 
 using Hanssens.Net;
-
+using Newtonsoft.Json;
 using RecognitionService.Models;
 
 namespace RecognitionService
@@ -30,7 +30,7 @@ namespace RecognitionService
 
 		public void Save(MarkerConfig config)
 		{
-			var json = Serialization.SerializeConfig(config);
+			var json = JsonConvert.SerializeObject(config);
 			_storage.Store(tangiblesKey, json);
 			_storage.Persist();
 		}
@@ -41,7 +41,7 @@ namespace RecognitionService
 			try
 			{
 				var json = _storage.Get<string>(tangiblesKey);
-				result = Serialization.DeserializeConfig(json);
+				result = JsonConvert.DeserializeObject<MarkerConfig>(json);
 			}
 			catch (ArgumentNullException ex)
 			{

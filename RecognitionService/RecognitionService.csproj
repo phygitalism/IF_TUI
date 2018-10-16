@@ -82,7 +82,6 @@
     <Compile Include="Input\Touch\IDeviceController.cs" />
     <Compile Include="MenuViewController.cs" />
     <Compile Include="Models\MarkerConfig.cs" />
-    <Compile Include="Models\Serialization.cs" />
     <Compile Include="PQMTClientImport.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
