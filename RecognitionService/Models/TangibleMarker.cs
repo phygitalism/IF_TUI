@@ -1,9 +1,6 @@
-using System;
 using System.Numerics;
 using System.Collections.Generic;
-
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace RecognitionService.Models
 {
@@ -14,6 +11,7 @@ namespace RecognitionService.Models
 		public float initialAngle;
 		public float angleToCenter;
 
+		[JsonIgnore]
 		public List<Segment> Sides
 		{
 			get { return triangle.sides; }
@@ -25,32 +23,6 @@ namespace RecognitionService.Models
 			this.triangle = triangle;
 			this.initialAngle = initialAngle;
 			this.angleToCenter = angleToCenter;
-		}
-
-		public JObject Serialize()
-		{
-			var triangleObj = triangle.Serialize();
-			var obj = new JObject()
-			{
-				["id"] = Id,
-				["triangle"] = triangleObj,
-				["initialAngle"] = initialAngle,
-				["angleToCenter"] = angleToCenter
-			};
-			return obj;
-
-		}
-
-		public static RegistredTangibleMarker Deserialize(JObject obj)
-		{
-			var tangible = new RegistredTangibleMarker(
-				obj.Value<int>("id"),
-				Triangle.Deserialize(obj.Value<JObject>("triangle")),
-				obj.Value<float>("initialAngle"),
-				obj.Value<float>("angleToCenter")
-			);
-
-			return tangible;
 		}
 	}
 

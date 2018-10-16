@@ -4,9 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
 namespace RecognitionService.Models
 {
     public class MarkerConfig
@@ -47,19 +44,6 @@ namespace RecognitionService.Models
         public bool IsRegistredWithId(int id)
         {
             return registredTangibles.Any(registredTangible => registredTangible.Id == id);
-        }
-
-        public string Serialize()
-        {
-            var list = new JArray(registredTangibles.Select(tangible => tangible.Serialize()));
-            return JsonConvert.SerializeObject(list);
-        }
-
-        public static MarkerConfig Deserialize(string json)
-        {
-            var tangibles = JToken.Parse(json).Value<JArray>();
-            var registredTangibles = tangibles.Select(token => RegistredTangibleMarker.Deserialize(token.Value<JObject>())).ToList();
-            return new MarkerConfig(registredTangibles);
         }
     }
 }

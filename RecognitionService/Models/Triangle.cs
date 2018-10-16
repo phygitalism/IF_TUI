@@ -4,7 +4,6 @@ using System.Numerics;
 using System.Collections.Generic;
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace RecognitionService.Models
 {
@@ -21,16 +20,19 @@ namespace RecognitionService.Models
 
         public List<Segment> sides;
 
+		[JsonIgnore]
         public Segment ShortSide
         {
             get { return sides[0]; }
         }
 
+        [JsonIgnore]
         public Segment MiddleSide
         {
             get { return sides[1]; }
         }
 
+        [JsonIgnore]
         public Segment LargeSide
         {
             get { return sides[2]; }
@@ -119,30 +121,6 @@ namespace RecognitionService.Models
                 hashCode = (hashCode * 397) ^ LargeSide.GetHashCode();
                 return hashCode;
             }
-        }
-
-        public JObject Serialize()
-        {
-            var obj = new JObject()
-            {
-                ["posA"] = JsonConvert.SerializeObject(posA, Formatting.None),
-                ["posB"] = JsonConvert.SerializeObject(posB, Formatting.None),
-                ["posC"] = JsonConvert.SerializeObject(posC, Formatting.None),
-            };
-
-            return obj;
-
-        }
-
-        public static Triangle Deserialize(JObject obj)
-        {
-            var tangible = new Triangle(
-                JObject.Parse(obj.Value<string>("posA")).ToObject<Vector2>(),
-                JObject.Parse(obj.Value<string>("posB")).ToObject<Vector2>(),
-                JObject.Parse(obj.Value<string>("posC")).ToObject<Vector2>()
-            );
-
-            return tangible;
         }
     }
 }
