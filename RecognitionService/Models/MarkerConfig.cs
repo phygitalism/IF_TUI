@@ -51,14 +51,17 @@ namespace RecognitionService.Models
 
         public string Serialize()
         {
-            var list = new JArray(registredTangibles.Select(tangible => tangible.Serialize()));
+            var list = new JArray(registredTangibles.Select(Serialization.SerializeMarker));
             return JsonConvert.SerializeObject(list);
         }
 
         public static MarkerConfig Deserialize(string json)
         {
             var tangibles = JToken.Parse(json).Value<JArray>();
-            var registredTangibles = tangibles.Select(token => RegistredTangibleMarker.Deserialize(token.Value<JObject>())).ToList();
+            var registredTangibles = tangibles
+                .Select(token => token.ToObject<JObject>())
+                .Select(Serialization.DeserializeMarker)
+                .ToList();
             return new MarkerConfig(registredTangibles);
         }
     }
