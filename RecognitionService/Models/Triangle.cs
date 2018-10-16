@@ -103,11 +103,16 @@ namespace RecognitionService.Models
             return this.Equals(other);
         }
 
-        public bool Equals(Triangle other)
+		public bool Equals(Triangle other)
+		{
+			return Equals(other, 1e-3);
+		}
+
+		public bool Equals(Triangle other, double precision = 1e-3)
         {
-            var areEqual = ShortSide.EqualSegmentExistInList(other.sides) &&
-                MiddleSide.EqualSegmentExistInList(other.sides) &&
-                LargeSide.EqualSegmentExistInList(other.sides);
+            var areEqual = ShortSide.EqualSegmentExistInList(other.sides, precision) &&
+                MiddleSide.EqualSegmentExistInList(other.sides, precision) &&
+                LargeSide.EqualSegmentExistInList(other.sides, precision);
 
             return areEqual;
         }
