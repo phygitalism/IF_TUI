@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace RecognitionService.Models
@@ -33,6 +34,22 @@ namespace RecognitionService.Models
 			);
 
 			return tangible;
+		}
+
+		public static string SerializeConfig(MarkerConfig config)
+		{
+			var list = new JArray(config.registredTangibles.Select(SerializeMarker));
+			return JsonConvert.SerializeObject(list);
+		}
+
+		public static MarkerConfig DeserializeConfig(string json)
+		{
+			var tangibles = JToken.Parse(json).Value<JArray>();
+			var registredTangibles = tangibles
+				.Select(token => token.ToObject<JObject>())
+				.Select(DeserializeMarker)
+				.ToList();
+			return new MarkerConfig(registredTangibles);
 		}
 	}
 }

@@ -48,21 +48,5 @@ namespace RecognitionService.Models
         {
             return registredTangibles.Any(registredTangible => registredTangible.Id == id);
         }
-
-        public string Serialize()
-        {
-            var list = new JArray(registredTangibles.Select(Serialization.SerializeMarker));
-            return JsonConvert.SerializeObject(list);
-        }
-
-        public static MarkerConfig Deserialize(string json)
-        {
-            var tangibles = JToken.Parse(json).Value<JArray>();
-            var registredTangibles = tangibles
-                .Select(token => token.ToObject<JObject>())
-                .Select(Serialization.DeserializeMarker)
-                .ToList();
-            return new MarkerConfig(registredTangibles);
-        }
     }
 }

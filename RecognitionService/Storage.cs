@@ -1,9 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Hanssens.Net;
 
@@ -34,7 +30,7 @@ namespace RecognitionService
 
 		public void Save(MarkerConfig config)
 		{
-			var json = config.Serialize();
+			var json = Serialization.SerializeConfig(config);
 			_storage.Store(tangiblesKey, json);
 			_storage.Persist();
 		}
@@ -45,8 +41,7 @@ namespace RecognitionService
 			try
 			{
 				var json = _storage.Get<string>(tangiblesKey);
-				result = MarkerConfig.Deserialize(json);
-
+				result = Serialization.DeserializeConfig(json);
 			}
 			catch (ArgumentNullException ex)
 			{
