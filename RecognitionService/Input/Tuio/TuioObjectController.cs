@@ -52,7 +52,7 @@ namespace RecognitionService.Input.Tuio
 			var currentRecognizedTangibles = new Dictionary<int, RecognizedTangibleMarker>();
 			foreach (var tangible in recognizedTangibles)
 			{
-				if (previouslyRecognizedTangibles.ContainsKey(tangible.Id))
+				if (previouslyRecognizedTangibles.ContainsKey(tangible.Id) && previouslyRecognizedTangibles[tangible.Id].Type != RecognizedTangibleMarker.ActionType.Removed)
 				{
 					// Updated
 					var tuioObj = previouslyRecognizedTangibles[tangible.Id];
