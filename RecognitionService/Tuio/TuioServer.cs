@@ -76,15 +76,18 @@ namespace RecognitionService
                 switch (tangible.Type)
                 {
                     case RecognizedTangibleMarker.ActionType.Added:
+						Console.WriteLine($"Tuio object added {tangible.Id}");
                         var objectToAdd = new TUIOObject(_tuioTransmitter.NextSessionId(), tangible.Id, tangible.center.X, tangible.center.Y, 0.0f, 0f, 0f, 0f, 0f, 0f);
                         objects[tangible.Id] = objectToAdd;
                         _tuioTransmitter.Add(objectToAdd);
                         break;
                     case RecognizedTangibleMarker.ActionType.Updated:
-                        objects[tangible.Id]?.Update(tangible.center.X, tangible.center.Y, 0.0f, 0f, 0f, 0f, 0f, 0f);
+						Console.WriteLine($"Tuio object Updated {tangible.Id}");
+						objects[tangible.Id]?.Update(tangible.center.X, tangible.center.Y, 0.0f, 0f, 0f, 0f, 0f, 0f);
                         break;
                     case RecognizedTangibleMarker.ActionType.Removed:
-                        var objectToRemove = cursors[tangible.Id];
+						Console.WriteLine($"Tuio object Removed {tangible.Id}");
+						var objectToRemove = objects[tangible.Id];
                         _tuioTransmitter.Remove(objectToRemove);
                         objects.Remove(tangible.Id);
                         break;

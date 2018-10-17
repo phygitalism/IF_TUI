@@ -106,7 +106,7 @@ namespace RecognitionService.Recognition
 		{
 			foreach (var tangibleMarker in _knownMarkers)
 			{
-				if (triangle.Equals(tangibleMarker.triangle))
+				if (triangle.Equals(tangibleMarker.triangle, tolerance))
 				{
 					return tangibleMarker;
 				}

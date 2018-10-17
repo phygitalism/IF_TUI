@@ -50,7 +50,7 @@ namespace RecognitionService.Models
                 new Segment(posB, posC),
                 new Segment(posC, posA)
             };
-            this.sides.Sort((v1, v2) => v2.length >= v1.length ? 1 : -1);
+            this.sides.Sort((v1, v2) => v1.length >= v2.length ? 1 : -1);
         }
 
         public Triangle(Segment sideA, Segment sideB, Segment sideC)
@@ -75,7 +75,7 @@ namespace RecognitionService.Models
                 new Segment(posB, posC),
                 new Segment(posC, posA)
             };
-            this.sides.Sort((v1, v2) => v2.length >= v1.length ? 1 : -1);
+            this.sides.Sort((v1, v2) => v1.length >= v2.length ? 1 : -1);
         }
 
         private static List<Vector2> RemoveDuplicates(List<Vector2> originalList)
@@ -103,11 +103,16 @@ namespace RecognitionService.Models
             return this.Equals(other);
         }
 
-        public bool Equals(Triangle other)
+		public bool Equals(Triangle other)
+		{
+			return Equals(other, 1e-3);
+		}
+
+		public bool Equals(Triangle other, double precision = 1e-3)
         {
-            var areEqual = ShortSide.EqualSegmentExistInList(other.sides) &&
-                MiddleSide.EqualSegmentExistInList(other.sides) &&
-                LargeSide.EqualSegmentExistInList(other.sides);
+            var areEqual = ShortSide.EqualSegmentExistInList(other.sides, precision) &&
+                MiddleSide.EqualSegmentExistInList(other.sides, precision) &&
+                LargeSide.EqualSegmentExistInList(other.sides, precision);
 
             return areEqual;
         }

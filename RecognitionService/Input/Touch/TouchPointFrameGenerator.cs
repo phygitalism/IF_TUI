@@ -26,7 +26,7 @@ namespace RecognitionService.Input.Touch
 
         public TouchPointFrameGenerator()
         {
-            var fileName = "TestInput3.txt";
+            var fileName = "TestInput4.txt";
             var basePath = Environment.CurrentDirectory;
             this.filePath = Path.Combine(basePath, "Resources", fileName);
 
@@ -53,7 +53,7 @@ namespace RecognitionService.Input.Touch
                     var line = file.ReadLine();
                     if (line != null)
                     {
-                        Console.WriteLine(line);
+                        // Console.WriteLine(line);
                         counter++;
 
                         var touchPointFrame = Parse(line);
