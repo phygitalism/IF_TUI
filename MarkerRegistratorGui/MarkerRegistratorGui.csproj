@@ -170,5 +170,5 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\CopyRelease.targets" />
+  <Import Project="$(SolutionDir)\PackRelease.targets" />
 </Project>
