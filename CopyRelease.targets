@@ -5,7 +5,7 @@
     <GetAssemblyIdentity AssemblyFiles="bin\Release\$(AssemblyName).exe">
       <Output TaskParameter="Assemblies" ItemName="MyAssemblyIdentities"/>
     </GetAssemblyIdentity>
-    <Exec ContinueOnError="True" Command="robocopy bin\Release $(SolutionDir)Release\$(AssemblyName)-%(MyAssemblyIdentities.Version) *.exe *.dll"/>
+    <Exec Command="powershell Compress-Archive -CompressionLevel Optimal -DestinationPath $(SolutionDir)Release\$(AssemblyName)-%(MyAssemblyIdentities.Version).zip -Path .\bin\Release\*.exe, .\bin\Release\*.dll"/>
   </Target>
   
 </Project>
