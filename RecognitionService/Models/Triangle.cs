@@ -50,7 +50,7 @@ namespace RecognitionService.Models
                 new Segment(posB, posC),
                 new Segment(posC, posA)
             };
-            this.sides.Sort((v1, v2) => v2.length >= v1.length ? 1 : -1);
+            this.sides.Sort((v1, v2) => v1.length >= v2.length ? 1 : -1);
         }
 
         public Triangle(Segment sideA, Segment sideB, Segment sideC)
@@ -75,7 +75,7 @@ namespace RecognitionService.Models
                 new Segment(posB, posC),
                 new Segment(posC, posA)
             };
-            this.sides.Sort((v1, v2) => v2.length >= v1.length ? 1 : -1);
+            this.sides.Sort((v1, v2) => v1.length >= v2.length ? 1 : -1);
         }
 
         private static List<Vector2> RemoveDuplicates(List<Vector2> originalList)
