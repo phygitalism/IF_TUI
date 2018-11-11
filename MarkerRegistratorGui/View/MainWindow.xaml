@@ -1,0 +1,196 @@
+﻿<Window x:Class="MarkerRegistratorGui.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:local="clr-namespace:MarkerRegistratorGui"
+		xmlns:viewmodel="clr-namespace:MarkerRegistratorGui.ViewModel"
+		xmlns:converters="clr-namespace:MarkerRegistratorGui.View.Converters"
+		xmlns:wpfautogrid="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
+		mc:Ignorable="d"
+		Title="MainWindow"
+		WindowState="Maximized" WindowStyle="None" ResizeMode="NoResize"
+		Height="{Binding ScaleAdapter.WindowHeight.Value, Mode=OneWayToSource}"
+		Width="{Binding ScaleAdapter.WindowWidth.Value, Mode=OneWayToSource}"
+		x:Name="mainWindow">
+	<Window.Resources>
+		<Color x:Key="ControlDarkColor">#FF211AA9</Color>
+		<converters:VectorConverter x:Key="vectorConverter"/>
+		<converters:PiToDegreeConverter x:Key="angleConverter"/>
+		<converters:MultiplyConverter x:Key="multiplyConverter"/>
+		<DataTemplate DataType="{x:Type viewmodel:TrackedMarkerViewModel}">
+			<Canvas>
+				<Canvas.RenderTransform>
+					<TranslateTransform 
+						X="{Binding
+							ScaledPosition.Value,
+							Converter={StaticResource vectorConverter},
+							ConverterParameter='X'}"
+						Y="{Binding
+							ScaledPosition.Value,
+							Converter={StaticResource vectorConverter},
+							ConverterParameter='Y'}"/>
+				</Canvas.RenderTransform>
+
+				<TextBlock
+					Text="{Binding
+						Rotation.Value,
+						Converter={StaticResource angleConverter},
+						StringFormat='Angle:{0}'}"/>
+				<Canvas>
+					<Canvas.Resources>
+						<Style x:Key="ShapeStyle" TargetType="Shape">
+							<Setter Property="StrokeThickness" Value="10"/>
+							<Setter Property="Stroke">
+								<Setter.Value>
+									<SolidColorBrush Color="{Binding Color}"/>
+								</Setter.Value>
+							</Setter>
+						</Style>
+					</Canvas.Resources>
+					<Canvas.RenderTransform>
+						<RotateTransform
+							Angle="{Binding
+								Rotation.Value,
+								Converter={StaticResource angleConverter}}"/>
+					</Canvas.RenderTransform>
+					<Ellipse
+						Canvas.Top="{Binding
+							ScaledRadius.Value,
+							Converter={StaticResource multiplyConverter},
+							ConverterParameter='-1'}"
+						Canvas.Left="{Binding
+							ScaledRadius.Value,
+							Converter={StaticResource multiplyConverter},
+							ConverterParameter='-1'}"
+						Width="{Binding
+							ScaledRadius.Value,
+							Converter={StaticResource multiplyConverter},
+							ConverterParameter='2'}"
+						Height="{Binding
+							ScaledRadius.Value,
+							Converter={StaticResource multiplyConverter},
+							ConverterParameter='2'}"
+						Fill="Transparent"
+						Style="{DynamicResource ShapeStyle}"/>
+					<Line
+						Y2="{Binding
+							ScaledRadius.Value,
+							Converter={StaticResource multiplyConverter},
+							ConverterParameter='-1'}"
+						Style="{DynamicResource ShapeStyle}"/>
+				</Canvas>
+			</Canvas>
+		</DataTemplate>
+		<DataTemplate DataType="{x:Type viewmodel:IdSelectionViewModel}">
+			<StackPanel
+				Background="Gray"
+				Opacity="0.8"
+				OpacityMask="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}">
+				<Label Content="Select marker Id" FontSize="50" HorizontalAlignment="Center"/>
+				<ItemsControl ItemsSource="{Binding SelectableIds}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate DataType="{x:Type viewmodel:SelectableIdViewModel}">
+							<Button
+								Content="{Binding Id}"
+								Command="{Binding SelectedCommand}"
+								TouchDown="CallButtonCommand"
+								Height="100"
+								Width="100">
+								<Button.Style>
+									<Style TargetType="{x:Type Button}">
+										<Setter Property="FontSize" Value="50"/>
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding IsSelected.Value}" Value="True">
+												<Setter Property="Background" Value="LightSlateGray" />
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</Button.Style>
+							</Button>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<wpfautogrid:AutoGrid RowCount="5" ColumnCount="5" Margin="1"/>
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+				</ItemsControl>
+			</StackPanel>
+		</DataTemplate>
+		<DataTemplate DataType="{x:Type viewmodel:MarkerRegistrationViewModel}">
+			<StackPanel
+				Orientation="Horizontal">
+				<StackPanel.RenderTransform>
+					<TranslateTransform
+						X="{Binding
+							FieldPosition.Value,
+							Converter={StaticResource vectorConverter},
+							ConverterParameter='X'}"
+						Y="{Binding
+							FieldPosition.Value,
+							Converter={StaticResource vectorConverter},
+							ConverterParameter='Y'}"/>
+				</StackPanel.RenderTransform>
+				<Canvas
+					HorizontalAlignment="Left"
+					VerticalAlignment="Top"
+					Width="{Binding
+						FieldSize.Value,
+						Converter={StaticResource vectorConverter},
+						ConverterParameter='X'}"
+					Height="{Binding
+						FieldSize.Value,
+						Converter={StaticResource vectorConverter},
+						ConverterParameter='Y'}"
+					Background="LightGray"
+					Opacity="0.8">
+					<Label
+						x:Name="registrationLabel"
+						FontSize="20">
+						<Label.Style>
+							<Style TargetType="Label">
+								<Setter Property="Content" Value="Place marker here"/>
+								<Style.Triggers>
+									<DataTrigger 
+										Binding="{Binding IsCandidatePlaced.Value}"
+										Value="true">
+										<Setter Property="Content" Value="Select id"/>
+									</DataTrigger>
+								</Style.Triggers>
+							</Style>
+						</Label.Style>
+					</Label>
+				</Canvas>
+				<ContentControl Content="{Binding IdSelectionPanel}">
+					<ContentControl.Style>
+						<Style TargetType="ContentControl">
+							<Setter Property="Visibility" Value="Collapsed"/>
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding IsSelectingId.Value}" Value="True">
+									<Setter Property="Visibility" Value="Visible"/>
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</ContentControl.Style>
+				</ContentControl>
+			</StackPanel>
+		</DataTemplate>
+	</Window.Resources>
+	<Canvas>
+		<Button
+			Name="ExitButton"
+			Content="X"
+			Command="{Binding ExitCommand}"
+			TouchDown="CallButtonCommand"
+			CommandParameter="{x:Reference Name=mainWindow}"
+			Canvas.Right="0"
+			Height="100"
+			Width="100"
+			FontSize="24"
+			BorderThickness="0">
+		</Button>
+		<ItemsControl Name="Markers" ItemsSource="{Binding MarkerTracking.TrackedMarkers}"/>
+		<ContentControl Name="MarkerRegistration" Content="{Binding MarkerRegistration}"/>
+	</Canvas>
+</Window>
