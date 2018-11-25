@@ -137,7 +137,7 @@ namespace RecognitionService.Input.Touch
 
         private void OnReceivePointFrame(int frameId, int timestamp, int movingPointCount, IntPtr movingPointArray, IntPtr callbackObject)
         {
-            Console.WriteLine($"frame_id:{frameId},time_stamp:{timestamp} ms,moving point count:{movingPointCount}");
+            //Console.WriteLine($"frame_id:{frameId},time_stamp:{timestamp} ms,moving point count:{movingPointCount}");
 
             var touchPoints = new List<TouchPoint>();
             for (int i = 0; i < movingPointCount; ++i)

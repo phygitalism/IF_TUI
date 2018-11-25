@@ -31,14 +31,13 @@ namespace RecognitionService.Input.Tuio
 			{
 				var registredTangibles = _tangibleMarkerController.Config.registredTangibles;
 				var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(frame.touches, registredTangibles);
-
-				Console.WriteLine($"Recognized markers{recognizedTangibles.Count}");
 				var currentRecognizedTangibles = DetermineMarkerState(recognizedTangibles);
 				previouslyRecognizedTangibles = currentRecognizedTangibles;
 
-				// TODO - split touches from objects
+                PrintMarkerStates(currentRecognizedTangibles.Values.ToList());
+                // TODO - split touches from objects
 
-				OnTuioInput?.Invoke(frame.touches, currentRecognizedTangibles.Values.ToList());
+                OnTuioInput?.Invoke(frame.touches, currentRecognizedTangibles.Values.ToList());
 			}
 			catch (System.Exception ex)
 			{
@@ -46,6 +45,26 @@ namespace RecognitionService.Input.Tuio
 			}
 
 		}
+
+        private void PrintMarkerStates(List<RecognizedTangibleMarker> recognizedTangibles)
+        {
+            var addedMarkerIds = recognizedTangibles.Where(marker => marker.Type == RecognizedTangibleMarker.ActionType.Added).Select(marker => marker.Id).ToList();
+            var uptedMarkerIds = recognizedTangibles.Where(marker => marker.Type == RecognizedTangibleMarker.ActionType.Updated).Select(marker => marker.Id).ToList();
+            var deletedMarkerIds = recognizedTangibles.Where(marker => marker.Type == RecognizedTangibleMarker.ActionType.Removed).Select(marker => marker.Id).ToList();
+
+            if (addedMarkerIds.Count > 0)
+            {
+                Console.WriteLine($"Added markers ids: {string.Join(" ", addedMarkerIds)}");
+            }
+            if (uptedMarkerIds.Count > 0)
+            {
+                Console.WriteLine($"Updated markers ids: {string.Join(" ", uptedMarkerIds)}");
+            }
+            if (deletedMarkerIds.Count > 0)
+            {
+                Console.WriteLine($"Removed markers ids: {string.Join(" ", deletedMarkerIds)}");
+            }
+        }
 
 		private Dictionary<int, RecognizedTangibleMarker> DetermineMarkerState(List<RecognizedTangibleMarker> recognizedTangibles)
 		{

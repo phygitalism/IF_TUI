@@ -25,6 +25,7 @@ namespace RecognitionService
     {
         private const string isDeviceMockedKey = "isDeviceMocked";
         private const string inputLoggingKey = "inputLogging";
+        private const string inputSerializationKey = "inputSerialization";
 
         private const int _serverPort = 8080;
 
@@ -46,7 +47,8 @@ namespace RecognitionService
         private readonly Dictionary<string, bool> featureToggles = new Dictionary<string, bool>()
         {
             [isDeviceMockedKey] = false,
-            [inputLoggingKey] = true
+            [inputLoggingKey] = false,
+            [inputSerializationKey] = true
         };
 
         public STAApplicationContext()
@@ -66,11 +68,14 @@ namespace RecognitionService
                 _touchInputProvider = (IInputProvider)deviceMock;
             }
 
-            if (featureToggles[inputLoggingKey])
+            if (featureToggles[inputSerializationKey])
             {
                 _inputSerializer = (new InputSerializer(_touchInputProvider))
                     .AddToDisposeBag(_disposeBag);
+            }
 
+            if (featureToggles[inputLoggingKey])
+            {
                 _inputLogger = (new InputLogger(_touchInputProvider))
                     .AddToDisposeBag(_disposeBag);
             }
