@@ -33,6 +33,12 @@ namespace RecognitionService.Input.Touch
         public float ScreenWidth { get; private set; }
         public float ScreenHeight { get; private set; }
 
+        // use static delegate to prevent the GC collect the CallBack functors;
+        private static PQ.PFuncOnReceivePointFrame OnReceivePointFrameFunc;
+        private static PQ.PFuncOnServerBreak OnServerBreakFunc;
+        private static PQ.PFuncOnReceiveError OnReceiveErrorFunc;
+        private static PQ.PFuncOnGetDeviceInfo OnGetDeviceInfoFunc;
+
         public TouchOverlay() { }
 
         public void Init()
@@ -90,10 +96,15 @@ namespace RecognitionService.Input.Touch
 
         private void BindToTouchOverlayEvents()
         {
-            PQ.SetOnReceivePointFrame(OnReceivePointFrame, IntPtr.Zero);
-            PQ.SetOnServerBreak(OnServerBreak, IntPtr.Zero);
-            PQ.SetOnReceiveError(OnReceiveError, IntPtr.Zero);
-            PQ.SetOnGetDeviceInfo(OnGetDeviceInfo, IntPtr.Zero);
+            OnReceivePointFrameFunc = new PQ.PFuncOnReceivePointFrame(OnReceivePointFrame);
+            OnServerBreakFunc = new PQ.PFuncOnServerBreak(OnServerBreak);
+            OnReceiveErrorFunc = new PQ.PFuncOnReceiveError(OnReceiveError);
+            OnGetDeviceInfoFunc = new PQ.PFuncOnGetDeviceInfo(OnGetDeviceInfo);
+
+            PQ.SetOnReceivePointFrame(OnReceivePointFrameFunc, IntPtr.Zero);
+            PQ.SetOnServerBreak(OnServerBreakFunc, IntPtr.Zero);
+            PQ.SetOnReceiveError(OnReceiveErrorFunc, IntPtr.Zero);
+            PQ.SetOnGetDeviceInfo(OnGetDeviceInfoFunc, IntPtr.Zero);
         }
 
         private void ConnectToServer()
