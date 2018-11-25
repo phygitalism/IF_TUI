@@ -73,29 +73,26 @@ namespace RecognitionService.Input.Tuio
 			{
 				if (previouslyRecognizedTangibles.ContainsKey(tangible.Id) && previouslyRecognizedTangibles[tangible.Id].Type != RecognizedTangibleMarker.ActionType.Removed)
 				{
-					// Updated
-					var tuioObj = previouslyRecognizedTangibles[tangible.Id];
-					tuioObj.Type = RecognizedTangibleMarker.ActionType.Updated;
-					currentRecognizedTangibles[tuioObj.Id] = tuioObj;
-				}
+                    // Updated
+                    tangible.Type = RecognizedTangibleMarker.ActionType.Updated;
+                    currentRecognizedTangibles[tangible.Id] = tangible;
+                }
 				else
 				{
 					// Added
-					var tuioObj = tangible;
-					tuioObj.Type = RecognizedTangibleMarker.ActionType.Added;
-					currentRecognizedTangibles[tuioObj.Id] = tuioObj;
-				}
+                    tangible.Type = RecognizedTangibleMarker.ActionType.Added;
+                    currentRecognizedTangibles[tangible.Id] = tangible;
+                }
 			}
 
 			var lookup = recognizedTangibles.ToDictionary(o => o.Id);
-			foreach (var tangibleId in previouslyRecognizedTangibles.Keys)
+			foreach (var tangible in previouslyRecognizedTangibles.Values)
 			{
-				if (!lookup.ContainsKey(tangibleId) && previouslyRecognizedTangibles[tangibleId].Type != RecognizedTangibleMarker.ActionType.Removed)
+				if (!lookup.ContainsKey(tangible.Id) && previouslyRecognizedTangibles[tangible.Id].Type != RecognizedTangibleMarker.ActionType.Removed)
 				{
-					// Removed
-					var tuioObj = previouslyRecognizedTangibles[tangibleId];
-					tuioObj.Type = RecognizedTangibleMarker.ActionType.Removed;
-					currentRecognizedTangibles[tuioObj.Id] = tuioObj;
+                    // Removed
+                    tangible.Type = RecognizedTangibleMarker.ActionType.Removed;
+                    currentRecognizedTangibles[tangible.Id] = tangible;
 				}
 			}
 
