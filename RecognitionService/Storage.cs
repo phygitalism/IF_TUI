@@ -26,7 +26,6 @@ namespace RecognitionService
 			}
 			catch (FileNotFoundException ex)
 			{
-				Console.WriteLine(ex);
 				result = new MarkerConfig();
 				Save(result);
 			}

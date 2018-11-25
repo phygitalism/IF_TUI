@@ -34,7 +34,6 @@ namespace RecognitionService
 
             try
             {
-                Console.WriteLine("SEND");
                 _tuioTransmitter.Send();
             }
             catch (SendTuioBundleException ex)
@@ -55,6 +54,7 @@ namespace RecognitionService
                         _tuioTransmitter.Add(cursorToAdd);
                         break;
                     case TouchPoint.ActionType.Move:
+                        //Console.WriteLine($"{tp.Position.X} {tp.Position.Y}");
                         cursors[tp.id]?.Update(tp.Position.X, tp.Position.Y, 0f, 0f, 0f);
                         break;
                     case TouchPoint.ActionType.Up:

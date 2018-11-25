@@ -56,10 +56,10 @@ namespace RecognitionService.Input.Tuio
             {
                 Console.WriteLine($"Added markers ids: {string.Join(" ", addedMarkerIds)}");
             }
-            if (uptedMarkerIds.Count > 0)
-            {
-                Console.WriteLine($"Updated markers ids: {string.Join(" ", uptedMarkerIds)}");
-            }
+            //if (uptedMarkerIds.Count > 0)
+            //{
+            //    Console.WriteLine($"Updated markers ids: {string.Join(" ", uptedMarkerIds)}");
+            //}
             if (deletedMarkerIds.Count > 0)
             {
                 Console.WriteLine($"Removed markers ids: {string.Join(" ", deletedMarkerIds)}");
@@ -85,18 +85,26 @@ namespace RecognitionService.Input.Tuio
                 }
 			}
 
-			var lookup = recognizedTangibles.ToDictionary(o => o.Id);
-			foreach (var tangible in previouslyRecognizedTangibles.Values)
-			{
-				if (!lookup.ContainsKey(tangible.Id) && previouslyRecognizedTangibles[tangible.Id].Type != RecognizedTangibleMarker.ActionType.Removed)
-				{
-                    // Removed
-                    tangible.Type = RecognizedTangibleMarker.ActionType.Removed;
-                    currentRecognizedTangibles[tangible.Id] = tangible;
-				}
-			}
+            try
+            {
+                var lookup = recognizedTangibles.ToDictionary(o => o.Id);
 
-			return currentRecognizedTangibles;
+			    foreach (var tangible in previouslyRecognizedTangibles.Values)
+			    {
+				    if (!lookup.ContainsKey(tangible.Id) && previouslyRecognizedTangibles[tangible.Id].Type != RecognizedTangibleMarker.ActionType.Removed)
+				    {
+                        // Removed
+                        tangible.Type = RecognizedTangibleMarker.ActionType.Removed;
+                        currentRecognizedTangibles[tangible.Id] = tangible;
+				    }
+			    }
+            }
+            catch (System.ArgumentException ex)
+            {
+                Console.WriteLine(ex);
+                // TODO - the same marker was recognized from different triangle
+            }
+            return currentRecognizedTangibles;
 		}
 
 		public void Dispose()
