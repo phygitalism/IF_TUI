@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using MarkerRegistratorGui.Model;
 using MarkerRegistratorGui.View.TouchInjection;
 using MarkerRegistratorGui.ViewModel;
@@ -78,7 +76,7 @@ namespace MarkerRegistratorGui.View
 			}
 		}
 
-		private readonly Window _window;
+		private readonly ScreenScaler _screenScaler;
 		private readonly PointersViewModel _pointersViewModel;
 
 		private readonly PointerTouchInfo[] _pointersBuffer = new PointerTouchInfo[_maxPointers];
@@ -87,9 +85,9 @@ namespace MarkerRegistratorGui.View
 
 		private CancellationTokenSource _autoUpdateCancellation;
 
-		public PointerInjector(Window window, PointersViewModel pointersViewModel)
+		public PointerInjector(ScreenScaler screenScaler, PointersViewModel pointersViewModel)
 		{
-			_window = window;
+			_screenScaler = screenScaler;
 			_pointersViewModel = pointersViewModel;
 
 			_pointersViewModel.WhenPointerEvent.Subscribe(HandlePointerUpdates);
@@ -107,7 +105,7 @@ namespace MarkerRegistratorGui.View
 			{
 				Debug.WriteLine($"Pointer id {e.id} event {e.type} pos {e.state.position}");
 
-				var position = ScaleAndSafePosition(e.state.position);
+				var position = _screenScaler.ScaleAndSafePosition(e.state.position);
 
 				_pointersBuffer[i] = CreatePointerTouchInfo(e.id, position, e.type);
 
@@ -175,25 +173,6 @@ namespace MarkerRegistratorGui.View
 
 			InjectPointers(_pointersBuffer, i);
 		}
-
-		private (int x, int y) ScaleAndSafePosition(Vector2 position)
-		{
-			var unscaledX = position.X;
-			var unscaledY = position.Y;
-
-			var scaledX = unscaledX * _window.Width;
-			var scaledY = unscaledY * _window.Height;
-
-			var screenPoint = _window.PointToScreen(new Point(scaledX, scaledY));
-
-			return (
-				SizeSafe((int)screenPoint.X, unscaledX),
-				SizeSafe((int)screenPoint.Y, unscaledY)
-			);
-		}
-
-		private int SizeSafe(int position, float unscaled)
-			=> unscaled == 1.0f ? position - 1 : position;
 
 		public void Dispose()
 		{
