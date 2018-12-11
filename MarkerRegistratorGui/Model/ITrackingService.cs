@@ -1,16 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace MarkerRegistratorGui.Model
 {
 	public readonly struct TrackerEvents
 	{
-		public readonly IEnumerable<TrackerEvent<MarkerState>> markerEvents;
-		public readonly IEnumerable<TrackerEvent<PointerState>> pointerEvents;
+		public readonly TrackerEvent<MarkerState>[] markerEvents;
+		public readonly TrackerEvent<PointerState>[] pointerEvents;
 
 		public TrackerEvents(
-			IEnumerable<TrackerEvent<MarkerState>> markerEvents,
-			IEnumerable<TrackerEvent<PointerState>> pointerEvents
+			TrackerEvent<MarkerState>[] markerEvents,
+			TrackerEvent<PointerState>[] pointerEvents
 		)
 		{
 			this.markerEvents = markerEvents;
