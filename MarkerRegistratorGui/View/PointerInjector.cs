@@ -26,20 +26,19 @@ namespace MarkerRegistratorGui.View
 
 			_disposable = new CompositeDisposable
 			{
-				_pointerInjectionThread,
-				_pointersViewModel.WhenPointerEvent.Subscribe(HandlePointerUpdates)
+				_pointerInjectionThread
 			};
+
+			pointersViewModel.OnPointersUpdate += HandlePointerUpdates;
 		}
 
-		public void HandlePointerUpdates(IEnumerable<TrackerEvent<PointerState>> update)
+		public void HandlePointerUpdates(TrackerEvent<PointerState>[] update)
 		{
-			Debug.WriteLine("Event update");
-
 			foreach (var e in update)
 			{
 				(var x, var y) = _screenScaler.ScaleAndSafePosition(e.state.position);
 
-				Debug.WriteLine($"Injecting id:{e.id} event:{e.type} pos:({x}:{y})");
+				Debug.WriteLine($"Pointer event {e.id} {e.type} ({x}:{y})");
 
 				switch (e.type)
 				{
