@@ -11,8 +11,8 @@ namespace RecognitionService.Recognition
 {
 	class TangibleMarkerRecognizer : ITangibleMarkerRecognizer
 	{
-		private const float physicalMarkerDiameter = 0.09f;
-		private const double tolerance = 0.015;
+		private const float physicalMarkerDiameter = 120f;
+		private const double tolerance = 5f;
 
 		private List<RegistredTangibleMarker> _knownMarkers = new List<RegistredTangibleMarker>();
 
