@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using MarkerRegistratorGui.View.TouchInjection;
 
@@ -100,13 +99,26 @@ namespace MarkerRegistratorGui.View
 				injection.NeedInjection = false;
 				injection.IsInjected = true;
 
+				return PointerFlags.INRANGE | PointerFlags.DOWN;
+			}
+
+			if (injection.IsInjected && !injection.IsInContact && !injection.NeedExtraction)
+			{
+				injection.IsInContact = true;
+
 				return PointerFlags.INRANGE | PointerFlags.INCONTACT | PointerFlags.DOWN;
 			}
 
-			if (injection.IsInjected && !injection.NeedInjection && !injection.NeedExtraction)
+			if (injection.IsInjected && injection.IsInContact && !injection.NeedInjection && !injection.NeedExtraction)
 				return PointerFlags.INRANGE | PointerFlags.INCONTACT | PointerFlags.UPDATE;
 
-			if (injection.IsInjected && injection.NeedExtraction)
+			if (injection.IsInjected && injection.IsInContact && injection.NeedExtraction)
+			{
+				injection.IsInContact = false;
+				return PointerFlags.INRANGE | PointerFlags.UP;
+			}
+
+			if (injection.IsInjected && !injection.IsInContact && injection.NeedExtraction)
 			{
 				injection.IsInjected = false;
 				injection.NeedExtraction = false;
@@ -140,6 +152,7 @@ namespace MarkerRegistratorGui.View
 
 			public bool IsInjected;
 			public bool NeedInjection;
+			public bool IsInContact;
 			public bool NeedExtraction;
 			public bool Dispose;
 		}
