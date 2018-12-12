@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using System.Numerics;
+
 using RecognitionService.Api;
 using RecognitionService.Models;
 using RecognitionService.Input.Touch;
@@ -101,7 +103,13 @@ namespace RecognitionService
             _wsServer.OnMarkerListRequested += _tangibleMarkerController.GetAllRegistredIds;
             _wsServer.OnRegisterMarkerRequested += (id, triangleInfo) =>
             {
-                var triangle = new Models.Triangle(triangleInfo.posA, triangleInfo.posB, triangleInfo.posC);
+                var width = _touchInputProvider.ScreenWidth;
+                var heigth = _touchInputProvider.ScreenHeight;
+
+                var kekA = new Vector2(triangleInfo.posA.X * width, triangleInfo.posA.Y * heigth);
+                var kekB = new Vector2(triangleInfo.posB.X * width, triangleInfo.posB.Y * heigth);
+                var kekC = new Vector2(triangleInfo.posC.X * width, triangleInfo.posC.Y * heigth);
+                var triangle = new Models.Triangle(kekA, kekB, kekC);
                 _tangibleMarkerController.RegisterMarkerWithId(triangle, id);
             };
             _wsServer.OnUnregisterMarkerRequested += _tangibleMarkerController.UnregisterMarkerWithId;

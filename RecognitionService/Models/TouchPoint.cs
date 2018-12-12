@@ -24,5 +24,12 @@ namespace RecognitionService.Models
             this.Acceleration = acceleration;
             this.type = type;
         }
+
+        public TouchPoint ToRelativeCoordinates(float width, float height)
+        {
+            var relativePosition = new Vector2(Position.X / width, Position.Y / height);
+            var relativeAcceleration = new Vector2(Acceleration.X / width, Acceleration.Y / height);
+            return new TouchPoint(id, relativePosition, relativeAcceleration, type);
+        }
     }
 }

@@ -37,7 +37,21 @@ namespace RecognitionService.Input.Tuio
                 PrintMarkerStates(currentRecognizedTangibles.Values.ToList());
                 // TODO - split touches from objects
 
-                OnTuioInput?.Invoke(frame.touches, currentRecognizedTangibles.Values.ToList());
+
+				var kek = frame.touches
+					.Select(touch => touch.ToRelativeCoordinates(
+						_inputProvider.ScreenWidth,
+						_inputProvider.ScreenHeight
+					)).ToList();
+				
+				// var tt = new TouchPointFrame(frame.Id, frame.timestamp, kek);
+				var rrr = currentRecognizedTangibles.Values.ToList();
+				rrr.ForEach(t => 
+				{
+					t.center = new System.Numerics.Vector2(t.center.X / _inputProvider.ScreenWidth, t.center.Y / _inputProvider.ScreenHeight);
+				});
+
+				OnTuioInput?.Invoke(kek, rrr);
 			}
 			catch (System.Exception ex)
 			{

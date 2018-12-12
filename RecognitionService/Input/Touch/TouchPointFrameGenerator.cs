@@ -13,15 +13,14 @@ namespace RecognitionService.Input.Touch
 {
     public class TouchPointFrameGenerator : IInputProvider, IDisposable
     {
-        private const float ScreenWidth = 3840;
-        private const float ScreenHeight = 2160;
-
         private DispatcherTimer _statusTimer;
 
         private string filePath;
         private StreamReader file;
         private int counter = 0;
 
+        public float ScreenWidth { get; private set; }  = 1920;
+        public float ScreenHeight { get; private set; } = 1080;
         public event Action<TouchPointFrame> OnTouchesRecieved;
 
         public TouchPointFrameGenerator()
