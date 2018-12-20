@@ -29,7 +29,10 @@ namespace MarkerRegistratorGui
 			InitializeDataContext();
 			InitializeComponent();
 
-			_pointerInjector = new PointerInjector(this, ((MainViewModel)DataContext).Pointers);
+			_pointerInjector = new PointerInjector(
+				new ScreenScaler(this),
+				((MainViewModel)DataContext).Pointers
+			);
 
 			Closed += (_, __) => _pointerInjector.Dispose();
 		}

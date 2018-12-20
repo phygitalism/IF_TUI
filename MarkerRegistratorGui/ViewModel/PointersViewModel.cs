@@ -1,23 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reactive.Linq;
-using System.Threading;
+using System.Linq;
 using MarkerRegistratorGui.Model;
 
 namespace MarkerRegistratorGui.ViewModel
 {
 	public class PointersViewModel
 	{
-		public IObservable<IEnumerable<TrackerEvent<PointerState>>> WhenPointerEvent { get; }
+		public event Action<TrackerEvent<PointerState>[]> OnPointersUpdate;
 
 		public PointersViewModel(ITrackingService trackingService)
 		{
-			WhenPointerEvent = Observable.FromEvent<TrackerEvents>(
-				h => trackingService.OnEvents += h,
-				h => trackingService.OnEvents -= h
-			)
-			.Select(events => events.pointerEvents)
-			.ObserveOn(SynchronizationContext.Current);
+			trackingService.OnEvents += HandleEvents;
+		}
+
+		private void HandleEvents(TrackerEvents events)
+		{
+			OnPointersUpdate?.Invoke(events.pointerEvents.ToArray());
 		}
 	}
 }

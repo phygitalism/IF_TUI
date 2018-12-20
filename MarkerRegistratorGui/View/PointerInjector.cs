@@ -1,203 +1,88 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Numerics;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
+using System.Reactive.Disposables;
 using MarkerRegistratorGui.Model;
-using MarkerRegistratorGui.View.TouchInjection;
 using MarkerRegistratorGui.ViewModel;
 
 namespace MarkerRegistratorGui.View
 {
 	public class PointerInjector : IDisposable
 	{
-		private const int _maxPointers = 255;
-
-		private static readonly TimeSpan _injectionDelay = TimeSpan.FromMilliseconds(125);
-
-		static PointerInjector()
-		{
-			if (!TouchInjector.InitializeTouchInjection(_maxPointers, TouchFeedback.INDIRECT))
-				throw new Exception("Couldn't initialize touch injection");
-		}
-
-		public static void InjectPointers(PointerTouchInfo[] touchInfo, int count)
-		{
-			if (count <= 0)
-				return;
-
-			LogInjection(touchInfo, count);
-
-			if (!TouchInjector.InjectTouchInput(count, touchInfo))
-				Debug.WriteLine($"Error while injecting: {new Win32Exception().Message}");
-		}
-
-		[Conditional("DEBUG")]
-		private static void LogInjection(PointerTouchInfo[] touchInfo, int count)
-		{
-			Debug.WriteLine("Injection start");
-			for (int i = 0; i < count; i++)
-			{
-				var touch = touchInfo[i];
-				Debug.WriteLine($"Injecting {touch.PointerInfo.PointerId} {touch.PointerInfo.PointerFlags} {touch.PointerInfo.PtPixelLocation.X}:{touch.PointerInfo.PtPixelLocation.Y}");
-			}
-			Debug.WriteLine("Injection end");
-		}
-
-		private static PointerTouchInfo CreatePointerTouchInfo(int id, (int x, int y) position, TrackerEventType eventType)
-			=> new PointerTouchInfo()
-			{
-				PointerInfo =
-				{
-					PointerId = (uint)id,
-					PointerType = PointerInputType.TOUCH,
-					PointerFlags = GetFlagsForEvent(eventType),
-					PtPixelLocation =
-					{
-						X = position.x,
-						Y = position.y
-					}
-				}
-			};
-
-		private static PointerFlags GetFlagsForEvent(TrackerEventType eventType)
-		{
-			switch (eventType)
-			{
-				case TrackerEventType.Down:
-					return PointerFlags.INRANGE | PointerFlags.INCONTACT | PointerFlags.DOWN;
-				case TrackerEventType.Update:
-					return PointerFlags.INRANGE | PointerFlags.INCONTACT | PointerFlags.UPDATE;
-				case TrackerEventType.Up:
-					return PointerFlags.UP;
-				default:
-					throw new NotSupportedException();
-			}
-		}
-
-		private readonly Window _window;
+		private readonly ScreenScaler _screenScaler;
 		private readonly PointersViewModel _pointersViewModel;
+		private readonly PointerInjectionThread _pointerInjectionThread;
+		private readonly IDisposable _disposable;
 
-		private readonly PointerTouchInfo[] _pointersBuffer = new PointerTouchInfo[_maxPointers];
-		private readonly Dictionary<int, (int x, int y)> _injectedPointers
-			= new Dictionary<int, (int x, int y)>();
+		private readonly Dictionary<int, PointerInjectionThread.InjectionHandle> _injections
+			= new Dictionary<int, PointerInjectionThread.InjectionHandle>();
 
-		private CancellationTokenSource _autoUpdateCancellation;
-
-		public PointerInjector(Window window, PointersViewModel pointersViewModel)
+		public PointerInjector(ScreenScaler screenScaler, PointersViewModel pointersViewModel)
 		{
-			_window = window;
+			_screenScaler = screenScaler;
 			_pointersViewModel = pointersViewModel;
 
-			_pointersViewModel.WhenPointerEvent.Subscribe(HandlePointerUpdates);
+			_pointerInjectionThread = new PointerInjectionThread();
+
+			_disposable = new CompositeDisposable
+			{
+				_pointerInjectionThread
+			};
+
+			pointersViewModel.OnPointersUpdate += HandlePointerUpdates;
 		}
 
-		public void HandlePointerUpdates(IEnumerable<TrackerEvent<PointerState>> value)
+		public void HandlePointerUpdates(TrackerEvent<PointerState>[] update)
 		{
-			Debug.WriteLine("Event update");
-
-			var updatedIds = new List<int>();
-
-			CancelAutoUpdate();
-			var i = 0;
-			foreach (var e in value)
+			foreach (var e in update)
 			{
-				Debug.WriteLine($"Pointer id {e.id} event {e.type} pos {e.state.position}");
+				(var x, var y) = _screenScaler.ScaleAndSafePosition(e.state.position);
 
-				var position = ScaleAndSafePosition(e.state.position);
+				Debug.WriteLine($"Pointer event {e.id} {e.type} ({x}:{y})");
 
-				_pointersBuffer[i] = CreatePointerTouchInfo(e.id, position, e.type);
-
-				if (e.type == TrackerEventType.Up)
-					_injectedPointers.Remove(e.id);
-				else
-					_injectedPointers[e.id] = position;
-
-				updatedIds.Add(e.id);
-				i++;
-			}
-
-			foreach (var pair in _injectedPointers)
-			{
-				var id = pair.Key;
-				var position = pair.Value;
-
-				if (updatedIds.Contains(id))
-					continue;
-
-				_pointersBuffer[i] = CreatePointerTouchInfo(id, position, TrackerEventType.Update);
-				i++;
-			}
-
-			InjectPointers(_pointersBuffer, i);
-			SheduleAutoUpdate();
-		}
-
-		private void CancelAutoUpdate()
-			=> _autoUpdateCancellation?.Cancel();
-
-		private async void SheduleAutoUpdate()
-		{
-			try
-			{
-				_autoUpdateCancellation = new CancellationTokenSource();
-
-				while (true)
+				switch (e.type)
 				{
-					await Task.Delay(_injectionDelay, _autoUpdateCancellation.Token);
-					AutoUpdate();
+					case TrackerEventType.Down:
+						AddPointer(e.id, x, y);
+						break;
+					case TrackerEventType.Update:
+						UpdatePointer(e.id, x, y);
+						break;
+					case TrackerEventType.Up:
+						RemovePointer(e.id, x, y);
+						break;
 				}
-
-			}
-			catch (OperationCanceledException)
-			{
-				Debug.WriteLine("AutoUpdate canceled");
-			}
-			catch (ObjectDisposedException)
-			{
-
 			}
 		}
 
-		private void AutoUpdate()
+		private void AddPointer(int id, int x, int y)
 		{
-			Debug.WriteLine("AutoUpdate");
+			var injection = _pointerInjectionThread.CreateInjection();
+			_injections.Add(id, injection);
 
-			var i = 0;
-			foreach (var pair in _injectedPointers)
-			{
-				_pointersBuffer[i] = CreatePointerTouchInfo(pair.Key, pair.Value, TrackerEventType.Update);
-				i++;
-			}
-
-			InjectPointers(_pointersBuffer, i);
+			injection.UpdatePosition(x, y);
+			injection.Inject();
 		}
 
-		private (int x, int y) ScaleAndSafePosition(Vector2 position)
+		private void UpdatePointer(int id, int x, int y)
 		{
-			var unscaledX = position.X;
-			var unscaledY = position.Y;
+			var injection = _injections[id];
 
-			var scaledX = unscaledX * _window.Width;
-			var scaledY = unscaledY * _window.Height;
-
-			var screenPoint = _window.PointToScreen(new Point(scaledX, scaledY));
-
-			return (
-				SizeSafe((int)screenPoint.X, unscaledX),
-				SizeSafe((int)screenPoint.Y, unscaledY)
-			);
+			injection.UpdatePosition(x, y);
 		}
 
-		private int SizeSafe(int position, float unscaled)
-			=> unscaled == 1.0f ? position - 1 : position;
+		private void RemovePointer(int id, int x, int y)
+		{
+			var injection = _injections[id];
+
+			injection.UpdatePosition(x, y);
+			injection.Extract();
+			injection.Dispose();
+
+			_injections.Remove(id);
+		}
 
 		public void Dispose()
-		{
-			_autoUpdateCancellation?.Dispose();
-		}
+			=> _disposable.Dispose();
 	}
 }
