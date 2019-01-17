@@ -46,7 +46,10 @@ namespace RecognitionService.Input.Tuio
 				var tangiblesWithUpdatedCenters = currentRecognizedTangibles.Values.ToList();
 				tangiblesWithUpdatedCenters.ForEach(t => 
 				{
-					t.center = new System.Numerics.Vector2(t.center.X / _inputProvider.ScreenWidth, t.center.Y / _inputProvider.ScreenHeight);
+					t.relativeCenter = new System.Numerics.Vector2(
+                        t.Center.X / _inputProvider.ScreenWidth,
+                        t.Center.Y / _inputProvider.ScreenHeight
+                    );
 				});
 
 				OnTuioInput?.Invoke(touchesWithRelativeCoords, tangiblesWithUpdatedCenters);
