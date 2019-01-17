@@ -106,10 +106,10 @@ namespace RecognitionService
                 var width = _touchInputProvider.ScreenWidth;
                 var heigth = _touchInputProvider.ScreenHeight;
 
-                var kekA = new Vector2(triangleInfo.posA.X * width, triangleInfo.posA.Y * heigth);
-                var kekB = new Vector2(triangleInfo.posB.X * width, triangleInfo.posB.Y * heigth);
-                var kekC = new Vector2(triangleInfo.posC.X * width, triangleInfo.posC.Y * heigth);
-                var triangle = new Models.Triangle(kekA, kekB, kekC);
+                var absoluteA = new Vector2(triangleInfo.posA.X * width, triangleInfo.posA.Y * heigth);
+                var absoluteB = new Vector2(triangleInfo.posB.X * width, triangleInfo.posB.Y * heigth);
+                var absoluteC = new Vector2(triangleInfo.posC.X * width, triangleInfo.posC.Y * heigth);
+                var triangle = new Models.Triangle(absoluteA, absoluteB, absoluteC);
                 _tangibleMarkerController.RegisterMarkerWithId(triangle, id);
             };
             _wsServer.OnUnregisterMarkerRequested += _tangibleMarkerController.UnregisterMarkerWithId;

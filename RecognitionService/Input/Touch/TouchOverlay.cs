@@ -145,9 +145,9 @@ namespace RecognitionService.Input.Touch
                 IntPtr p_tp = (IntPtr)(movingPointArray.ToInt64() + i * Marshal.SizeOf(typeof(PQ.TouchPoint)));
                 PQ.TouchPoint tp = (PQ.TouchPoint)Marshal.PtrToStructure(p_tp, typeof(PQ.TouchPoint));
 
-                var relativePosition = new Vector2(tp.x, tp.y);
-                var relativeAcceleration = new Vector2(tp.dx, tp.dy);
-                var touchPoint = new TouchPoint(tp.id, relativePosition, relativeAcceleration, (TouchPoint.ActionType)tp.point_event);
+                var absolutePosition = new Vector2(tp.x, tp.y);
+                var absoluteAcceleration = new Vector2(tp.dx, tp.dy);
+                var touchPoint = new TouchPoint(tp.id, absolutePosition, absoluteAcceleration, (TouchPoint.ActionType)tp.point_event);
                 touchPoints.Add(touchPoint);
             }
 
