@@ -9,11 +9,6 @@ namespace RecognitionService.Models
 {
     public struct Triangle : IEquatable<Triangle>
     {
-        public class NonExistentTriangle : Exception
-        {
-            public NonExistentTriangle(string message) : base(message) { }
-        }
-
         public Vector2 posA;
         public Vector2 posB;
         public Vector2 posC;
@@ -53,8 +48,9 @@ namespace RecognitionService.Models
             this.sides.Sort((v1, v2) => v1.length >= v2.length ? 1 : -1);
         }
 
-        public Triangle(Segment sideA, Segment sideB, Segment sideC)
+        public static bool TryBuildFromSegments(Segment sideA, Segment sideB, Segment sideC, out Triangle? triangle)
         {
+            triangle = null;
             var sides = new List<Segment>() { sideA, sideB, sideC };
 
             var points = sides.SelectMany(side => new Vector2[] { side.origin, side.destination }).ToList();
@@ -62,20 +58,11 @@ namespace RecognitionService.Models
             var vertecies = RemoveDuplicates(points); // TODO - compare points with precision
             if (vertecies.Count != 3)
             {
-                throw new Triangle.NonExistentTriangle("Unable to determine vertices");
+                return false;
             }
 
-            this.posA = vertecies[0];
-            this.posB = vertecies[1];
-            this.posC = vertecies[2];
-
-            this.sides = new List<Segment>()
-            {
-                new Segment(this.posA, this.posB),
-                new Segment(posB, posC),
-                new Segment(posC, posA)
-            };
-            this.sides.Sort((v1, v2) => v1.length >= v2.length ? 1 : -1);
+            triangle = new Triangle(vertecies[0], vertecies[1], vertecies[2]);
+            return true;
         }
 
         private static List<Vector2> RemoveDuplicates(List<Vector2> originalList)

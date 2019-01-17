@@ -75,15 +75,12 @@ namespace RecognitionService.Recognition
 					continue;
 				}
 
-				Triangle triangle;
-				try
+				if (Triangle.TryBuildFromSegments(sides[0], sides[1], sides[2], out var triangle) && triangle != null)
 				{
-					triangle = new Triangle(sides[0], sides[1], sides[2]);
-					constructedTriangles.Add(triangle);
+					constructedTriangles.Add(triangle.Value);
 				}
-				catch (Triangle.NonExistentTriangle ex)
+				else
 				{
-                    // TODO - remove exception (bad performance)
 					//Console.WriteLine(ex);
 				}
 			}
