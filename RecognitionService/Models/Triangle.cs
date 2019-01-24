@@ -33,6 +33,9 @@ namespace RecognitionService.Models
             get { return sides[2]; }
         }
 
+        /* result = vector multiplication of short and large sides in coordinates
+           define where point relative to vector
+           result>0 => clockwise; result<0 => counter clockwise */
         public bool ClockwiseRotation
         {
             get { return (((LargeSide.origin.X - ShortSide.origin.X) * (MiddleSide.origin.Y - ShortSide.origin.Y) - 
