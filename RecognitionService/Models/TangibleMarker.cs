@@ -26,7 +26,7 @@ namespace RecognitionService.Models
 		}
 	}
 
-	public struct RecognizedTangibleMarker
+	public class RecognizedTangibleMarker
 	{
 		public enum ActionType
 		{

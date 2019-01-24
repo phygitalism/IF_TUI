@@ -31,14 +31,25 @@ namespace RecognitionService.Input.Tuio
 			{
 				var registredTangibles = _tangibleMarkerController.Config.registredTangibles;
 				var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(frame.touches, registredTangibles);
-
-				Console.WriteLine($"Recognized markers{recognizedTangibles.Count}");
 				var currentRecognizedTangibles = DetermineMarkerState(recognizedTangibles);
 				previouslyRecognizedTangibles = currentRecognizedTangibles;
 
-				// TODO - split touches from objects
+                PrintMarkerStates(currentRecognizedTangibles.Values.ToList());
+                // TODO - split touches from objects
 
-				OnTuioInput?.Invoke(frame.touches, currentRecognizedTangibles.Values.ToList());
+				var touchesWithRelativeCoords = frame.touches
+					.Select(touch => touch.ToRelativeCoordinates(
+						_inputProvider.ScreenWidth,
+						_inputProvider.ScreenHeight
+					)).ToList();
+				
+				var tangiblesWithUpdatedCenters = currentRecognizedTangibles.Values.ToList();
+				tangiblesWithUpdatedCenters.ForEach(t => 
+				{
+					t.center = new System.Numerics.Vector2(t.center.X / _inputProvider.ScreenWidth, t.center.Y / _inputProvider.ScreenHeight);
+				});
+
+				OnTuioInput?.Invoke(touchesWithRelativeCoords, tangiblesWithUpdatedCenters);
 			}
 			catch (System.Exception ex)
 			{
@@ -47,6 +58,26 @@ namespace RecognitionService.Input.Tuio
 
 		}
 
+        private void PrintMarkerStates(List<RecognizedTangibleMarker> recognizedTangibles)
+        {
+            var addedMarkerIds = recognizedTangibles.Where(marker => marker.Type == RecognizedTangibleMarker.ActionType.Added).Select(marker => marker.Id).ToList();
+            var uptedMarkerIds = recognizedTangibles.Where(marker => marker.Type == RecognizedTangibleMarker.ActionType.Updated).Select(marker => marker.Id).ToList();
+            var deletedMarkerIds = recognizedTangibles.Where(marker => marker.Type == RecognizedTangibleMarker.ActionType.Removed).Select(marker => marker.Id).ToList();
+
+            if (addedMarkerIds.Count > 0)
+            {
+                Console.WriteLine($"Added markers ids: {string.Join(" ", addedMarkerIds)}");
+            }
+            //if (uptedMarkerIds.Count > 0)
+            //{
+            //    Console.WriteLine($"Updated markers ids: {string.Join(" ", uptedMarkerIds)}");
+            //}
+            if (deletedMarkerIds.Count > 0)
+            {
+                Console.WriteLine($"Removed markers ids: {string.Join(" ", deletedMarkerIds)}");
+            }
+        }
+
 		private Dictionary<int, RecognizedTangibleMarker> DetermineMarkerState(List<RecognizedTangibleMarker> recognizedTangibles)
 		{
 			var currentRecognizedTangibles = new Dictionary<int, RecognizedTangibleMarker>();
@@ -54,33 +85,38 @@ namespace RecognitionService.Input.Tuio
 			{
 				if (previouslyRecognizedTangibles.ContainsKey(tangible.Id) && previouslyRecognizedTangibles[tangible.Id].Type != RecognizedTangibleMarker.ActionType.Removed)
 				{
-					// Updated
-					var tuioObj = previouslyRecognizedTangibles[tangible.Id];
-					tuioObj.Type = RecognizedTangibleMarker.ActionType.Updated;
-					currentRecognizedTangibles[tuioObj.Id] = tuioObj;
-				}
+                    // Updated
+                    tangible.Type = RecognizedTangibleMarker.ActionType.Updated;
+                    currentRecognizedTangibles[tangible.Id] = tangible;
+                }
 				else
 				{
 					// Added
-					var tuioObj = tangible;
-					tuioObj.Type = RecognizedTangibleMarker.ActionType.Added;
-					currentRecognizedTangibles[tuioObj.Id] = tuioObj;
-				}
+                    tangible.Type = RecognizedTangibleMarker.ActionType.Added;
+                    currentRecognizedTangibles[tangible.Id] = tangible;
+                }
 			}
 
-			var lookup = recognizedTangibles.ToDictionary(o => o.Id);
-			foreach (var tangibleId in previouslyRecognizedTangibles.Keys)
-			{
-				if (!lookup.ContainsKey(tangibleId) && previouslyRecognizedTangibles[tangibleId].Type != RecognizedTangibleMarker.ActionType.Removed)
-				{
-					// Removed
-					var tuioObj = previouslyRecognizedTangibles[tangibleId];
-					tuioObj.Type = RecognizedTangibleMarker.ActionType.Removed;
-					currentRecognizedTangibles[tuioObj.Id] = tuioObj;
-				}
-			}
+            try
+            {
+                var lookup = recognizedTangibles.ToDictionary(o => o.Id);
 
-			return currentRecognizedTangibles;
+			    foreach (var tangible in previouslyRecognizedTangibles.Values)
+			    {
+				    if (!lookup.ContainsKey(tangible.Id) && previouslyRecognizedTangibles[tangible.Id].Type != RecognizedTangibleMarker.ActionType.Removed)
+				    {
+                        // Removed
+                        tangible.Type = RecognizedTangibleMarker.ActionType.Removed;
+                        currentRecognizedTangibles[tangible.Id] = tangible;
+				    }
+			    }
+            }
+            catch (System.ArgumentException ex)
+            {
+                Console.WriteLine(ex);
+                // TODO - the same marker was recognized from different triangle
+            }
+            return currentRecognizedTangibles;
 		}
 
 		public void Dispose()

@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using System.Numerics;
+
 using RecognitionService.Api;
 using RecognitionService.Models;
 using RecognitionService.Input.Touch;
@@ -25,6 +27,7 @@ namespace RecognitionService
     {
         private const string isDeviceMockedKey = "isDeviceMocked";
         private const string inputLoggingKey = "inputLogging";
+        private const string inputSerializationKey = "inputSerialization";
 
         private const int _serverPort = 8080;
 
@@ -46,7 +49,8 @@ namespace RecognitionService
         private readonly Dictionary<string, bool> featureToggles = new Dictionary<string, bool>()
         {
             [isDeviceMockedKey] = false,
-            [inputLoggingKey] = true
+            [inputLoggingKey] = false,
+            [inputSerializationKey] = true
         };
 
         public STAApplicationContext()
@@ -66,11 +70,14 @@ namespace RecognitionService
                 _touchInputProvider = (IInputProvider)deviceMock;
             }
 
-            if (featureToggles[inputLoggingKey])
+            if (featureToggles[inputSerializationKey])
             {
                 _inputSerializer = (new InputSerializer(_touchInputProvider))
                     .AddToDisposeBag(_disposeBag);
+            }
 
+            if (featureToggles[inputLoggingKey])
+            {
                 _inputLogger = (new InputLogger(_touchInputProvider))
                     .AddToDisposeBag(_disposeBag);
             }
@@ -96,7 +103,13 @@ namespace RecognitionService
             _wsServer.OnMarkerListRequested += _tangibleMarkerController.GetAllRegistredIds;
             _wsServer.OnRegisterMarkerRequested += (id, triangleInfo) =>
             {
-                var triangle = new Models.Triangle(triangleInfo.posA, triangleInfo.posB, triangleInfo.posC);
+                var width = _touchInputProvider.ScreenWidth;
+                var heigth = _touchInputProvider.ScreenHeight;
+
+                var absoluteA = new Vector2(triangleInfo.posA.X * width, triangleInfo.posA.Y * heigth);
+                var absoluteB = new Vector2(triangleInfo.posB.X * width, triangleInfo.posB.Y * heigth);
+                var absoluteC = new Vector2(triangleInfo.posC.X * width, triangleInfo.posC.Y * heigth);
+                var triangle = new Models.Triangle(absoluteA, absoluteB, absoluteC);
                 _tangibleMarkerController.RegisterMarkerWithId(triangle, id);
             };
             _wsServer.OnUnregisterMarkerRequested += _tangibleMarkerController.UnregisterMarkerWithId;

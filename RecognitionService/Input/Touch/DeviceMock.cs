@@ -11,6 +11,9 @@ namespace RecognitionService.Input.Touch
 
 		private TouchPointFrameGenerator _touchPointFrameGenerator;
 
+		public float ScreenWidth { get; private set; }
+		public float ScreenHeight { get; private set; }
+
 		public string DeviceName { get; } = "Device Mock";
 		public DeviceState State { get; private set; } = DeviceState.Uninitialized;
 		public event Action<DeviceState> OnStateChanged;

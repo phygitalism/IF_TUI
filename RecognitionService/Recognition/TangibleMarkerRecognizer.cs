@@ -11,8 +11,8 @@ namespace RecognitionService.Recognition
 {
 	class TangibleMarkerRecognizer : ITangibleMarkerRecognizer
 	{
-		private const float physicalMarkerDiameter = 9;
-		private const double tolerance = 8e-3;
+		private const float physicalMarkerDiameter = 120f;
+		private const double tolerance = 5f;
 
 		private List<RegistredTangibleMarker> _knownMarkers = new List<RegistredTangibleMarker>();
 
@@ -20,6 +20,11 @@ namespace RecognitionService.Recognition
 
 		public List<RecognizedTangibleMarker> RecognizeTangibleMarkers(List<TouchPoint> frame, List<RegistredTangibleMarker> knownMarkers)
 		{
+            if (frame.Count < 3)
+            {
+                return new List<RecognizedTangibleMarker>();
+            }
+
 			_knownMarkers = knownMarkers;
 			var allPossibleTriangles = DistinguishTriangles(frame);
 			var recognizedMarkers = new List<RecognizedTangibleMarker>();
@@ -49,7 +54,7 @@ namespace RecognitionService.Recognition
 			var allKnownSegments = _knownMarkers.SelectMany(marker => marker.Sides).ToList();
 			var markerSegments = segments
 				.Where(segment => segment.length <= physicalMarkerDiameter)
-				.Where(segment => segment.EqualSegmentExistInList(allKnownSegments, tolerance))
+				//.Where(segment => segment.EqualSegmentExistInList(allKnownSegments, tolerance))
 				.ToList();
 
 			var distinguishedTriangles = ConstructTriangles(markerSegments);
@@ -70,15 +75,13 @@ namespace RecognitionService.Recognition
 					continue;
 				}
 
-				Triangle triangle;
-				try
+				if (Triangle.TryBuildFromSegments(sides[0], sides[1], sides[2], out var triangle) && triangle != null)
 				{
-					triangle = new Triangle(sides[0], sides[1], sides[2]);
-					constructedTriangles.Add(triangle);
+					constructedTriangles.Add(triangle.Value);
 				}
-				catch (Triangle.NonExistentTriangle ex)
+				else
 				{
-					Console.WriteLine(ex);
+					//Console.WriteLine(ex);
 				}
 			}
 
