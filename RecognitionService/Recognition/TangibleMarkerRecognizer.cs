@@ -37,7 +37,7 @@ namespace RecognitionService.Recognition
 					var recognizedMarker = new RecognizedTangibleMarker(
 						knownTangibleMarker.Value.Id,
 						triangle,
-						0.0f
+						knownTangibleMarker.Value.initialAngle
 					);
 
 					recognizedMarkers.Add(recognizedMarker);
