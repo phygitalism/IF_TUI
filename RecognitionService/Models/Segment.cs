@@ -49,5 +49,10 @@ namespace RecognitionService.Models
             var equalSegments = segments.Where(segment => Math.Abs(segment.length - source.length) <= precision).ToList();
             return equalSegments;
         }
+
+        public static float CompareSegment(this Segment source, Segment other)
+        {
+            return Math.Abs(source.length - other.length);
+        }
     }
 }
