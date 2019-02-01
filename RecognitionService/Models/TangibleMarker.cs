@@ -7,9 +7,15 @@ namespace RecognitionService.Models
 {
 	public struct RegistredTangibleMarker
 	{
+		public enum MarkerState
+		{
+			Active = 0,
+			Passive = 1
+		}
 		public int Id;
 		public Triangle triangle;
 		public float initialAngle;
+		public MarkerState State;
 
 		[JsonIgnore]
 		public List<Segment> Sides
@@ -22,6 +28,7 @@ namespace RecognitionService.Models
 			this.Id = id;
 			this.triangle = triangle;
 			this.initialAngle = triangle.LargeSide.CalculateAngleBetweenY();
+			this.State = MarkerState.Passive;
 		}
 	}
 
