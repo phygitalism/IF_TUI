@@ -30,6 +30,16 @@ namespace RecognitionService.Models
 			this.initialAngle = triangle.LargeSide.CalculateAngleBetweenY();
 			this.State = MarkerState.Passive;
 		}
+
+		public void ChangeToPassive()
+		{
+			this.State = MarkerState.Passive;
+		}
+
+		public void ChangeToActive()
+		{
+			this.State = MarkerState.Active;
+		}
 	}
 
 	public class RecognizedTangibleMarker

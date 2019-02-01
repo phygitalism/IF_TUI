@@ -15,7 +15,6 @@ namespace RecognitionService.Input.Tuio
 		private ITangibleMarkerRecognizer _tangibleMarkerRecognizer = new TangibleMarkerRecognizer();
 
 		private Dictionary<int, RecognizedTangibleMarker> previouslyRecognizedTangibles = new Dictionary<int, RecognizedTangibleMarker>();
-		//private List<RegistredTangibleMarker> updatedRegisteredMarkers = new List<RegistredTangibleMarker>(); 
 
 		public event Action<List<TouchPoint>, List<RecognizedTangibleMarker>> OnTuioInput;
 
@@ -31,8 +30,7 @@ namespace RecognitionService.Input.Tuio
 			try
 			{
 				var registredTangibles = _tangibleMarkerController.Config.registredTangibles;
-				//updatedRegisteredMarkers = updatedRegisteredMarkers();
-				var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(frame.touches, registredTangibles);
+				var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(frame.touches, FilterPassiveRegistredMarkers(registredTangibles));
 				var currentRecognizedTangibles = DetermineMarkerState(recognizedTangibles);
 				previouslyRecognizedTangibles = currentRecognizedTangibles;
 
@@ -65,25 +63,10 @@ namespace RecognitionService.Input.Tuio
 
 		private List<RegistredTangibleMarker> FilterPassiveRegistredMarkers(List<RegistredTangibleMarker> registredTangibles)
 		{
-			/*previouslyRecognizedTangibles.ToList().Sort((id1, id2) => id1.Key>=id2.Key? 1: -1);
-			for (int i = 0; i < registredTangibles.Count; i++)
-			{
-				if (previouslyRecognizedTangibles.Keys.ToList().BinarySearch(registredTangibles[i].Id))
-				{
-					registredTangibles[i].State = RegistredTangibleMarker.MarkerState.Active;
-				}
-				else
-				{
-					registredTangibles[i].State = RegistredTangibleMarker.MarkerState.Passive;
-				}
-			}*/
-			//var intersection = registredTangibles.Where(marker => marker.IdIntersect(previouslyRecognizedTangibles.Keys));
-			
-			//var intersection = registredTangibles.SelectMany(reg => previouslyRecognizedTangibles.Where(rec => rec.Key == reg.Id)).ToList();
 			var intersection = previouslyRecognizedTangibles.SelectMany(rec => registredTangibles.Where(reg => reg.Id == rec.Key)).ToList();
 			foreach (var tangible in intersection)
 			{
-				tangible.State = RegistredTangibleMarker.MarkerState.Active;
+				tangible.ChangeToActive();
 			}
 			var passiveMarkers = registredTangibles.Where(marker => marker.State == RegistredTangibleMarker.MarkerState.Passive).ToList();
 			return passiveMarkers;
