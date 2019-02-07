@@ -44,10 +44,10 @@ namespace RecognitionService.Input.Tuio
 				var allRecognizedTangibles = ConcatenateRecognizedTangibles(currentRecognizedTangibles, newRecognizedTangibles);
 				
 
-				RecognizedMarkersToActive(registredTangibles, newRecognizedTangibles);
+				RecognizedMarkersToActive(newRecognizedTangibles);
 				//var activeMarkersIDs = updatedRegistredTangibles.Values.Where(marker => marker.State == RegistredTangibleMarker.MarkerState.Active).Select(marker => marker.Id).ToList();
 				//RemoveLostMarkers(); ???
-				var activeMarkers = DetermineMarkerState(allRecognizedTangibles.Values.ToList(), registredTangibles);
+				var activeMarkers = DetermineMarkerState(allRecognizedTangibles.Values.ToList());
 				previouslyRecognizedTangibles = activeMarkers;
 
 				PrintMarkerStates(activeMarkers.Values.ToList());
@@ -71,7 +71,6 @@ namespace RecognitionService.Input.Tuio
 		private List<RecognizedTangibleMarker> RecognizedMarkersToActive(List<RegistredTangibleMarker> registredTangibles,
 			List<RecognizedTangibleMarker> newRecognizedTangibles)
 		{
-			var registredTangiblesDictionary = registredTangibles.ToDictionary(o => o.Id);
 			foreach (var marker in newRecognizedTangibles)
 			{
 				registredTangiblesDictionary[marker.Id].State = RegistredTangibleMarker.MarkerState.Active;
@@ -142,7 +141,7 @@ namespace RecognitionService.Input.Tuio
         }
          
 
-		private Dictionary<int, RecognizedTangibleMarker> DetermineMarkerState(List<RecognizedTangibleMarker> recognizedTangibles, List<RegistredTangibleMarker> registredTangibles)
+		private Dictionary<int, RecognizedTangibleMarker> DetermineMarkerState(List<RecognizedTangibleMarker> recognizedTangibles)//, List<RegistredTangibleMarker> registredTangibles)
 		{
 			var currentRecognizedTangibles = new Dictionary<int, RecognizedTangibleMarker>();
 			foreach (var tangible in recognizedTangibles)
@@ -164,7 +163,6 @@ namespace RecognitionService.Input.Tuio
             try
             {
                 var lookup = recognizedTangibles.ToDictionary(o => o.Id);
-                var registredTangiblesDictionary = registredTangibles.ToDictionary(o => o.Id);
 			    foreach (var tangible in previouslyRecognizedTangibles.Values)
 			    {
 				    if (!lookup.ContainsKey(tangible.Id) && previouslyRecognizedTangibles[tangible.Id].Type != RecognizedTangibleMarker.ActionType.Removed)
@@ -172,8 +170,7 @@ namespace RecognitionService.Input.Tuio
                         // Removed
                         tangible.Type = RecognizedTangibleMarker.ActionType.Removed;
                         
-                        registredTangiblesDictionary[tangible.Id].ChangeToPassive();
-                        _tangibleMarkerController.Config.Update(registredTangiblesDictionary[tangible.Id]);
+                        _tangibleMarkerController.Config.ChangeToPassive(tangible.Id);
                         
                         currentRecognizedTangibles[tangible.Id] = tangible;
 				    }

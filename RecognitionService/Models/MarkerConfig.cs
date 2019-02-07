@@ -25,6 +25,18 @@ namespace RecognitionService.Models
             registredTangibles.Add(tangible);
         }
 
+        public void ChangeToActive(int tangibleId)
+        {
+            var registredMarkerDictionary = registredTangibles.ToDictionary(o => o.Id);
+            registredMarkerDictionary[tangibleId].ChangeToActive();
+        }
+        
+        public void ChangeToPassive(int tangibleId)
+        {
+            var registredMarkerDictionary = registredTangibles.ToDictionary(o => o.Id);
+            registredMarkerDictionary[tangibleId].ChangeToPassive();
+        }
+
         public void Update(RegistredTangibleMarker tangible)
         {
             var registredTangibleIndex = registredTangibles.FindIndex(marker => marker.Id == tangible.Id);
