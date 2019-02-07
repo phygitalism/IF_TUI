@@ -16,6 +16,9 @@ namespace RecognitionService.Input.Tuio
 
 		private Dictionary<int, RecognizedTangibleMarker> previouslyRecognizedTangibles = new Dictionary<int, RecognizedTangibleMarker>();
 
+		public Dictionary<int, int> markerTouches = new Dictionary<int, int>();
+		
+
 		public event Action<List<TouchPoint>, List<RecognizedTangibleMarker>> OnTuioInput;
 
 		public TuioObjectController(IInputProvider inputProvider, TangibleMarkerController tangibleMarkerController)
@@ -30,7 +33,10 @@ namespace RecognitionService.Input.Tuio
 			try
 			{
 				var registredTangibles = _tangibleMarkerController.Config.registredTangibles;
-				var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(frame.touches, registredTangibles);
+				var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(
+						frame.ExtractValidTouches(markerTouches), 
+						FilterPassiveRegistredMarkers(registredTangibles),
+						ref markerTouches);
 				var currentRecognizedTangibles = DetermineMarkerState(recognizedTangibles);
 				previouslyRecognizedTangibles = currentRecognizedTangibles;
 

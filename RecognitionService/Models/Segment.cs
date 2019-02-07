@@ -7,21 +7,21 @@ namespace RecognitionService.Models
 {
     public struct Segment
     {
-        public Vector2 origin;
-        public Vector2 destination;
+        public TouchPoint origin;
+        public TouchPoint destination;
 
         public float length;
 
-        public Segment(Vector2 origin, Vector2 destination)
+        public Segment(TouchPoint origin, TouchPoint destination)
         {
             this.origin = origin;
             this.destination = destination;
-            this.length = Vector2.Distance(origin, destination);
+            this.length = Vector2.Distance(origin.Position, destination.Position);
         }
         
         public float CalculateAngleBetweenY()
         {
-            Vector2 segmentFromZero = destination - origin;
+            Vector2 segmentFromZero = destination.Position - origin.Position;
             float radians = (float) Math.Atan2(segmentFromZero.Y, segmentFromZero.X);
             return radians;
         }

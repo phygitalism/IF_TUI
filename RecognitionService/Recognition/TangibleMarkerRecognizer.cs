@@ -18,15 +18,19 @@ namespace RecognitionService.Recognition
 
 		public TangibleMarkerRecognizer() { }
 
-		public List<RecognizedTangibleMarker> RecognizeTangibleMarkers(List<TouchPoint> frame, List<RegistredTangibleMarker> knownMarkers)
+		public List<RecognizedTangibleMarker> RecognizeTangibleMarkers(
+			List<TouchPoint> validTouches, 
+			List<RegistredTangibleMarker> knownMarkers, 
+			ref Dictionary<int, int> markersTouches
+		)
 		{
-            if (frame.Count < 3)
+            if (validTouches.Count < 3)
             {
                 return new List<RecognizedTangibleMarker>();
             }
 
 			_knownMarkers = knownMarkers;
-			var allPossibleTriangles = CreateTrianglesFromTouches(frame);
+			var allPossibleTriangles = CreateTrianglesFromTouches(validTouches);
 			var recognizedMarkers = new List<RecognizedTangibleMarker>();
 
 			foreach (var triangle in allPossibleTriangles)
@@ -34,6 +38,8 @@ namespace RecognitionService.Recognition
 				var knownTangibleMarker = FindTangibleMarkerForTriangle(triangle);
 				if (knownTangibleMarker!=null)
 				{
+					//knownMarkers[knownTangibleMarker.Value.Id].State = RegistredTangibleMarker.MarkerState.Active;
+					AddMarkerTouches(markersTouches, triangle, knownTangibleMarker.Value.Id);
 					var recognizedMarker = new RecognizedTangibleMarker(
 						knownTangibleMarker.Id,
 						triangle,
@@ -43,15 +49,14 @@ namespace RecognitionService.Recognition
 					recognizedMarkers.Add(recognizedMarker);
 				}
 			}
-
 			return recognizedMarkers;
 		}
 
-		private List<Triangle> CreateTrianglesFromTouches(List<TouchPoint> frame)
+		private List<Triangle> CreateTrianglesFromTouches(List<TouchPoint> validTouches)
 		{
 			var constructedTriangles = new List<Triangle>();
 
-			var combinationsOfTouches = frame.GetCombinationsWithoutRepetition(3);
+			var combinationsOfTouches = validTouches.GetCombinationsWithoutRepetition(3);
 			foreach (var combinationOfTouches in combinationsOfTouches)
 			{
 				var touches = combinationOfTouches.ToList();
@@ -59,7 +64,7 @@ namespace RecognitionService.Recognition
 				{
 					continue;
 				}
-				Triangle triangle = new Triangle(touches[0].Position, touches[1].Position, touches[2].Position);
+				Triangle triangle = new Triangle(touches[0], touches[1], touches[2]);
 				if (triangle.LargeSide.length <= physicalMarkerDiameter)
 				{
 					constructedTriangles.Add(triangle);
@@ -153,6 +158,13 @@ namespace RecognitionService.Recognition
 		{
 			pretenderMarkers.Sort((pair1, pair2) => pair1.Item2 >= pair2.Item2 ? 1 : -1);
 			return pretenderMarkers[0].Item1;
+		}
+
+		private void AddMarkerTouches(Dictionary<int, int> markerTouches, Triangle triangle, int markerId)
+		{
+			markerTouches.Add(triangle.posA.id, markerId);
+			markerTouches.Add(triangle.posB.id, markerId);
+			markerTouches.Add(triangle.posC.id, markerId);
 		}
 	}
 }

@@ -9,9 +9,9 @@ namespace RecognitionService.Models
 {
     public struct Triangle : IEquatable<Triangle>
     {
-        public Vector2 posA;
-        public Vector2 posB;
-        public Vector2 posC;
+        public TouchPoint posA;
+        public TouchPoint posB;
+        public TouchPoint posC;
 
         public List<Segment> sides;
 
@@ -38,12 +38,12 @@ namespace RecognitionService.Models
            result>0 => clockwise; result<0 => counter clockwise */
         public bool ClockwiseRotation
         {
-            get { return (((LargeSide.origin.X - ShortSide.origin.X) * (MiddleSide.origin.Y - ShortSide.origin.Y) - 
-                           (LargeSide.origin.Y - ShortSide.origin.Y) * (MiddleSide.origin.X - ShortSide.origin.X)) > 0);
+            get { return (((LargeSide.origin.Position.X - ShortSide.origin.Position.X) * (MiddleSide.origin.Position.Y - ShortSide.origin.Position.Y) - 
+                           (LargeSide.origin.Position.Y - ShortSide.origin.Position.Y) * (MiddleSide.origin.Position.X - ShortSide.origin.Position.X)) > 0);
             }
         }
 
-        public Triangle(Vector2 posA, Vector2 posB, Vector2 posC)
+        public Triangle(TouchPoint posA, TouchPoint posB, TouchPoint posC)
         {
             this.posA = posA;
             this.posB = posB;

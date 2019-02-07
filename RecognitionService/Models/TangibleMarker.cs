@@ -38,12 +38,13 @@ namespace RecognitionService.Models
 			Updated = 1,
 			Removed = 2
 		}
-
 		public int Id;
 		public ActionType Type;
 		public Triangle triangle;
 		public float initialAngle;
-
+		//public int ShortVertexId;
+		//public int MiddleVertexId;
+		//public int LargeVertexId;
 		public float rotationAngle
 		{
 			get { return ClockwiseDifferenceBetweenAngles(initialAngle, triangle.LargeSide.CalculateAngleBetweenY()); }
@@ -72,17 +73,17 @@ namespace RecognitionService.Models
 		private Vector2 FindCenter()
 		{
 
-			if (triangle.posB.X - triangle.posA.X < 1e-3)
+			if (triangle.posB.Position.X - triangle.posA.Position.X < 1e-3)
 			{
-				return find_center(triangle.posB, triangle.posC, triangle.posA);
+				return find_center(triangle.posB.Position, triangle.posC.Position, triangle.posA.Position);
 			}
 
-			if (triangle.posC.X - triangle.posB.X < 1e-3)
+			if (triangle.posC.Position.X - triangle.posB.Position.X < 1e-3)
 			{
-				return find_center(triangle.posC, triangle.posA, triangle.posB);
+				return find_center(triangle.posC.Position, triangle.posA.Position, triangle.posB.Position);
 			}
 
-			return find_center(triangle.posA, triangle.posB, triangle.posC);
+			return find_center(triangle.posA.Position, triangle.posB.Position, triangle.posC.Position);
 		}
 
 		private Vector2 find_center(Vector2 v1, Vector2 v2, Vector2 v3)

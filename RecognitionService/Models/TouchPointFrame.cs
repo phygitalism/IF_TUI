@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RecognitionService.Models
 {
@@ -20,6 +21,14 @@ namespace RecognitionService.Models
             this.Id = id;
             this.timestamp = timestamp;
             this.touches = touches;
+        }
+
+        public List<TouchPoint> ExtractValidTouches(Dictionary<int, int> markerTouches)
+        {
+            //var validTouches = touches.Except(markerTouches);
+            //точки которые не входят в зареганные 
+            var validTouches = touches.Where(t => !markerTouches.Keys.Any(mt => mt == t.id)).ToList();
+            return validTouches;
         }
     }
 
