@@ -14,8 +14,8 @@ namespace RecognitionService.Input.Tuio
 		private TangibleMarkerController _tangibleMarkerController;
 		private ITangibleMarkerRecognizer _tangibleMarkerRecognizer = new TangibleMarkerRecognizer();
 
+		// markerID - recognized marker
 		private Dictionary<int, RecognizedTangibleMarker> previouslyRecognizedTangibles = new Dictionary<int, RecognizedTangibleMarker>();
-
 		public Dictionary<int, int> markerTouchesIdToMarkersId = new Dictionary<int, int>();
 		
 
@@ -33,15 +33,25 @@ namespace RecognitionService.Input.Tuio
 			try
 			{
 				var registredTangibles = _tangibleMarkerController.Config.registredTangibles;
-				var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(
-						frame.ExtractValidTouches(markerTouchesIdToMarkersId), 
-						FilterPassiveRegistredMarkers(registredTangibles),
-						ref markerTouchesIdToMarkersId);
-				var currentRecognizedTangibles = DetermineMarkerState(recognizedTangibles);
-				previouslyRecognizedTangibles = currentRecognizedTangibles;
+				var validTouches = frame.ExtractValidTouches(markerTouchesIdToMarkersId);
+				var markerTouches = frame.ExtractMarkerTouches(markerTouchesIdToMarkersId);
+				//var activeMarkersIDs = registredTangibles.Where(marker => marker.State == RegistredTangibleMarker.MarkerState.Active).Select(marker => marker.Id).ToList();
+				var passiveMarkers = registredTangibles.Where(marker => marker.State == RegistredTangibleMarker.MarkerState.Passive).ToList();
+				
+				var newRecognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(validTouches, passiveMarkers, ref markerTouchesIdToMarkersId);
+				
+				var currentRecognizedTangibles = previouslyRecognizedTangibles;
+				var allRecognizedTangibles = ConcatenateRecognizedTangibles(currentRecognizedTangibles, newRecognizedTangibles);
+				
 
-                PrintMarkerStates(currentRecognizedTangibles.Values.ToList());
-                // TODO - split touches from objects
+				RecognizedMarkersToActive(registredTangibles, newRecognizedTangibles);
+				//var activeMarkersIDs = updatedRegistredTangibles.Values.Where(marker => marker.State == RegistredTangibleMarker.MarkerState.Active).Select(marker => marker.Id).ToList();
+				//RemoveLostMarkers(); ???
+				var activeMarkers = DetermineMarkerState(allRecognizedTangibles.Values.ToList());
+				previouslyRecognizedTangibles = activeMarkers;
+
+				PrintMarkerStates(activeMarkers.Values.ToList());
+				// TODO - split touches from objects
 
 				var touchesWithRelativeCoords = frame.touches
 					.Select(touch => touch.ToRelativeCoordinates(
@@ -49,8 +59,7 @@ namespace RecognitionService.Input.Tuio
 						_inputProvider.ScreenHeight
 					)).ToList();
 
-				var updatedActiveMarkers = UpdateTangibleMarkerPosition(activeMarkers,
-					frame.ExtractMarkerTouches(markerTouchesIdToMarkersId));
+				var updatedActiveMarkers = UpdateTangibleMarkerPosition(activeMarkers, markerTouches);
 				OnTuioInput?.Invoke(touchesWithRelativeCoords, updatedActiveMarkers);
 			}
 			catch (System.Exception ex)
