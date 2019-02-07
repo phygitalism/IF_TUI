@@ -16,7 +16,7 @@ namespace RecognitionService.Input.Tuio
 
 		private Dictionary<int, RecognizedTangibleMarker> previouslyRecognizedTangibles = new Dictionary<int, RecognizedTangibleMarker>();
 
-		public Dictionary<int, int> markerTouches = new Dictionary<int, int>();
+		public Dictionary<int, int> markerTouchesIdToMarkersId = new Dictionary<int, int>();
 		
 
 		public event Action<List<TouchPoint>, List<RecognizedTangibleMarker>> OnTuioInput;
@@ -34,9 +34,9 @@ namespace RecognitionService.Input.Tuio
 			{
 				var registredTangibles = _tangibleMarkerController.Config.registredTangibles;
 				var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(
-						frame.ExtractValidTouches(markerTouches), 
+						frame.ExtractValidTouches(markerTouchesIdToMarkersId), 
 						FilterPassiveRegistredMarkers(registredTangibles),
-						ref markerTouches);
+						ref markerTouchesIdToMarkersId);
 				var currentRecognizedTangibles = DetermineMarkerState(recognizedTangibles);
 				previouslyRecognizedTangibles = currentRecognizedTangibles;
 
@@ -48,17 +48,10 @@ namespace RecognitionService.Input.Tuio
 						_inputProvider.ScreenWidth,
 						_inputProvider.ScreenHeight
 					)).ToList();
-				
-				var tangiblesWithUpdatedCenters = currentRecognizedTangibles.Values.ToList();
-				tangiblesWithUpdatedCenters.ForEach(t => 
-				{
-					t.relativeCenter = new System.Numerics.Vector2(
-                        t.Center.X / _inputProvider.ScreenWidth,
-                        t.Center.Y / _inputProvider.ScreenHeight
-                    );
-				});
 
-				OnTuioInput?.Invoke(touchesWithRelativeCoords, tangiblesWithUpdatedCenters);
+				var updatedActiveMarkers = UpdateTangibleMarkerPosition(activeMarkers,
+					frame.ExtractMarkerTouches(markerTouchesIdToMarkersId));
+				OnTuioInput?.Invoke(touchesWithRelativeCoords, updatedActiveMarkers);
 			}
 			catch (System.Exception ex)
 			{
@@ -80,6 +73,28 @@ namespace RecognitionService.Input.Tuio
 
 			var activeMarkers = previouslyRecognizedTangibles.Values.Where(marker => activeIds.Contains(marker.Id)).ToList();
 			return activeMarkers;
+		}
+		
+		//обновляем положение точек маркера
+		private List<RecognizedTangibleMarker> UpdateTangibleMarkerPosition(Dictionary<int, RecognizedTangibleMarker> activeMarkers,
+			List<TouchPoint> markerTouches)
+		{
+			var markerTouchesDictionary = markerTouches.ToDictionary(o => o.id);
+			foreach (var touchId in markerTouchesIdToMarkersId.Keys)
+			{
+				int currentMarkerId = markerTouchesIdToMarkersId[touchId];
+				TouchPoint currentTouch = markerTouchesDictionary[touchId];
+				activeMarkers[currentMarkerId].UpdatePosition(currentTouch);
+			}
+			var tangiblesWithUpdatedCenters = activeMarkers.Values.ToList();
+			tangiblesWithUpdatedCenters.ForEach(t => 
+			{
+				t.relativeCenter = new System.Numerics.Vector2(
+                    t.Center.X / _inputProvider.ScreenWidth,
+                    t.Center.Y / _inputProvider.ScreenHeight
+                );
+			});
+			return tangiblesWithUpdatedCenters;
 		}
 
         private void PrintMarkerStates(List<RecognizedTangibleMarker> recognizedTangibles)

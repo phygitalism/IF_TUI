@@ -70,6 +70,22 @@ namespace RecognitionService.Models
 			this.initialAngle = initialAngle;
 		}
 
+		public void UpdatePosition(TouchPoint newTouch)
+		{
+			if (newTouch.id == triangle.posA.id)
+			{
+				triangle.posA = newTouch;
+			}
+			else if (newTouch.id == triangle.posB.id)
+			{
+				triangle.posB = newTouch;
+			}
+			else
+			{
+				triangle.posC = newTouch;
+			}
+		}
+
 		private Vector2 FindCenter()
 		{
 
