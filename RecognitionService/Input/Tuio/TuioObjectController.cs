@@ -38,8 +38,8 @@ namespace RecognitionService.Input.Tuio
 				//var activeMarkersIDs = registredTangibles.Where(marker => marker.State == RegistredTangibleMarker.MarkerState.Active).Select(marker => marker.Id).ToList();
 				var passiveMarkers = registredTangibles.Where(marker => marker.State == RegistredTangibleMarker.MarkerState.Passive).ToList();
 				
-				var newRecognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(validTouches, passiveMarkers, ref markerTouchesIdToMarkersId);
-				
+				var newRecognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(validTouches, passiveMarkers);
+				AddRecognizedMarkersTouches(newRecognizedTangibles);
 				var currentRecognizedTangibles = previouslyRecognizedTangibles;
 				var allRecognizedTangibles = ConcatenateRecognizedTangibles(currentRecognizedTangibles, newRecognizedTangibles);
 				
@@ -106,6 +106,21 @@ namespace RecognitionService.Input.Tuio
 			return tangiblesWithUpdatedCenters;
 		}
 
+		private void AddRecognizedMarkersTouches(List<RecognizedTangibleMarker> newRecognizedTangibles)
+		{
+			foreach (var marker in newRecognizedTangibles)
+			{
+				AddMarkerTouches(marker);
+			}
+		}
+		
+		private void AddMarkerTouches(RecognizedTangibleMarker recognizedMarker)
+		{
+			markerTouchesIdToMarkersId.Add(recognizedMarker.triangle.posA.id, recognizedMarker.Id);
+			markerTouchesIdToMarkersId.Add(recognizedMarker.triangle.posB.id, recognizedMarker.Id);
+			markerTouchesIdToMarkersId.Add(recognizedMarker.triangle.posC.id, recognizedMarker.Id);
+		}
+
         private void PrintMarkerStates(List<RecognizedTangibleMarker> recognizedTangibles)
         {
             var addedMarkerIds = recognizedTangibles.Where(marker => marker.Type == RecognizedTangibleMarker.ActionType.Added).Select(marker => marker.Id).ToList();
@@ -125,6 +140,7 @@ namespace RecognitionService.Input.Tuio
                 Console.WriteLine($"Removed markers ids: {string.Join(" ", deletedMarkerIds)}");
             }
         }
+         
 
 		private Dictionary<int, RecognizedTangibleMarker> DetermineMarkerState(List<RecognizedTangibleMarker> recognizedTangibles)
 		{

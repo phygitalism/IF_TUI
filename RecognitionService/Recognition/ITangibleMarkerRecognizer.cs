@@ -9,8 +9,7 @@ namespace RecognitionService.Recognition
     {
         List<RecognizedTangibleMarker> RecognizeTangibleMarkers(
             List<TouchPoint> validTouches,
-            List<RegistredTangibleMarker> knownMarkers,
-            ref Dictionary<int, int> markerTouchesIdToMarkersId
+            List<RegistredTangibleMarker> knownMarkers
         );
     }
 }

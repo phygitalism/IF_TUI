@@ -20,8 +20,7 @@ namespace RecognitionService.Recognition
 
 		public List<RecognizedTangibleMarker> RecognizeTangibleMarkers(
 			List<TouchPoint> validTouches, 
-			List<RegistredTangibleMarker> knownMarkers, 
-			ref Dictionary<int, int> markersTouches
+			List<RegistredTangibleMarker> knownMarkers
 		)
 		{
             if (validTouches.Count < 3)
@@ -39,7 +38,6 @@ namespace RecognitionService.Recognition
 				if (knownTangibleMarker!=null)
 				{
 					//knownMarkers[knownTangibleMarker.Value.Id].State = RegistredTangibleMarker.MarkerState.Active;
-					AddMarkerTouches(markersTouches, triangle, knownTangibleMarker.Value.Id);
 					var recognizedMarker = new RecognizedTangibleMarker(
 						knownTangibleMarker.Id,
 						triangle,
@@ -158,13 +156,6 @@ namespace RecognitionService.Recognition
 		{
 			pretenderMarkers.Sort((pair1, pair2) => pair1.Item2 >= pair2.Item2 ? 1 : -1);
 			return pretenderMarkers[0].Item1;
-		}
-
-		private void AddMarkerTouches(Dictionary<int, int> markerTouches, Triangle triangle, int markerId)
-		{
-			markerTouches.Add(triangle.posA.id, markerId);
-			markerTouches.Add(triangle.posB.id, markerId);
-			markerTouches.Add(triangle.posC.id, markerId);
 		}
 	}
 }
