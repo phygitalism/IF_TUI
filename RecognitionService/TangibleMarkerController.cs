@@ -23,7 +23,7 @@ namespace RecognitionService
 		public void RegisterMarkerWithId(Triangle triangle, int id)
 		{
 			Console.WriteLine("RegisterMarkerWithId");
-			var tangible = new RegistredTangibleMarker(id, triangle, 0.0f, 0.0f);
+			var tangible = new RegistredTangibleMarker(id, triangle);
 			if (!Config.IsRegistredWithId(tangible.Id))
 			{
 				Config.Add(tangible);

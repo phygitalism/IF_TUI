@@ -18,6 +18,23 @@ namespace RecognitionService.Models
             this.destination = destination;
             this.length = Vector2.Distance(origin, destination);
         }
+        
+        public float CalculateAngleBetweenY(bool degree = false)
+        {
+            float cosine = Vector2.Dot(Vector2.UnitY, Vector2.Normalize(destination - origin));
+            cosine = (cosine < -1) ? -1 : ((cosine > 1) ? 1 : cosine);
+            float radians = (float)Math.Acos(cosine);
+            if (degree)
+            {
+                return radToDeg(radians);
+            }
+            return radians;
+        }
+		
+        private float radToDeg(float rad)
+        {
+            return (float)((rad * 180)/Math.PI);
+        }
     }
 
     public static class SegmentExtensions
