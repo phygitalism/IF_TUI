@@ -25,16 +25,15 @@ namespace RecognitionService.Models
 
         public List<TouchPoint> ExtractValidTouches(Dictionary<int, int> markerTouchesIdToMarkersId)
         {
-            //var validTouches = touches.Except(markerTouches);
             //точки которые не входят в зареганные 
-            var validTouches = touches.Where(t => !markerTouchesIdToMarkersId.Keys.Any(mt => mt == t.id)).ToList();
+            var validTouches = touches.Where(t => !markerTouchesIdToMarkersId.Keys.Contains(t.id)).ToList(); 
             return validTouches;
         }
         
         public List<TouchPoint> ExtractMarkerTouches(Dictionary<int, int> markerTouchesIdToMarkersId)
         {
             //точки которые входят в зареганные 
-            var markerTouches = touches.Where(t => markerTouchesIdToMarkersId.Keys.Any(mt => mt == t.id)).ToList();
+            var markerTouches = touches.Where(t => markerTouchesIdToMarkersId.Keys.Contains(t.id)).ToList(); 
             return markerTouches;
         }
     }

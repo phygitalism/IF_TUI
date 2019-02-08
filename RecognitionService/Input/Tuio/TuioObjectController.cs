@@ -16,7 +16,7 @@ namespace RecognitionService.Input.Tuio
 
 		// markerID - recognized marker
 		private Dictionary<int, RecognizedTangibleMarker> previouslyRecognizedTangibles = new Dictionary<int, RecognizedTangibleMarker>();
-		public Dictionary<int, int> markerTouchesIdToMarkersId = new Dictionary<int, int>();
+		private Dictionary<int, int> markerTouchesIdToMarkersId = new Dictionary<int, int>();
 		
 
 		public event Action<List<TouchPoint>, List<RecognizedTangibleMarker>> OnTuioInput;
