@@ -15,7 +15,7 @@ namespace RecognitionService.Input.Tuio
 		private ITangibleMarkerRecognizer _tangibleMarkerRecognizer = new TangibleMarkerRecognizer();
 
 		// markerID - recognized marker
-		private Dictionary<int, RecognizedTangibleMarker> previouslyRecognizedTangibles = new Dictionary<int, RecognizedTangibleMarker>();
+		private Dictionary<int, RecognizedTangibleMarker> activeMarkers = new Dictionary<int, RecognizedTangibleMarker>();
 		private Dictionary<int, int> markerTouchesIdToMarkersId = new Dictionary<int, int>();
 		
 
@@ -34,21 +34,19 @@ namespace RecognitionService.Input.Tuio
 			{
 				var registredTangibles = _tangibleMarkerController.Config.registredTangibles;
 				var validTouches = frame.ExtractValidTouches(markerTouchesIdToMarkersId);
+				var lostTouches = frame.ExtractLostTouches();
 				var markerTouches = frame.ExtractMarkerTouches(markerTouchesIdToMarkersId);
 				//var activeMarkersIDs = registredTangibles.Where(marker => marker.State == RegistredTangibleMarker.MarkerState.Active).Select(marker => marker.Id).ToList();
 				var passiveMarkers = registredTangibles.Where(marker => marker.State == RegistredTangibleMarker.MarkerState.Passive).ToList();
-				
 				var newRecognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(validTouches, passiveMarkers);
-				AddRecognizedMarkersTouches(newRecognizedTangibles);
-				var currentRecognizedTangibles = previouslyRecognizedTangibles;
-				var allRecognizedTangibles = ConcatenateRecognizedTangibles(currentRecognizedTangibles, newRecognizedTangibles);
 				
-
+				
+				AddRecognizedMarkersTouches(newRecognizedTangibles);
 				RecognizedMarkersToActive(newRecognizedTangibles);
+				RemoveLostMarkers(lostTouches);
 				//var activeMarkersIDs = updatedRegistredTangibles.Values.Where(marker => marker.State == RegistredTangibleMarker.MarkerState.Active).Select(marker => marker.Id).ToList();
-				//RemoveLostMarkers(); ???
-				var activeMarkers = DetermineMarkerState(allRecognizedTangibles.Values.ToList());
-				previouslyRecognizedTangibles = activeMarkers;
+	
+				activeMarkers = ConcatenateRecognizedTangibles(activeMarkers, newRecognizedTangibles);
 
 				PrintMarkerStates(activeMarkers.Values.ToList());
 				// TODO - split touches from objects
@@ -93,6 +91,7 @@ namespace RecognitionService.Input.Tuio
 				int currentMarkerId = markerTouchesIdToMarkersId[touchId];
 				TouchPoint currentTouch = markerTouchesDictionary[touchId];
 				activeMarkers[currentMarkerId].UpdatePosition(currentTouch);
+				activeMarkers[currentMarkerId].Type = RecognizedTangibleMarker.ActionType.Updated;
 			}
 			var tangiblesWithUpdatedCenters = activeMarkers.Values.ToList();
 			tangiblesWithUpdatedCenters.ForEach(t => 
@@ -120,6 +119,31 @@ namespace RecognitionService.Input.Tuio
 			markerTouchesIdToMarkersId.Add(recognizedMarker.triangle.posC.id, recognizedMarker.Id);
 		}
 
+		private void RemoveLostMarkers(List<TouchPoint> lostTouches)
+		{
+			var lostTouchesDictionary = lostTouches.ToDictionary(o => o.id);
+		    //List<int> deletedTouches = new List<int>();
+			foreach (var lostTouchId in lostTouchesDictionary.Keys)
+			{
+				if (markerTouchesIdToMarkersId.ContainsKey(lostTouchId))//if (!deletedTouches.Contains(lostTouchId))
+				{
+					var lostMarkerId = markerTouchesIdToMarkersId[lostTouchId];
+					RemoveLostMarkerTouches(lostMarkerId);
+					//activeMarkers.Remove(lostMarkerId);
+					activeMarkers[lostMarkerId].Type = RecognizedTangibleMarker.ActionType.Removed;
+					_tangibleMarkerController.Config.ChangeToPassive(lostMarkerId);
+				}
+			}
+		}
+
+		private void RemoveLostMarkerTouches(int lostMarkerId)
+		{
+			markerTouchesIdToMarkersId.Remove(activeMarkers[lostMarkerId].triangle.posA.id);
+			markerTouchesIdToMarkersId.Remove(activeMarkers[lostMarkerId].triangle.posB.id);
+			markerTouchesIdToMarkersId.Remove(activeMarkers[lostMarkerId].triangle.posC.id);
+		}
+		
+		
         private void PrintMarkerStates(List<RecognizedTangibleMarker> recognizedTangibles)
         {
             var addedMarkerIds = recognizedTangibles.Where(marker => marker.Type == RecognizedTangibleMarker.ActionType.Added).Select(marker => marker.Id).ToList();
@@ -141,7 +165,8 @@ namespace RecognitionService.Input.Tuio
         }
          
 
-		private Dictionary<int, RecognizedTangibleMarker> DetermineMarkerState(List<RecognizedTangibleMarker> recognizedTangibles)//, List<RegistredTangibleMarker> registredTangibles)
+		/*
+		private Dictionary<int, RecognizedTangibleMarker> DetermineMarkerState(List<RecognizedTangibleMarker> recognizedTangibles)
 		{
 			var currentRecognizedTangibles = new Dictionary<int, RecognizedTangibleMarker>();
 			foreach (var tangible in recognizedTangibles)
@@ -182,7 +207,7 @@ namespace RecognitionService.Input.Tuio
                 // TODO - the same marker was recognized from different triangle
             }
             return currentRecognizedTangibles;
-		}
+		}*/
 
 		public void Dispose()
 		{

@@ -36,6 +36,13 @@ namespace RecognitionService.Models
             var markerTouches = touches.Where(t => markerTouchesIdToMarkersId.Keys.Contains(t.id)).ToList(); 
             return markerTouches;
         }
+
+        public List<TouchPoint> ExtractLostTouches()
+        {
+            //точки которые пропадут
+            var lostTouches = touches.Where(t => t.type == TouchPoint.ActionType.Up).ToList();
+            return lostTouches;
+        }
     }
 
 }
