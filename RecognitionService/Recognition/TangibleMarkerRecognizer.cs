@@ -32,13 +32,12 @@ namespace RecognitionService.Recognition
 			foreach (var triangle in allPossibleTriangles)
 			{
 				var knownTangibleMarker = FindTangibleMarkerForTriangle(triangle);
-				if (knownTangibleMarker.HasValue)
+				if (knownTangibleMarker!=null)
 				{
-					//knownMarkers[knownTangibleMarker.Value.Id].State = RegistredTangibleMarker.MarkerState.Active;
 					var recognizedMarker = new RecognizedTangibleMarker(
-						knownTangibleMarker.Value.Id,
+						knownTangibleMarker.Id,
 						triangle,
-						knownTangibleMarker.Value.initialAngle
+						knownTangibleMarker.initialAngle
 					);
 
 					recognizedMarkers.Add(recognizedMarker);
