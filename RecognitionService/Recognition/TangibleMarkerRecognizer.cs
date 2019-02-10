@@ -89,6 +89,64 @@ namespace RecognitionService.Recognition
 			}
 			return null;
 		}
+		
+		private List<Triangle> ConstructTriangles(List<Segment> segments)
+		{
+			var constructedTriangles = new List<Triangle>();
+
+			var combinationsOfSegments = segments.GetCombinationsWithoutRepetition(3);
+			foreach (var combinationOfSegments in combinationsOfSegments)
+			{
+				var sides = combinationOfSegments.ToList();
+				if (sides.Count != 3)
+				{
+					continue;
+				}
+
+				if (Triangle.TryBuildFromSegments(sides[0], sides[1], sides[2], out var triangle) && triangle != null)
+				{
+					constructedTriangles.Add(triangle.Value);
+				}
+				else
+				{
+					//Console.WriteLine(ex);
+				}
+			}
+
+			return constructedTriangles;
+		}
+		
+		private List<Triangle> DistinguishTriangles(List<TouchPoint> frame)
+		{
+			var segments = ConnectAllPointsToEachOthers(frame);
+			var allKnownSegments = _knownMarkers.SelectMany(marker => marker.Sides).ToList();
+			var markerSegments = segments
+				.Where(segment => segment.length <= physicalMarkerDiameter)
+				//.Where(segment => segment.EqualSegmentExistInList(allKnownSegments, tolerance))
+				.ToList();
+
+			var distinguishedTriangles = ConstructTriangles(markerSegments);
+
+			return distinguishedTriangles;
+		}
+		
+		private List<Segment> ConnectAllPointsToEachOthers(List<TouchPoint> frame)
+		{
+			var enumeratedPoints = frame.Select((tp, i) => (i, tp.Position)).ToList();
+			var amount = enumeratedPoints.Count;
+			var allPossibleSegments = new List<Segment>();
+
+			foreach ((var index, var point) in enumeratedPoints)
+			{
+				foreach ((var index2, var point2) in enumeratedPoints.Slice(index + 1, amount))
+				{
+					allPossibleSegments.Add(new Segment(point, point2));
+				}
+			}
+
+			return allPossibleSegments;
+		}
+
 
 		// in case when several markers correspond to the same triangle
 		private RegistredTangibleMarker ChooseMostSimilarMarker(List<(RegistredTangibleMarker, float)> pretenderMarkers)

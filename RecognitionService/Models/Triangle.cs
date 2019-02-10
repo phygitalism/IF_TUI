@@ -90,6 +90,38 @@ namespace RecognitionService.Models
                                ShortSide.CompareWith(other.ShortSide))/3;
             return meanError;
         }
+        
+        public static bool TryBuildFromSegments(Segment sideA, Segment sideB, Segment sideC, out Triangle? triangle)
+        {
+            triangle = null;
+            var sides = new List<Segment>() { sideA, sideB, sideC };
+
+            var points = sides.SelectMany(side => new Vector2[] { side.origin, side.destination }).ToList();
+
+            var vertecies = RemoveDuplicates(points); // TODO - compare points with precision
+            if (vertecies.Count != 3)
+            {
+                return false;
+            }
+
+            triangle = new Triangle(vertecies[0], vertecies[1], vertecies[2]);
+            return true;
+        }
+
+        private static List<Vector2> RemoveDuplicates(List<Vector2> originalList)
+        {
+            HashSet<Vector2> set = new HashSet<Vector2>();
+
+            foreach (var obj in originalList)
+            {
+                if (!set.Contains(obj))
+                {
+                    set.Add(obj);
+                }
+            }
+            return set.ToList();
+        }
+
 
         public override int GetHashCode()
         {
