@@ -30,7 +30,9 @@ namespace RecognitionService.Input.Tuio
 			try
 			{
 				var registredTangibles = _tangibleMarkerController.Config.registredTangibles;
-				var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(frame.touches, FilterPassiveRegistredMarkers(registredTangibles));
+				
+				var passiveMarkers = registredTangibles.Where(reg => !previouslyRecognizedTangibles.ContainsKey(reg.Id)).ToList();
+				var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(frame.touches, passiveMarkers);
 				var currentRecognizedTangibles = DetermineMarkerState(recognizedTangibles);
 				previouslyRecognizedTangibles = currentRecognizedTangibles;
 
@@ -61,15 +63,20 @@ namespace RecognitionService.Input.Tuio
 
 		}
 
-		private List<RegistredTangibleMarker> FilterPassiveRegistredMarkers(List<RegistredTangibleMarker> registredTangibles)
+		private List<RecognizedTangibleMarker> RecognizedMarkersToActive(List<RegistredTangibleMarker> registredTangibles,
+			List<RecognizedTangibleMarker> newRecognizedTangibles)
 		{
-			var intersection = previouslyRecognizedTangibles.SelectMany(rec => registredTangibles.Where(reg => reg.Id == rec.Key)).ToList();
-			foreach (var tangible in intersection)
+			var registredTangiblesDictionary = registredTangibles.ToDictionary(o => o.Id);
+			foreach (var marker in newRecognizedTangibles)
 			{
-				tangible.ChangeToActive();
+				registredTangiblesDictionary[marker.Id].State = RegistredTangibleMarker.MarkerState.Active;
 			}
-			var passiveMarkers = registredTangibles.Where(marker => marker.State == RegistredTangibleMarker.MarkerState.Passive).ToList();
-			return passiveMarkers;
+
+			var activeIds = registredTangiblesDictionary.Values.Where(marker =>
+				marker.State == RegistredTangibleMarker.MarkerState.Active).Select(marker => marker.Id);
+
+			var activeMarkers = previouslyRecognizedTangibles.Values.Where(marker => activeIds.Contains(marker.Id)).ToList();
+			return activeMarkers;
 		}
 
         private void PrintMarkerStates(List<RecognizedTangibleMarker> recognizedTangibles)

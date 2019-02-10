@@ -83,11 +83,11 @@ namespace RecognitionService.Models
             return areEqual;
         }
 
-        public float CalculateMeanError(Triangle other)
+        public float SimiliarityWith(Triangle other)
         {
-            float meanError = (LargeSide.CompareSegment(other.LargeSide) +
-                               MiddleSide.CompareSegment(other.MiddleSide) +
-                               ShortSide.CompareSegment(other.ShortSide))/3;
+            float meanError = (LargeSide.CompareWith(other.LargeSide) +
+                               MiddleSide.CompareWith(other.MiddleSide) +
+                               ShortSide.CompareWith(other.ShortSide))/3;
             return meanError;
         }
 

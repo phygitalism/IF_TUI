@@ -73,12 +73,12 @@ namespace RecognitionService.Recognition
 			return constructedTriangles;
 		}
 
-		private RegistredTangibleMarker? FindTangibleMarkerForTriangle(Triangle triangle)
+		private RegistredTangibleMarker FindTangibleMarkerForTriangle(Triangle triangle)
 		{
 			List<(RegistredTangibleMarker, float)> pretenderMarkers = new List<(RegistredTangibleMarker, float)>();
 			foreach (var tangibleMarker in _knownMarkers)
 			{
-				float sidesMeanError = triangle.CalculateMeanError(tangibleMarker.triangle);
+				float sidesMeanError = triangle.SimiliarityWith(tangibleMarker.triangle);
 				if (sidesMeanError < tolerance)
 				{
 					pretenderMarkers.Add((tangibleMarker, sidesMeanError));

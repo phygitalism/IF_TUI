@@ -45,7 +45,7 @@ namespace RecognitionService.Models
             return equalSegments;
         }
 
-        public static float CompareSegment(this Segment source, Segment other)
+        public static float CompareWith(this Segment source, Segment other)
         {
             return Math.Abs(source.length - other.length);
         }
