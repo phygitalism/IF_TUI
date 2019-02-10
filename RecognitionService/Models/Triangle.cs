@@ -58,6 +58,39 @@ namespace RecognitionService.Models
             this.sides.Sort((v1, v2) => v1.length >= v2.length ? 1 : -1);
         }
 
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Triangle))
+            {
+                return false;
+            }
+
+            var other = (Triangle)obj;
+            return this.Equals(other);
+        }
+
+		public bool Equals(Triangle other)
+		{
+			return Equals(other, 1e-3);
+		}
+
+		public bool Equals(Triangle other, double precision = 1e-3)
+        {
+            var areEqual = ShortSide.EqualSegmentExistInList(other.sides, precision) &&
+                MiddleSide.EqualSegmentExistInList(other.sides, precision) &&
+                LargeSide.EqualSegmentExistInList(other.sides, precision);
+
+            return areEqual;
+        }
+
+        public float SimiliarityWith(Triangle other)
+        {
+            float meanError = (LargeSide.CompareWith(other.LargeSide) +
+                               MiddleSide.CompareWith(other.MiddleSide) +
+                               ShortSide.CompareWith(other.ShortSide))/3;
+            return meanError;
+        }
+        
         public static bool TryBuildFromSegments(Segment sideA, Segment sideB, Segment sideC, out Triangle? triangle)
         {
             triangle = null;
@@ -89,30 +122,6 @@ namespace RecognitionService.Models
             return set.ToList();
         }
 
-        public override bool Equals(object obj)
-        {
-            if (!(obj is Triangle))
-            {
-                return false;
-            }
-
-            var other = (Triangle)obj;
-            return this.Equals(other);
-        }
-
-		public bool Equals(Triangle other)
-		{
-			return Equals(other, 1e-3);
-		}
-
-		public bool Equals(Triangle other, double precision = 1e-3)
-        {
-            var areEqual = ShortSide.EqualSegmentExistInList(other.sides, precision) &&
-                MiddleSide.EqualSegmentExistInList(other.sides, precision) &&
-                LargeSide.EqualSegmentExistInList(other.sides, precision);
-
-            return areEqual;
-        }
 
         public override int GetHashCode()
         {

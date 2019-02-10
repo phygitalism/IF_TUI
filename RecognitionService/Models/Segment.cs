@@ -19,15 +19,10 @@ namespace RecognitionService.Models
             this.length = Vector2.Distance(origin, destination);
         }
         
-        public float CalculateAngleBetweenY(bool degree = false)
+        public float CalculateAngleBetweenY()
         {
-            float cosine = Vector2.Dot(Vector2.UnitY, Vector2.Normalize(destination - origin));
-            cosine = (cosine < -1) ? -1 : ((cosine > 1) ? 1 : cosine);
-            float radians = (float)Math.Acos(cosine);
-            if (degree)
-            {
-                return radToDeg(radians);
-            }
+            Vector2 segmentFromZero = destination - origin;
+            float radians = (float) Math.Atan2(segmentFromZero.Y, segmentFromZero.X);
             return radians;
         }
 		
@@ -48,6 +43,11 @@ namespace RecognitionService.Models
         {
             var equalSegments = segments.Where(segment => Math.Abs(segment.length - source.length) <= precision).ToList();
             return equalSegments;
+        }
+
+        public static float CompareWith(this Segment source, Segment other)
+        {
+            return Math.Abs(source.length - other.length);
         }
     }
 }

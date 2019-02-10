@@ -58,7 +58,22 @@ namespace RecognitionService.Input.Tuio
 			{
 				Console.WriteLine(ex);
 			}
+		}
 
+		private List<RecognizedTangibleMarker> RecognizedMarkersToActive(List<RegistredTangibleMarker> registredTangibles,
+			List<RecognizedTangibleMarker> newRecognizedTangibles)
+		{
+			var registredTangiblesDictionary = registredTangibles.ToDictionary(o => o.Id);
+			foreach (var marker in newRecognizedTangibles)
+			{
+				registredTangiblesDictionary[marker.Id].State = RegistredTangibleMarker.MarkerState.Active;
+			}
+
+			var activeIds = registredTangiblesDictionary.Values.Where(marker =>
+				marker.State == RegistredTangibleMarker.MarkerState.Active).Select(marker => marker.Id);
+
+			var activeMarkers = previouslyRecognizedTangibles.Values.Where(marker => activeIds.Contains(marker.Id)).ToList();
+			return activeMarkers;
 		}
 
         private void PrintMarkerStates(List<RecognizedTangibleMarker> recognizedTangibles)

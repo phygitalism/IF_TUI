@@ -5,12 +5,17 @@ using Newtonsoft.Json;
 
 namespace RecognitionService.Models
 {
-	public struct RegistredTangibleMarker
+	public class RegistredTangibleMarker
 	{
+		public enum MarkerState
+		{
+			Passive, 
+			Active
+		}
 		public int Id;
 		public Triangle triangle;
 		public float initialAngle;
-
+		public MarkerState State { get; set; } = MarkerState.Passive;
 		[JsonIgnore]
 		public List<Segment> Sides
 		{

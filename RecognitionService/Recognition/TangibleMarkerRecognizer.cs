@@ -26,18 +26,18 @@ namespace RecognitionService.Recognition
             }
 
 			_knownMarkers = knownMarkers;
-			var allPossibleTriangles = DistinguishTriangles(frame);
+			var allPossibleTriangles = CreateTrianglesFromTouches(frame);
 			var recognizedMarkers = new List<RecognizedTangibleMarker>();
 
 			foreach (var triangle in allPossibleTriangles)
 			{
 				var knownTangibleMarker = FindTangibleMarkerForTriangle(triangle);
-				if (knownTangibleMarker.HasValue)
+				if (knownTangibleMarker!=null)
 				{
 					var recognizedMarker = new RecognizedTangibleMarker(
-						knownTangibleMarker.Value.Id,
+						knownTangibleMarker.Id,
 						triangle,
-						knownTangibleMarker.Value.initialAngle
+						knownTangibleMarker.initialAngle
 					);
 
 					recognizedMarkers.Add(recognizedMarker);
@@ -47,20 +47,49 @@ namespace RecognitionService.Recognition
 			return recognizedMarkers;
 		}
 
-		private List<Triangle> DistinguishTriangles(List<TouchPoint> frame)
+		private List<Triangle> CreateTrianglesFromTouches(List<TouchPoint> frame)
 		{
-			var segments = ConnectAllPointsToEachOthers(frame);
-			var allKnownSegments = _knownMarkers.SelectMany(marker => marker.Sides).ToList();
-			var markerSegments = segments
-				.Where(segment => segment.length <= physicalMarkerDiameter)
-				//.Where(segment => segment.EqualSegmentExistInList(allKnownSegments, tolerance))
-				.ToList();
+			var constructedTriangles = new List<Triangle>();
 
-			var distinguishedTriangles = ConstructTriangles(markerSegments);
-
-			return distinguishedTriangles;
+			var combinationsOfTouches = frame.GetCombinationsWithoutRepetition(3);
+			foreach (var combinationOfTouches in combinationsOfTouches)
+			{
+				var touches = combinationOfTouches.ToList();
+				if (touches.Count != 3)
+				{
+					continue;
+				}
+				Triangle triangle = new Triangle(touches[0].Position, touches[1].Position, touches[2].Position);
+				if (triangle.LargeSide.length <= physicalMarkerDiameter)
+				{
+					constructedTriangles.Add(triangle);
+				}
+				else
+				{
+					//Console.WriteLine(ex);
+				}
+			}
+			return constructedTriangles;
 		}
 
+		private RegistredTangibleMarker FindTangibleMarkerForTriangle(Triangle triangle)
+		{
+			List<(RegistredTangibleMarker, float)> pretenderMarkers = new List<(RegistredTangibleMarker, float)>();
+			foreach (var tangibleMarker in _knownMarkers)
+			{
+				float sidesMeanError = triangle.SimiliarityWith(tangibleMarker.triangle);
+				if (sidesMeanError < tolerance)
+				{
+					pretenderMarkers.Add((tangibleMarker, sidesMeanError));
+				}
+			}
+			if (pretenderMarkers.Count > 0)
+			{
+				return ChooseMostSimilarMarker(pretenderMarkers);
+			}
+			return null;
+		}
+		
 		private List<Triangle> ConstructTriangles(List<Segment> segments)
 		{
 			var constructedTriangles = new List<Triangle>();
@@ -86,7 +115,21 @@ namespace RecognitionService.Recognition
 
 			return constructedTriangles;
 		}
+		
+		private List<Triangle> DistinguishTriangles(List<TouchPoint> frame)
+		{
+			var segments = ConnectAllPointsToEachOthers(frame);
+			var allKnownSegments = _knownMarkers.SelectMany(marker => marker.Sides).ToList();
+			var markerSegments = segments
+				.Where(segment => segment.length <= physicalMarkerDiameter)
+				//.Where(segment => segment.EqualSegmentExistInList(allKnownSegments, tolerance))
+				.ToList();
 
+			var distinguishedTriangles = ConstructTriangles(markerSegments);
+
+			return distinguishedTriangles;
+		}
+		
 		private List<Segment> ConnectAllPointsToEachOthers(List<TouchPoint> frame)
 		{
 			var enumeratedPoints = frame.Select((tp, i) => (i, tp.Position)).ToList();
@@ -104,17 +147,12 @@ namespace RecognitionService.Recognition
 			return allPossibleSegments;
 		}
 
-		private RegistredTangibleMarker? FindTangibleMarkerForTriangle(Triangle triangle)
-		{
-			foreach (var tangibleMarker in _knownMarkers)
-			{
-				if (triangle.Equals(tangibleMarker.triangle, tolerance))
-				{
-					return tangibleMarker;
-				}
-			}
 
-			return null;
+		// in case when several markers correspond to the same triangle
+		private RegistredTangibleMarker ChooseMostSimilarMarker(List<(RegistredTangibleMarker, float)> pretenderMarkers)
+		{
+			pretenderMarkers.Sort((pair1, pair2) => pair1.Item2 >= pair2.Item2 ? 1 : -1);
+			return pretenderMarkers[0].Item1;
 		}
 	}
 }
