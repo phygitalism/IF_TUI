@@ -30,9 +30,7 @@ namespace RecognitionService.Input.Tuio
 			try
 			{
 				var registredTangibles = _tangibleMarkerController.Config.registredTangibles;
-				
-				var passiveMarkers = registredTangibles.Where(reg => !previouslyRecognizedTangibles.ContainsKey(reg.Id)).ToList();
-				var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(frame.touches, passiveMarkers);
+				var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(frame.touches, registredTangibles);
 				var currentRecognizedTangibles = DetermineMarkerState(recognizedTangibles);
 				previouslyRecognizedTangibles = currentRecognizedTangibles;
 
@@ -60,7 +58,6 @@ namespace RecognitionService.Input.Tuio
 			{
 				Console.WriteLine(ex);
 			}
-
 		}
 
 		private List<RecognizedTangibleMarker> RecognizedMarkersToActive(List<RegistredTangibleMarker> registredTangibles,
