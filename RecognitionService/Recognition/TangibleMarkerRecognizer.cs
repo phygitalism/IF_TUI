@@ -37,7 +37,6 @@ namespace RecognitionService.Recognition
 				var knownTangibleMarker = FindTangibleMarkerForTriangle(triangle);
 				if (knownTangibleMarker!=null)
 				{
-					//knownMarkers[knownTangibleMarker.Value.Id].State = RegistredTangibleMarker.MarkerState.Active;
 					var recognizedMarker = new RecognizedTangibleMarker(
 						knownTangibleMarker.Id,
 						triangle,
