@@ -9,9 +9,14 @@ namespace RecognitionService.Models
 {
     public struct Triangle : IEquatable<Triangle>
     {
-        public TouchPoint posA;
-        public TouchPoint posB;
-        public TouchPoint posC;
+        public Vector2 posA;
+        public Vector2 posB;
+        public Vector2 posC;
+        
+        [JsonIgnore]
+        public TouchPoint touchA  { get; set; }
+        public TouchPoint touchB { get; set; }
+        public TouchPoint touchC { get; set; }
 
         public List<Segment> sides;
         public Dictionary<int, TouchPoint> vertex;
@@ -44,23 +49,27 @@ namespace RecognitionService.Models
             }
         }
 
-        public Triangle(TouchPoint posA, TouchPoint posB, TouchPoint posC)
+        public Triangle(TouchPoint touchA, TouchPoint touchB, TouchPoint touchC)
         {
-            this.posA = posA;
-            this.posB = posB;
-            this.posC = posC;
+            this.touchA = touchA;
+            this.touchB = touchB;
+            this.touchC = touchC;
+
+            this.posA = touchA.Position;
+            this.posB = touchB.Position;
+            this.posC = touchC.Position;
 
             this.sides = new List<Segment>()
             {
-                new Segment(posA, posB),
-                new Segment(posB, posC),
-                new Segment(posC, posA)
+                new Segment(touchA, touchB),
+                new Segment(touchB, touchC),
+                new Segment(touchC, touchA)
             };
             this.vertex = new Dictionary<int, TouchPoint>()
             {
-                {posA.id, posA},
-                {posB.id, posB},
-                {posC.id, posC}
+                {touchA.id, touchA},
+                {touchB.id, touchB},
+                {touchC.id, touchC}
             };
             this.sides.Sort((v1, v2) => v1.length >= v2.length ? 1 : -1);
         }

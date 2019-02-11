@@ -76,17 +76,17 @@ namespace RecognitionService.Models
 		private Vector2 FindCenter()
 		{
 
-			if (triangle.posB.Position.X - triangle.posA.Position.X < 1e-3)
+			if (triangle.touchB.Position.X - triangle.touchA.Position.X < 1e-3)
 			{
-				return find_center(triangle.posB.Position, triangle.posC.Position, triangle.posA.Position);
+				return find_center(triangle.touchB.Position, triangle.touchC.Position, triangle.touchA.Position);
 			}
 
-			if (triangle.posC.Position.X - triangle.posB.Position.X < 1e-3)
+			if (triangle.touchC.Position.X - triangle.touchB.Position.X < 1e-3)
 			{
-				return find_center(triangle.posC.Position, triangle.posA.Position, triangle.posB.Position);
+				return find_center(triangle.touchC.Position, triangle.touchA.Position, triangle.touchB.Position);
 			}
 
-			return find_center(triangle.posA.Position, triangle.posB.Position, triangle.posC.Position);
+			return find_center(triangle.touchA.Position, triangle.touchB.Position, triangle.touchC.Position);
 		}
 
 		private Vector2 find_center(Vector2 v1, Vector2 v2, Vector2 v3)

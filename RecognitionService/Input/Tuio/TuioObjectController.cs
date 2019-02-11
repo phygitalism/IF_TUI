@@ -103,9 +103,9 @@ namespace RecognitionService.Input.Tuio
 		}
 		private void AddMarkerTouches(RecognizedTangibleMarker recognizedMarker)
 		{
-			markerTouchesIdToMarkersId.Add(recognizedMarker.triangle.posA.id, recognizedMarker.Id);
-			markerTouchesIdToMarkersId.Add(recognizedMarker.triangle.posB.id, recognizedMarker.Id);
-			markerTouchesIdToMarkersId.Add(recognizedMarker.triangle.posC.id, recognizedMarker.Id);
+			markerTouchesIdToMarkersId.Add(recognizedMarker.triangle.touchA.id, recognizedMarker.Id);
+			markerTouchesIdToMarkersId.Add(recognizedMarker.triangle.touchB.id, recognizedMarker.Id);
+			markerTouchesIdToMarkersId.Add(recognizedMarker.triangle.touchC.id, recognizedMarker.Id);
 		}
 		private void MarkLostMarkers(List<TouchPoint> lostTouches)
 		{
@@ -122,9 +122,9 @@ namespace RecognitionService.Input.Tuio
 		}
 		private void RemoveLostMarkerTouches(int lostMarkerId)
 		{
-			markerTouchesIdToMarkersId.Remove(recognizedMarkers[lostMarkerId].triangle.posA.id);
-			markerTouchesIdToMarkersId.Remove(recognizedMarkers[lostMarkerId].triangle.posB.id);
-			markerTouchesIdToMarkersId.Remove(recognizedMarkers[lostMarkerId].triangle.posC.id);
+			markerTouchesIdToMarkersId.Remove(recognizedMarkers[lostMarkerId].triangle.touchA.id);
+			markerTouchesIdToMarkersId.Remove(recognizedMarkers[lostMarkerId].triangle.touchB.id);
+			markerTouchesIdToMarkersId.Remove(recognizedMarkers[lostMarkerId].triangle.touchC.id);
 		}
 		
 		//обновляем положение точек маркера
