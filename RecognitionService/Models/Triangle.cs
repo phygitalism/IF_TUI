@@ -91,6 +91,7 @@ namespace RecognitionService.Models
             return meanError;
         }
         
+        /*
         public static bool TryBuildFromSegments(Segment sideA, Segment sideB, Segment sideC, out Triangle? triangle)
         {
             triangle = null;
@@ -121,7 +122,7 @@ namespace RecognitionService.Models
             }
             return set.ToList();
         }
-
+*/
 
         public override int GetHashCode()
         {

@@ -8,7 +8,7 @@ namespace RecognitionService.Recognition
     public interface ITangibleMarkerRecognizer
     {
         List<RecognizedTangibleMarker> RecognizeTangibleMarkers(
-            List<TouchPoint> validTouches,
+            List<TouchPoint> frame,
             List<RegistredTangibleMarker> knownMarkers
         );
     }

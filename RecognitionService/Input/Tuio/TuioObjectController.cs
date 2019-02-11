@@ -33,19 +33,21 @@ namespace RecognitionService.Input.Tuio
 			try
 			{
 				List<RegistredTangibleMarker> registredTangibles = _tangibleMarkerController.Config.registredTangibles;
-				List<TouchPoint> validTouches = frame.ExtractValidTouches(markerTouchesIdToMarkersId);
-				List<TouchPoint> lostTouches = frame.ExtractLostTouches();
-				List<TouchPoint> markerTouches = frame.ExtractMarkerTouches(markerTouchesIdToMarkersId);
+				List<TouchPoint> validTouches = ExtractValidTouches(frame.touches);
+				List<TouchPoint> lostTouches = ExtractLostTouches(frame.touches);
+				List<TouchPoint> markerTouches = ExtractMarkerTouches(frame.touches);
 				//var activeMarkersIDs = registredTangibles.Where(marker => marker.State == RegistredTangibleMarker.MarkerState.Active).Select(marker => marker.Id).ToList();
 				List<RegistredTangibleMarker> passiveMarkers = registredTangibles.Where(marker => marker.State == RegistredTangibleMarker.MarkerState.Passive).ToList();
 				List<RecognizedTangibleMarker> newRecognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(validTouches, passiveMarkers);
 				
 				
 				AddRecognizedMarkersTouches(newRecognizedTangibles);
-				RecognizedMarkersToActive(newRecognizedTangibles);
+				RecognizedMarkersToActive(registredTangibles, newRecognizedTangibles);
 				RemoveLostMarkers(lostTouches);
 				//var activeMarkersIDs = updatedRegistredTangibles.Values.Where(marker => marker.State == RegistredTangibleMarker.MarkerState.Active).Select(marker => marker.Id).ToList();
-				ConcatenateRecognizedTangibles(newRecognizedTangibles);
+				activeMarkers = activeMarkers.Concat(newRecognizedTangibles
+					.ToDictionary(x => x.Id, x => x))
+					.ToDictionary(x => x.Key, x => x.Value);
 
 				PrintMarkerStates(activeMarkers.Values.ToList());
 				// TODO - split touches from objects
@@ -64,10 +66,32 @@ namespace RecognitionService.Input.Tuio
 				Console.WriteLine(ex);
 			}
 		}
+		
+		public List<TouchPoint> ExtractValidTouches(List<TouchPoint> touches)
+		{
+			//точки которые не входят в зареганные 
+			var validTouches = touches.Where(t => !markerTouchesIdToMarkersId.Keys.Contains(t.id)).ToList(); 
+			return validTouches;
+		}
+        
+		public List<TouchPoint> ExtractMarkerTouches(List<TouchPoint> touches)
+		{
+			//точки которые входят в зареганные 
+			var markerTouches = touches.Where(t => markerTouchesIdToMarkersId.Keys.Contains(t.id)).ToList(); 
+			return markerTouches;
+		}
 
-		private List<RecognizedTangibleMarker> RecognizedMarkersToActive(List<RegistredTangibleMarker> registredTangibles,
+		public List<TouchPoint> ExtractLostTouches(List<TouchPoint> touches)
+		{
+			//точки которые пропадут
+			var lostTouches = touches.Where(t => t.type == TouchPoint.ActionType.Up).ToList();
+			return lostTouches;
+		}
+
+		private void RecognizedMarkersToActive(List<RegistredTangibleMarker> registredTangibles,
 			List<RecognizedTangibleMarker> newRecognizedTangibles)
 		{
+			Dictionary<int, RegistredTangibleMarker> registredTangiblesDictionary = registredTangibles.ToDictionary(o => o.Id);
 			foreach (var marker in newRecognizedTangibles)
 			{
 				registredTangiblesDictionary[marker.Id].State = RegistredTangibleMarker.MarkerState.Active;
@@ -76,8 +100,9 @@ namespace RecognitionService.Input.Tuio
 			var activeIds = registredTangiblesDictionary.Values.Where(marker =>
 				marker.State == RegistredTangibleMarker.MarkerState.Active).Select(marker => marker.Id);
 
-			var activeMarkers = previouslyRecognizedTangibles.Values.Where(marker => activeIds.Contains(marker.Id)).ToList();
-			return activeMarkers;
+			activeMarkers = activeMarkers
+				.Where(marker => activeIds.Contains(marker.Key))
+				.ToDictionary(i => i.Key, i => i.Value);
 		}
 		
 		//обновляем положение точек маркера
@@ -129,7 +154,6 @@ namespace RecognitionService.Input.Tuio
 					RemoveLostMarkerTouches(lostMarkerId);
 					//activeMarkers.Remove(lostMarkerId);
 					activeMarkers[lostMarkerId].Type = RecognizedTangibleMarker.ActionType.Removed;
-					_tangibleMarkerController.Config.ChangeToPassive(lostMarkerId);
 				}
 			}
 		}

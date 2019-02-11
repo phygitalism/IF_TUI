@@ -22,27 +22,6 @@ namespace RecognitionService.Models
             this.timestamp = timestamp;
             this.touches = touches;
         }
-
-        public List<TouchPoint> ExtractValidTouches(Dictionary<int, int> markerTouchesIdToMarkersId)
-        {
-            //точки которые не входят в зареганные 
-            var validTouches = touches.Where(t => !markerTouchesIdToMarkersId.Keys.Contains(t.id)).ToList(); 
-            return validTouches;
-        }
-        
-        public List<TouchPoint> ExtractMarkerTouches(Dictionary<int, int> markerTouchesIdToMarkersId)
-        {
-            //точки которые входят в зареганные 
-            var markerTouches = touches.Where(t => markerTouchesIdToMarkersId.Keys.Contains(t.id)).ToList(); 
-            return markerTouches;
-        }
-
-        public List<TouchPoint> ExtractLostTouches()
-        {
-            //точки которые пропадут
-            var lostTouches = touches.Where(t => t.type == TouchPoint.ActionType.Up).ToList();
-            return lostTouches;
-        }
     }
 
 }

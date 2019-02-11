@@ -19,17 +19,17 @@ namespace RecognitionService.Recognition
 		public TangibleMarkerRecognizer() { }
 
 		public List<RecognizedTangibleMarker> RecognizeTangibleMarkers(
-			List<TouchPoint> validTouches, 
+			List<TouchPoint> frame, 
 			List<RegistredTangibleMarker> knownMarkers
 		)
 		{
-            if (validTouches.Count < 3)
+            if (frame.Count < 3)
             {
                 return new List<RecognizedTangibleMarker>();
             }
 
 			_knownMarkers = knownMarkers;
-			var allPossibleTriangles = CreateTrianglesFromTouches(validTouches);
+			var allPossibleTriangles = CreateTrianglesFromTouches(frame);
 			var recognizedMarkers = new List<RecognizedTangibleMarker>();
 
 			foreach (var triangle in allPossibleTriangles)
@@ -50,11 +50,11 @@ namespace RecognitionService.Recognition
 			return recognizedMarkers;
 		}
 
-		private List<Triangle> CreateTrianglesFromTouches(List<TouchPoint> validTouches)
+		private List<Triangle> CreateTrianglesFromTouches(List<TouchPoint> frame)
 		{
 			var constructedTriangles = new List<Triangle>();
 
-			var combinationsOfTouches = validTouches.GetCombinationsWithoutRepetition(3);
+			var combinationsOfTouches = frame.GetCombinationsWithoutRepetition(3);
 			foreach (var combinationOfTouches in combinationsOfTouches)
 			{
 				var touches = combinationOfTouches.ToList();
@@ -92,7 +92,7 @@ namespace RecognitionService.Recognition
 			}
 			return null;
 		}
-		
+		/*
 		private List<Triangle> ConstructTriangles(List<Segment> segments)
 		{
 			var constructedTriangles = new List<Triangle>();
@@ -149,7 +149,7 @@ namespace RecognitionService.Recognition
 
 			return allPossibleSegments;
 		}
-
+		*/
 
 		// in case when several markers correspond to the same triangle
 		private RegistredTangibleMarker ChooseMostSimilarMarker(List<(RegistredTangibleMarker, float)> pretenderMarkers)
