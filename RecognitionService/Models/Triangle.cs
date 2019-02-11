@@ -14,6 +14,7 @@ namespace RecognitionService.Models
         public TouchPoint posC;
 
         public List<Segment> sides;
+        public Dictionary<int, TouchPoint> vertex;
 
 		[JsonIgnore]
         public Segment ShortSide
@@ -54,6 +55,12 @@ namespace RecognitionService.Models
                 new Segment(posA, posB),
                 new Segment(posB, posC),
                 new Segment(posC, posA)
+            };
+            this.vertex = new Dictionary<int, TouchPoint>()
+            {
+                {posA.id, posA},
+                {posB.id, posB},
+                {posC.id, posC}
             };
             this.sides.Sort((v1, v2) => v1.length >= v2.length ? 1 : -1);
         }

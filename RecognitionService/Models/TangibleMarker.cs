@@ -42,9 +42,7 @@ namespace RecognitionService.Models
 		public ActionType Type;
 		public Triangle triangle;
 		public float initialAngle;
-		//public int ShortVertexId;
-		//public int MiddleVertexId;
-		//public int LargeVertexId;
+		
 		public float rotationAngle
 		{
 			get { return ClockwiseDifferenceBetweenAngles(initialAngle, triangle.LargeSide.CalculateAngleBetweenY()); }
@@ -72,18 +70,7 @@ namespace RecognitionService.Models
 
 		public void UpdatePosition(TouchPoint newTouch)
 		{
-			if (newTouch.id == triangle.posA.id)
-			{
-				triangle.posA = newTouch;
-			}
-			else if (newTouch.id == triangle.posB.id)
-			{
-				triangle.posB = newTouch;
-			}
-			else
-			{
-				triangle.posC = newTouch;
-			}
+			triangle.vertex[newTouch.id] = newTouch;
 		}
 
 		private Vector2 FindCenter()
