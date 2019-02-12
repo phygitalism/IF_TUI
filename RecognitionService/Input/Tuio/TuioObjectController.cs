@@ -12,12 +12,9 @@ namespace RecognitionService.Input.Tuio
 	{
 		private IInputProvider _inputProvider;
 		private TangibleMarkerController _tangibleMarkerController;
+		
+		private MarkerActivityController _activityController = new MarkerActivityController();
 		private ITangibleMarkerRecognizer _tangibleMarkerRecognizer = new TangibleMarkerRecognizer();
-
-		// markerID - recognized marker
-		private Dictionary<int, RecognizedTangibleMarker> recognizedMarkers = new Dictionary<int, RecognizedTangibleMarker>();
-		//private Dictionary<int, HashSet<int>> markerIdtoMarkerTouchesIds = new Dictionary<int, HashSet<int>>();
-		private Dictionary<int, int> markerTouchesIdToMarkersId = new Dictionary<int, int>();
 
 		public event Action<List<TouchPoint>, List<RecognizedTangibleMarker>> OnTuioInput;
 
@@ -32,28 +29,19 @@ namespace RecognitionService.Input.Tuio
 		{
 			try
 			{
-				//recognizedMarkers - и есть активные маркеры (только Added and Updated)
 				var registredTangibles = _tangibleMarkerController.Config.registredTangibles;
-				var lostTouches = ExtractLostTouches(frame.touches);
-				var markerTouches = ExtractMarkerTouches(frame.touches);
-				var validTouches = ExtractValidTouches(frame.touches);
+				_activityController.ProcessTouchPointFrame(frame, registredTangibles);
+				
+				var validTouches = _activityController.ValidTouches;
 				//мигать не будет тк если маркер пропал его уже удалили из recognizedMarkers
-				var passiveMarkers = registredTangibles.Where(reg => !recognizedMarkers.ContainsKey(reg.Id)).ToList();
+				var passiveMarkers = _activityController.PassiveMarkers;
 				//новые распознанные автоматически имеют тип Added
 				var newRecognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(validTouches, passiveMarkers);
 				
-				//обновляем положение распознанных маркеров, для Added обновляется только центр
-				UpdateActiveMarkers(markerTouches);
-				AddRecognizedMarkersTouches(newRecognizedTangibles);
-				//помечаем удаленные маркеры как Removed и удаляем их тачи из словаря
-				MarkLostMarkers(lostTouches);
-				//соединяем все равспознанные тачи с новыми
-				recognizedMarkers = recognizedMarkers.Concat(newRecognizedTangibles
-					.ToDictionary(x => x.Id, x => x))
-					.ToDictionary(x => x.Key, x => x.Value);
-
-				PrintMarkerStates(recognizedMarkers.Values.ToList());
-				// TODO - split touches from objects
+				_activityController.AddRecognizedMarkers(newRecognizedTangibles);
+				
+				var recognizedMarkers = _activityController.ActiveMarkers;
+				PrintMarkerStates(recognizedMarkers);
 
 				var touchesWithRelativeCoords = frame.touches
 					.Select(touch => touch.ToRelativeCoordinates(
@@ -62,9 +50,10 @@ namespace RecognitionService.Input.Tuio
 					)).ToList();
 				
 				
-				OnTuioInput?.Invoke(touchesWithRelativeCoords, recognizedMarkers.Values.ToList());
+				OnTuioInput?.Invoke(touchesWithRelativeCoords, _activityController.ActiveMarkers);
+
 				//теперь можно удалить дохлые маркеры
-				RemoveLostMarkers();
+				_activityController.RemoveLostMarkers();
 				//в конце в recognizedMarkers останутся только активные (Added and Updated)
 			}
 			catch (System.Exception ex)
@@ -72,92 +61,7 @@ namespace RecognitionService.Input.Tuio
 				Console.WriteLine(ex);
 			}
 		}
-		
-		public List<TouchPoint> ExtractValidTouches(List<TouchPoint> touches)
-		{
-			//точки которые не входят в зареганные 
-			var validTouches = touches.Where(t => !markerTouchesIdToMarkersId.Keys.Contains(t.id)).ToList(); 
-			return validTouches;
-		}
-        
-		public List<TouchPoint> ExtractMarkerTouches(List<TouchPoint> touches)
-		{
-			//точки которые входят в зареганные
-			var markerTouches = touches.Where(t => markerTouchesIdToMarkersId.Keys.Contains(t.id)).ToList(); 
-			return markerTouches;
-		}
 
-		public List<TouchPoint> ExtractLostTouches(List<TouchPoint> touches)
-		{
-			//точки которые пропадут
-			var lostTouches = touches.Where(t => t.type == TouchPoint.ActionType.Up).ToList();
-			return lostTouches;
-		}
-		
-		private void AddRecognizedMarkersTouches(List<RecognizedTangibleMarker> newRecognizedTangibles)
-		{
-			foreach (var marker in newRecognizedTangibles)
-			{
-				AddMarkerTouches(marker);
-			}
-		}
-		private void AddMarkerTouches(RecognizedTangibleMarker recognizedMarker)
-		{
-			markerTouchesIdToMarkersId.Add(recognizedMarker.triangle.touchA.id, recognizedMarker.Id);
-			markerTouchesIdToMarkersId.Add(recognizedMarker.triangle.touchB.id, recognizedMarker.Id);
-			markerTouchesIdToMarkersId.Add(recognizedMarker.triangle.touchC.id, recognizedMarker.Id);
-		}
-		private void MarkLostMarkers(List<TouchPoint> lostTouches)
-		{
-			var lostTouchesDictionary = lostTouches.ToDictionary(o => o.id);
-			foreach (var lostTouchId in lostTouchesDictionary.Keys)
-			{
-				if (markerTouchesIdToMarkersId.ContainsKey(lostTouchId))
-				{
-					var lostMarkerId = markerTouchesIdToMarkersId[lostTouchId];
-					RemoveLostMarkerTouches(lostMarkerId);
-					recognizedMarkers[lostMarkerId].Type = RecognizedTangibleMarker.ActionType.Removed;
-				}
-			}
-		}
-		private void RemoveLostMarkerTouches(int lostMarkerId)
-		{
-			markerTouchesIdToMarkersId.Remove(recognizedMarkers[lostMarkerId].triangle.touchA.id);
-			markerTouchesIdToMarkersId.Remove(recognizedMarkers[lostMarkerId].triangle.touchB.id);
-			markerTouchesIdToMarkersId.Remove(recognizedMarkers[lostMarkerId].triangle.touchC.id);
-		}
-		
-		//обновляем положение точек маркера
-		private void UpdateActiveMarkers(List<TouchPoint> markerTouches)
-		{
-			Dictionary<int, TouchPoint> markerTouchesDictionary = markerTouches.ToDictionary(o => o.id);
-			foreach (var touchId in markerTouchesIdToMarkersId.Keys)
-			{
-				int currentMarkerId = markerTouchesIdToMarkersId[touchId];
-				TouchPoint currentTouch = markerTouchesDictionary[touchId];
-				recognizedMarkers[currentMarkerId].UpdatePosition(currentTouch);
-				recognizedMarkers[currentMarkerId].Type = RecognizedTangibleMarker.ActionType.Updated;
-			}
-			//а центр обновляется вапще у всех
-			recognizedMarkers.Values.ToList().ForEach(t => 
-			{
-				t.relativeCenter = new System.Numerics.Vector2(
-                    t.Center.X / _inputProvider.ScreenWidth,
-                    t.Center.Y / _inputProvider.ScreenHeight
-                );
-			});
-		}
-
-		private void RemoveLostMarkers()
-		{
-			var removedMarkersIds = recognizedMarkers.Values.Where(marker => 
-					marker.Type == RecognizedTangibleMarker.ActionType.Removed)
-					.Select(marker => marker.Id);
-			foreach (var removedId in removedMarkersIds)
-			{
-				recognizedMarkers.Remove(removedId);
-			}
-		}
 
         private void PrintMarkerStates(List<RecognizedTangibleMarker> recognizedTangibles)
         {

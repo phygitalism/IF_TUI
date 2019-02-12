@@ -60,7 +60,7 @@ namespace RecognitionService.Models
 			get { return triangle.sides; }
 		}
 
-		public RecognizedTangibleMarker(int id, Triangle triangle, float initialAngle)
+		public RecognizedTangibleMarker(int id, Triangle triangle, float initialAngle) //TODO rework to touchPoints
 		{
 			this.Id = id;
 			this.Type = ActionType.Added;
