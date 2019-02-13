@@ -32,15 +32,16 @@ namespace RecognitionService.Recognition
 			var allPossibleTriangles = CreateTrianglesFromTouches(frame);
 			var recognizedMarkers = new List<RecognizedTangibleMarker>();
 
-			foreach (var triangle in allPossibleTriangles)
+			foreach (var pair in allPossibleTriangles)
 			{
-				var knownTangibleMarker = FindTangibleMarkerForTriangle(triangle);
+				var knownTangibleMarker = FindTangibleMarkerForTriangle(pair.Item1);
 				if (knownTangibleMarker!=null)
 				{
 					var recognizedMarker = new RecognizedTangibleMarker(
 						knownTangibleMarker.Id,
-						triangle,
-						knownTangibleMarker.initialAngle
+						pair.Item1,
+						knownTangibleMarker.initialAngle,
+						pair.Item2
 					);
 
 					recognizedMarkers.Add(recognizedMarker);
@@ -49,9 +50,9 @@ namespace RecognitionService.Recognition
 			return recognizedMarkers;
 		}
 
-		private List<Triangle> CreateTrianglesFromTouches(List<TouchPoint> frame)
+		private List<(Triangle, List<int>)> CreateTrianglesFromTouches(List<TouchPoint> frame)
 		{
-			var constructedTriangles = new List<Triangle>();
+			var constructedTriangles = new List<(Triangle, List<int>)>();
 
 			var combinationsOfTouches = frame.GetCombinationsWithoutRepetition(3);
 			foreach (var combinationOfTouches in combinationsOfTouches)
@@ -61,10 +62,13 @@ namespace RecognitionService.Recognition
 				{
 					continue;
 				}
-				Triangle triangle = new Triangle(touches[0], touches[1], touches[2]);
+				Triangle triangle = new Triangle(touches[0].Position, touches[1].Position, touches[2].Position);
+				List<int> vertecies = new List<int>(){touches[0].id, touches[1].id, touches[2].id};
+			
 				if (triangle.LargeSide.length <= physicalMarkerDiameter)
 				{
-					constructedTriangles.Add(triangle);
+					(Triangle, List<int>) pair = (triangle, vertecies);
+					constructedTriangles.Add(pair);
 				}
 				else
 				{

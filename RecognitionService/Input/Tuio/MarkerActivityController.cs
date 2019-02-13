@@ -11,7 +11,7 @@ namespace RecognitionService.Input.Tuio
     {
         // recognizedMarkers - и есть активные маркеры (только Added and Updated)
         private Dictionary<int, RecognizedTangibleMarker> _recognizedMarkers = new Dictionary<int, RecognizedTangibleMarker>();
-        private Dictionary<int, HashSet<TouchPoint>> markerTouches = new Dictionary<int, HashSet<TouchPoint>>();
+        private Dictionary<int, HashSet<int>> markerTouches = new Dictionary<int, HashSet<int>>();
         private HashSet<TouchPoint> touches = new HashSet<TouchPoint>();
         private List<RegistredTangibleMarker> _registredMarkers = new List<RegistredTangibleMarker>();
         
@@ -26,14 +26,21 @@ namespace RecognitionService.Input.Tuio
 
         public List<TouchPoint> MarkerTouches
         {
-            get
+           /* get
             {
                 //точки которые входят в зареганные
                 return markerTouches.Values
                     .Select(touchePoints => touchePoints.ToList())
                     .SelectMany(touchPoint => touchPoint).ToList();
+            }*/
+           //нужны тачи с рамки они новые
+            get
+            {
+                //точки которые входят в зареганные
+                var markerTouchesIds = markerTouches.Values.Select(set => set.ToList())
+                    .SelectMany(id => id).ToList();
+                return touches.Where(t => markerTouchesIds.Contains(t.id)).ToList(); 
             }
-
         }
 
         public List<TouchPoint> ValidTouches
@@ -61,9 +68,9 @@ namespace RecognitionService.Input.Tuio
                 Dictionary<int, int> reverseMarkerTouches = new Dictionary<int, int>();
                 foreach (var markerId in markerTouches.Keys)
                 {
-                    foreach (var touchPoint in markerTouches[markerId])
+                    foreach (var touchPointId in markerTouches[markerId])
                     {
-                        reverseMarkerTouches[touchPoint.id] = markerId;
+                        reverseMarkerTouches[touchPointId] = markerId;
                     }
                 }
                 return reverseMarkerTouches;
@@ -134,27 +141,32 @@ namespace RecognitionService.Input.Tuio
                 .ToDictionary(x => x.Key, x => x.Value);
         }
 
+        private void AddMarkerTouches(RecognizedTangibleMarker newMarker)
+        {
+            markerTouches[newMarker.Id] = new HashSet<int>()
+            {
+                newMarker.verteciesIds[0],
+                newMarker.verteciesIds[1],
+                newMarker.verteciesIds[2]
+            };
+        }
+
         //обновляем положение точек маркера
         private void UpdateRecognizedMarkers()
         {
             // Added -> Updated
             // Update triangle position
+            
+            //потом подумаю как переписать нормально - проблема что обновленные тачи хранятся по отдельности не можем сразу сетом их брать
             Dictionary<int, TouchPoint> markerTouchesDictionary = MarkerTouches.ToDictionary(o => o.id);
-            foreach (var touchId in markerTouchesIdToMarkersId.Keys)
+            var reverseMarkerTouches = ReverseMarkerTouches;
+            foreach (var touchId in reverseMarkerTouches.Keys)
             {
-                int currentMarkerId = markerTouchesIdToMarkersId[touchId];
+                int currentMarkerId = reverseMarkerTouches[touchId];
                 TouchPoint currentTouch = markerTouchesDictionary[touchId];
-                recognizedMarkers[currentMarkerId].UpdatePosition(currentTouch);
-                recognizedMarkers[currentMarkerId].Type = RecognizedTangibleMarker.ActionType.Updated;
+                _recognizedMarkers[currentMarkerId].UpdatePosition(currentTouch);
+                _recognizedMarkers[currentMarkerId].Type = RecognizedTangibleMarker.ActionType.Updated;
             }
-            //а центр обновляется вапще у всех
-            recognizedMarkers.Values.ToList().ForEach(t => 
-            {
-                t.relativeCenter = new System.Numerics.Vector2(
-                    t.Center.X / _inputProvider.ScreenWidth,
-                    t.Center.Y / _inputProvider.ScreenHeight
-                );
-            });
         }
 
         public void RemoveLostMarkers()

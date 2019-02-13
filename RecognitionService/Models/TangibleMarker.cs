@@ -7,15 +7,9 @@ namespace RecognitionService.Models
 {
 	public class RegistredTangibleMarker
 	{
-		public enum MarkerState
-		{
-			Passive, 
-			Active
-		}
 		public int Id;
 		public Triangle triangle;
 		public float initialAngle;
-		public MarkerState State { get; set; } = MarkerState.Passive;
 		[JsonIgnore]
 		public List<Segment> Sides
 		{
@@ -42,7 +36,30 @@ namespace RecognitionService.Models
 		public ActionType Type;
 		public Triangle triangle;
 		public float initialAngle;
+		public List<int> verteciesIds;
 		
+		/*public void UpdatePosition(List<TouchPoint> newTouches)
+		{
+			triangle.posA = newTouches[0];
+			triangle.posB = newTouches[1];
+			triangle.posC = newTouches[2];
+		}*/
+		//я знаю что очень криво но по-другому тоже будет криво пока так чтолы поткстить
+		public void UpdatePosition(TouchPoint newTouch)
+		{
+			if (newTouch.id == verteciesIds[0])
+			{
+				triangle.posA = newTouch.Position;
+			}
+			else if (newTouch.id == verteciesIds[1])
+			{
+				triangle.posA = newTouch.Position;
+			}
+			else if (newTouch.id == verteciesIds[2])
+			{
+				triangle.posA = newTouch.Position;
+			}
+		}
 		public float rotationAngle
 		{
 			get { return ClockwiseDifferenceBetweenAngles(initialAngle, triangle.LargeSide.CalculateAngleBetweenY()); }
@@ -60,33 +77,29 @@ namespace RecognitionService.Models
 			get { return triangle.sides; }
 		}
 
-		public RecognizedTangibleMarker(int id, Triangle triangle, float initialAngle) //TODO rework to touchPoints
+		public RecognizedTangibleMarker(int id, Triangle triangle, float initialAngle, List<int> verteciesIds) //TODO rework to touchPoints
 		{
 			this.Id = id;
 			this.Type = ActionType.Added;
 			this.triangle = triangle;
 			this.initialAngle = initialAngle;
-		}
-
-		public void UpdatePosition(TouchPoint newTouch)
-		{
-			triangle.vertex[newTouch.id] = newTouch;
+			this.verteciesIds = verteciesIds;
 		}
 
 		private Vector2 FindCenter()
 		{
 
-			if (triangle.touchB.Position.X - triangle.touchA.Position.X < 1e-3)
+			if (triangle.posB.X - triangle.posA.X < 1e-3)
 			{
-				return find_center(triangle.touchB.Position, triangle.touchC.Position, triangle.touchA.Position);
+				return find_center(triangle.posB, triangle.posC, triangle.posA);
 			}
 
-			if (triangle.touchC.Position.X - triangle.touchB.Position.X < 1e-3)
+			if (triangle.posC.X - triangle.posB.X < 1e-3)
 			{
-				return find_center(triangle.touchC.Position, triangle.touchA.Position, triangle.touchB.Position);
+				return find_center(triangle.posC, triangle.posA, triangle.posB);
 			}
 
-			return find_center(triangle.touchA.Position, triangle.touchB.Position, triangle.touchC.Position);
+			return find_center(triangle.posA, triangle.posB, triangle.posC);
 		}
 
 		private Vector2 find_center(Vector2 v1, Vector2 v2, Vector2 v3)

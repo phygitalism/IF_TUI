@@ -13,13 +13,7 @@ namespace RecognitionService.Models
         public Vector2 posB;
         public Vector2 posC;
         
-        [JsonIgnore]
-        public TouchPoint touchA  { get; set; }
-        public TouchPoint touchB { get; set; }
-        public TouchPoint touchC { get; set; }
-
         public List<Segment> sides;
-        public Dictionary<int, TouchPoint> vertex;
 
 		[JsonIgnore]
         public Segment ShortSide
@@ -44,33 +38,30 @@ namespace RecognitionService.Models
            result>0 => clockwise; result<0 => counter clockwise */
         public bool ClockwiseRotation
         {
-            get { return (((LargeSide.origin.Position.X - ShortSide.origin.Position.X) * (MiddleSide.origin.Position.Y - ShortSide.origin.Position.Y) - 
-                           (LargeSide.origin.Position.Y - ShortSide.origin.Position.Y) * (MiddleSide.origin.Position.X - ShortSide.origin.Position.X)) > 0);
+            get { return (((LargeSide.origin.X - ShortSide.origin.X) * (MiddleSide.origin.Y - ShortSide.origin.Y) - 
+                           (LargeSide.origin.Y - ShortSide.origin.Y) * (MiddleSide.origin.X - ShortSide.origin.X)) > 0);
             }
         }
 
-        public Triangle(TouchPoint touchA, TouchPoint touchB, TouchPoint touchC)
+        public Triangle(Vector2 posA, Vector2 posB, Vector2 posC)
         {
-            this.touchA = touchA;
-            this.touchB = touchB;
-            this.touchC = touchC;
-
-            this.posA = touchA.Position;
-            this.posB = touchB.Position;
-            this.posC = touchC.Position;
+            this.posA = posA;
+            this.posB = posB;
+            this.posC = posC;
 
             this.sides = new List<Segment>()
             {
-                new Segment(touchA, touchB),
-                new Segment(touchB, touchC),
-                new Segment(touchC, touchA)
+                new Segment(posA, posB),
+                new Segment(posB, posC),
+                new Segment(posC, posA)
             };
-            this.vertex = new Dictionary<int, TouchPoint>()
+           /* this.vertex = new Dictionary<int, TouchPoint>()
             {
-                {touchA.id, touchA},
-                {touchB.id, touchB},
-                {touchC.id, touchC}
-            };
+                {posA.id, posA},
+                {posB.id, posB},
+                {posC.id, posC}
+            };*/
+           
             this.sides.Sort((v1, v2) => v1.length >= v2.length ? 1 : -1);
         }
 

@@ -41,6 +41,16 @@ namespace RecognitionService.Input.Tuio
 				
 				var recognizedMarkers = _activityController.ActiveMarkers;
 				PrintMarkerStates(recognizedMarkers);
+				
+				//а центр обновляется вапще у всех
+				
+				recognizedMarkers.ForEach(t => 
+				{
+					t.relativeCenter = new System.Numerics.Vector2(
+						t.Center.X / _inputProvider.ScreenWidth,
+						t.Center.Y / _inputProvider.ScreenHeight
+					);
+				});
 
 				var touchesWithRelativeCoords = frame.touches
 					.Select(touch => touch.ToRelativeCoordinates(
@@ -49,7 +59,7 @@ namespace RecognitionService.Input.Tuio
 					)).ToList();
 				
 				
-				OnTuioInput?.Invoke(touchesWithRelativeCoords, _activityController.ActiveMarkers);
+				OnTuioInput?.Invoke(touchesWithRelativeCoords, recognizedMarkers);
 
 				//теперь можно удалить дохлые маркеры
 				_activityController.RemoveLostMarkers();
