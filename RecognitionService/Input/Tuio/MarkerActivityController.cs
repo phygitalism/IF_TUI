@@ -13,12 +13,12 @@ namespace RecognitionService.Input.Tuio
         private Dictionary<int, RecognizedTangibleMarker> _recognizedMarkers = new Dictionary<int, RecognizedTangibleMarker>();
         private Dictionary<int, HashSet<TouchPoint>> markerTouches = new Dictionary<int, HashSet<TouchPoint>>();
         private HashSet<TouchPoint> touches = new HashSet<TouchPoint>();
-        private List<RegistredTangibleMarker> _registredTangibles = new List<RegistredTangibleMarker>();
+        private List<RegistredTangibleMarker> _registredMarkers = new List<RegistredTangibleMarker>();
         
         public List<TouchPoint> LostTouches
         {
-            get {
-
+            get
+            {
                 //точки которые пропадут
                 return touches.Where(t => t.type == TouchPoint.ActionType.Up).ToList();
             }
@@ -50,7 +50,41 @@ namespace RecognitionService.Input.Tuio
         {
             get
             {
-                return _registredTangibles.Where(reg => !markerTouches.ContainsKey(reg.Id)).ToList();
+                return _registredMarkers.Where(reg => !markerTouches.ContainsKey(reg.Id)).ToList();
+            }
+        }
+
+        public Dictionary<int, int> ReverseMarkerTouches
+        {
+            get
+            {
+                Dictionary<int, int> reverseMarkerTouches = new Dictionary<int, int>();
+                foreach (var markerId in markerTouches.Keys)
+                {
+                    foreach (var touchPoint in markerTouches[markerId])
+                    {
+                        reverseMarkerTouches[touchPoint.id] = markerId;
+                    }
+                }
+                return reverseMarkerTouches;
+            }
+            
+        }
+
+        public HashSet<int> LostMarkersIds
+        {
+            get
+            {
+                HashSet<int> lostMarkersIds = new HashSet<int>();
+                var reverseMarkerTouches = ReverseMarkerTouches;
+                foreach (var lostTouch in LostTouches)
+                {
+                    if (reverseMarkerTouches.ContainsKey(lostTouch.id))
+                    {
+                        lostMarkersIds.Add(reverseMarkerTouches[lostTouch.id]);
+                    }
+                }
+                return lostMarkersIds;
             }
         }
         
@@ -69,13 +103,26 @@ namespace RecognitionService.Input.Tuio
         public void ProcessTouchPointFrame(TouchPointFrame frame, List<RegistredTangibleMarker> registredMarkers)
         {
             touches = new HashSet<TouchPoint>(frame.touches);
-            _registredTangibles = registredMarkers;
+            _registredMarkers = registredMarkers;
             // update and remove
             //обновляем положение распознанных маркеров, для Added обновляется только центр
             UpdateRecognizedMarkers(markerTouches); // все Addded пометим Updated
             //помечаем удаленные маркеры как Removed и удаляем их тачи из словаря
             MarkLostMarkers(lostTouches);
         }
+
+        private void MarkLostMarkers()
+        {
+            foreach (var markerId in LostMarkersIds)
+            {
+                markerTouches.Remove(markerId);
+                _recognizedMarkers[markerId].Type = RecognizedTangibleMarker.ActionType.Removed;
+            }
+        }
+
+
+       
+        
         
         public void AddRecognizedMarkers(List<RecognizedTangibleMarker> newRecognizedTangibles)
         {
@@ -91,19 +138,7 @@ namespace RecognitionService.Input.Tuio
         }
         
         
-        private void MarkLostMarkers(List<TouchPoint> lostTouches)
-        {
-            var lostTouchesDictionary = lostTouches.ToDictionary(o => o.id);
-            foreach (var lostTouchId in lostTouchesDictionary.Keys)
-            {
-                if (markerTouchesIdToMarkersId.ContainsKey(lostTouchId))
-                {
-                    var lostMarkerId = markerTouchesIdToMarkersId[lostTouchId];
-                    RemoveLostMarkerTouches(lostMarkerId);
-                    recognizedMarkers[lostMarkerId].Type = RecognizedTangibleMarker.ActionType.Removed;
-                }
-            }
-        }
+        
 		
         //обновляем положение точек маркера
         private void UpdateRecognizedMarkers(List<TouchPoint> markerTouches)
