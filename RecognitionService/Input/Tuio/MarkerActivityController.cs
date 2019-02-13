@@ -106,9 +106,9 @@ namespace RecognitionService.Input.Tuio
             _registredMarkers = registredMarkers;
             // update and remove
             //обновляем положение распознанных маркеров, для Added обновляется только центр
-            UpdateRecognizedMarkers(markerTouches); // все Addded пометим Updated
+            UpdateRecognizedMarkers(); // все Addded пометим Updated
             //помечаем удаленные маркеры как Removed и удаляем их тачи из словаря
-            MarkLostMarkers(lostTouches);
+            MarkLostMarkers();
         }
 
         private void MarkLostMarkers()
@@ -121,9 +121,6 @@ namespace RecognitionService.Input.Tuio
         }
 
 
-       
-        
-        
         public void AddRecognizedMarkers(List<RecognizedTangibleMarker> newRecognizedTangibles)
         {
             //
@@ -132,20 +129,17 @@ namespace RecognitionService.Input.Tuio
                 AddMarkerTouches(marker);
             }
             //соединяем все равспознанные тачи с новыми
-            recognizedMarkers = recognizedMarkers.Concat(newRecognizedTangibles
+            _recognizedMarkers = _recognizedMarkers.Concat(newRecognizedTangibles
                     .ToDictionary(x => x.Id, x => x))
                 .ToDictionary(x => x.Key, x => x.Value);
         }
-        
-        
-        
-		
+
         //обновляем положение точек маркера
-        private void UpdateRecognizedMarkers(List<TouchPoint> markerTouches)
+        private void UpdateRecognizedMarkers()
         {
             // Added -> Updated
             // Update triangle position
-            Dictionary<int, TouchPoint> markerTouchesDictionary = markerTouches.ToDictionary(o => o.id);
+            Dictionary<int, TouchPoint> markerTouchesDictionary = MarkerTouches.ToDictionary(o => o.id);
             foreach (var touchId in markerTouchesIdToMarkersId.Keys)
             {
                 int currentMarkerId = markerTouchesIdToMarkersId[touchId];
@@ -165,12 +159,12 @@ namespace RecognitionService.Input.Tuio
 
         public void RemoveLostMarkers()
         {
-            var removedMarkersIds = recognizedMarkers.Values.Where(marker => 
+            var removedMarkersIds = _recognizedMarkers.Values.Where(marker => 
                     marker.Type == RecognizedTangibleMarker.ActionType.Removed)
                 .Select(marker => marker.Id);
             foreach (var removedId in removedMarkersIds)
             {
-                recognizedMarkers.Remove(removedId);
+                _recognizedMarkers.Remove(removedId);
             }
         }
     }

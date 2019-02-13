@@ -37,7 +37,6 @@ namespace RecognitionService.Input.Tuio
 				var passiveMarkers = _activityController.PassiveMarkers;
 				//новые распознанные автоматически имеют тип Added
 				var newRecognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(validTouches, passiveMarkers);
-				
 				_activityController.AddRecognizedMarkers(newRecognizedTangibles);
 				
 				var recognizedMarkers = _activityController.ActiveMarkers;
@@ -62,7 +61,6 @@ namespace RecognitionService.Input.Tuio
 			}
 		}
 
-
         private void PrintMarkerStates(List<RecognizedTangibleMarker> recognizedTangibles)
         {
             var addedMarkerIds = recognizedTangibles.Where(marker => marker.Type == RecognizedTangibleMarker.ActionType.Added).Select(marker => marker.Id).ToList();
@@ -82,51 +80,7 @@ namespace RecognitionService.Input.Tuio
                 Console.WriteLine($"Removed markers ids: {string.Join(" ", deletedMarkerIds)}");
             }
         }
-         
-		/*
-		private Dictionary<int, RecognizedTangibleMarker> DetermineMarkerState(List<RecognizedTangibleMarker> recognizedTangibles)
-		{
-			var currentRecognizedTangibles = new Dictionary<int, RecognizedTangibleMarker>();
-			foreach (var tangible in recognizedTangibles)
-			{
-				if (previouslyRecognizedTangibles.ContainsKey(tangible.Id) && previouslyRecognizedTangibles[tangible.Id].Type != RecognizedTangibleMarker.ActionType.Removed)
-				{
-                    // Updated
-                    tangible.Type = RecognizedTangibleMarker.ActionType.Updated;
-                    currentRecognizedTangibles[tangible.Id] = tangible;
-                }
-				else
-				{
-					// Added
-                    tangible.Type = RecognizedTangibleMarker.ActionType.Added;
-                    currentRecognizedTangibles[tangible.Id] = tangible;
-                }
-			}
-
-            try
-            {
-                var lookup = recognizedTangibles.ToDictionary(o => o.Id);
-			    foreach (var tangible in previouslyRecognizedTangibles.Values)
-			    {
-				    if (!lookup.ContainsKey(tangible.Id) && previouslyRecognizedTangibles[tangible.Id].Type != RecognizedTangibleMarker.ActionType.Removed)
-				    {
-                        // Removed
-                        tangible.Type = RecognizedTangibleMarker.ActionType.Removed;
-                        
-                        _tangibleMarkerController.Config.ChangeToPassive(tangible.Id);
-                        
-                        currentRecognizedTangibles[tangible.Id] = tangible;
-				    }
-			    }
-            }
-            catch (System.ArgumentException ex)
-            {
-                Console.WriteLine(ex);
-                // TODO - the same marker was recognized from different triangle
-            }
-            return currentRecognizedTangibles;
-		}*/
-
+   
 		public void Dispose()
 		{
 			_inputProvider.OnTouchesRecieved -= ProcessFrame;
