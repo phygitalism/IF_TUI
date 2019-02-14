@@ -98,11 +98,10 @@ namespace RecognitionService.Input.Tuio
         public List<RecognizedTangibleMarker> ActiveMarkers
         {
             get
-            {    // TODO
-//                return _registredTangibles.Where(reg => !markerTouches.ContainsKey(reg.Id)).ToList();
-                return new List<RecognizedTangibleMarker>();
-            }
-            
+            {    
+               //return _registredTangibles.Where(reg => !markerTouches.ContainsKey(reg.Id)).ToList();
+               return _recognizedMarkers.Values.ToList();
+            }   
         }
         
         public MarkerActivityController(){ }
