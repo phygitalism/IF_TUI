@@ -50,9 +50,9 @@ namespace RecognitionService.Recognition
 			return recognizedMarkers;
 		}
 
-		private List<(Triangle, List<int>)> CreateTrianglesFromTouches(List<TouchPoint> frame)
+		private List<(Triangle, List<TouchPoint>)> CreateTrianglesFromTouches(List<TouchPoint> frame)
 		{
-			var constructedTriangles = new List<(Triangle, List<int>)>();
+			var constructedTriangles = new List<(Triangle, List<TouchPoint>)>();
 
 			var combinationsOfTouches = frame.GetCombinationsWithoutRepetition(3);
 			foreach (var combinationOfTouches in combinationsOfTouches)
@@ -63,23 +63,23 @@ namespace RecognitionService.Recognition
 					continue;
 				}
 				// айди могут перемешаться суперкостыльныйкостыль я пока не придумала как нормально сделать
-				var sidesFromTouches = new List<(int, Segment)>()
+				var sidesFromTouches = new List<(TouchPoint, Segment)>()
 				{
-					(touches[0].id, new Segment(touches[0].Position, touches[1].Position)),
-					(touches[1].id, new Segment(touches[1].Position, touches[2].Position)),
-					(touches[2].id, new Segment(touches[2].Position, touches[0].Position))
+					(touches[0], new Segment(touches[0].Position, touches[1].Position)),
+					(touches[1], new Segment(touches[1].Position, touches[2].Position)),
+					(touches[2], new Segment(touches[2].Position, touches[0].Position))
 				};
 				// айди могут перемешаться суперкостыльныйкостыль
 				sidesFromTouches.Sort((v1, v2) => v1.Item2.length >= v2.Item2.length ? 1 : -1);
 				Triangle triangle = new Triangle(touches[0].Position, touches[1].Position, touches[2].Position);
 				
-				List<int> verteciesIds = new List<int>(){sidesFromTouches[0].Item1,
+				List<TouchPoint> vertecies = new List<TouchPoint>(){sidesFromTouches[0].Item1,
 					sidesFromTouches[1].Item1,
 					sidesFromTouches[2].Item1};
 			
 				if (triangle.LargeSide.length <= physicalMarkerDiameter)
 				{
-					(Triangle, List<int>) pair = (triangle, verteciesIds);
+					(Triangle, List<TouchPoint>) pair = (triangle, vertecies);
 					constructedTriangles.Add(pair);
 				}
 				else

@@ -36,33 +36,31 @@ namespace RecognitionService.Models
 		public ActionType Type;
 		public Triangle triangle;
 		public float initialAngle;
-		public List<int> verteciesIds;
+		public List<TouchPoint> vertecies;
 		
-		/*public void UpdatePosition(List<TouchPoint> newTouches)
-		{
-			triangle.posA = newTouches[0];
-			triangle.posB = newTouches[1];
-			triangle.posC = newTouches[2];
-		}*/
 		//я знаю что очень криво но по-другому тоже будет криво пока так чтолы поткстить
-		public void UpdatePosition(TouchPoint newTouch)
+		public void UpdatePosition(Dictionary<int, TouchPoint> newTouches)
 		{
-			if (newTouch.id == verteciesIds[0])
+			foreach (var touchId in newTouches.Keys)
 			{
-				triangle.posA = newTouch.Position;
+				if (touchId == vertecies[0].id)
+				{
+					triangle.posA = newTouches[touchId].Position;
+				}
+				else if (touchId == vertecies[1].id)
+				{
+					triangle.posB = newTouches[touchId].Position;
+				}
+				else if (touchId == vertecies[2].id)
+				{
+					triangle.posC = newTouches[touchId].Position;
+				}
 			}
-			else if (newTouch.id == verteciesIds[1])
-			{
-				triangle.posA = newTouch.Position;
-			}
-			else if (newTouch.id == verteciesIds[2])
-			{
-				triangle.posA = newTouch.Position;
-			}
+			UpdateSides();
 		}
 
 		//TODO rewrite update methods
-		public void UpdateSides()
+		private void UpdateSides()
 		{
 			triangle.sides = new List<Segment>()
 			{
@@ -88,13 +86,13 @@ namespace RecognitionService.Models
 			get { return triangle.sides; }
 		}
 
-		public RecognizedTangibleMarker(int id, Triangle triangle, float initialAngle, List<int> verteciesIds) //TODO rework to touchPoints
+		public RecognizedTangibleMarker(int id, Triangle triangle, float initialAngle, List<TouchPoint> vertecies) 
 		{
 			this.Id = id;
 			this.Type = ActionType.Added;
 			this.triangle = triangle;
 			this.initialAngle = initialAngle;
-			this.verteciesIds = verteciesIds;
+			this.vertecies = vertecies;
 		}
 
 		private Vector2 FindCenter()

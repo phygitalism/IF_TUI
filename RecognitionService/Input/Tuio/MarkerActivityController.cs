@@ -11,7 +11,7 @@ namespace RecognitionService.Input.Tuio
     {
         // recognizedMarkers - и есть активные маркеры (только Added and Updated)
         private Dictionary<int, RecognizedTangibleMarker> _recognizedMarkers = new Dictionary<int, RecognizedTangibleMarker>();
-        private Dictionary<int, HashSet<int>> markerTouches = new Dictionary<int, HashSet<int>>();
+        private Dictionary<int, Dictionary<int, TouchPoint>> markerTouches = new Dictionary<int, Dictionary<int, TouchPoint>>();
         private HashSet<TouchPoint> touches = new HashSet<TouchPoint>();
         private List<RegistredTangibleMarker> _registredMarkers = new List<RegistredTangibleMarker>();
         
@@ -37,8 +37,8 @@ namespace RecognitionService.Input.Tuio
             get
             {
                 //точки которые входят в зареганные
-                var markerTouchesIds = markerTouches.Values.Select(set => set.ToList())
-                    .SelectMany(id => id).ToList();
+                var markerTouchesIds = markerTouches.Values.Select(dict => dict.Values.ToList())
+                    .SelectMany(tp => tp).ToList().Select(t => t.id);
                 return touches.Where(t => markerTouchesIds.Contains(t.id)).ToList(); 
             }
         }
@@ -60,7 +60,7 @@ namespace RecognitionService.Input.Tuio
                 return _registredMarkers.Where(reg => !markerTouches.ContainsKey(reg.Id)).ToList();
             }
         }
-
+/*
         public Dictionary<int, int> ReverseMarkerTouches
         {
             get
@@ -77,24 +77,28 @@ namespace RecognitionService.Input.Tuio
             }
             
         }
-
+*/
         public HashSet<int> LostMarkersIds
         {
             get
             {
                 HashSet<int> lostMarkersIds = new HashSet<int>();
-                var reverseMarkerTouches = ReverseMarkerTouches;
+
                 foreach (var lostTouch in LostTouches)
                 {
-                    if (reverseMarkerTouches.ContainsKey(lostTouch.id))
+                    foreach (var touchesTripletDict in markerTouches.Values)
                     {
-                        lostMarkersIds.Add(reverseMarkerTouches[lostTouch.id]);
+                        if (touchesTripletDict.ContainsKey(lostTouch.id))
+                        {
+                            lostMarkersIds.Add(lostTouch.id);
+                        }
                     }
                 }
+
                 return lostMarkersIds;
             }
         }
-        
+
         public List<RecognizedTangibleMarker> ActiveMarkers
         {
             get
@@ -110,11 +114,12 @@ namespace RecognitionService.Input.Tuio
         {
             touches = new HashSet<TouchPoint>(frame.touches);
             _registredMarkers = registredMarkers;
-            // update and remove
-            //обновляем положение распознанных маркеров, для Added обновляется только центр
-            UpdateRecognizedMarkers(); // все Addded пометим Updated
-            //помечаем удаленные маркеры как Removed и удаляем их тачи из словаря
+            //в первую очередь помечаем удаленные маркеры как Removed и удаляем их тачи из словаря
             MarkLostMarkers();
+            //обновляем словарь с тачами
+            UpdateMarkerTouches();
+            //обновляем положение распознанных маркеров  на основе словаря, Added переведем в updated только на сл шане у них обновляется только центр
+            UpdateRecognizedMarkers(); // все Addded которые остались с предыдущего шага пометим Updated
         }
 
         private void MarkLostMarkers()
@@ -126,10 +131,23 @@ namespace RecognitionService.Input.Tuio
             }
         }
 
-
+        public void UpdateMarkerTouches()
+        {
+            foreach (var touch in MarkerTouches)
+            {
+                foreach (var touchTripletDict in markerTouches.Values)
+                {
+                    if (touchTripletDict.ContainsKey(touch.id))
+                    {
+                        touchTripletDict[touch.id] = touch;
+                    } 
+                }
+            }
+        }
+        
         public void AddRecognizedMarkers(List<RecognizedTangibleMarker> newRecognizedTangibles)
         {
-            //
+            //добавляем новые тачи в словарь
             foreach (var marker in newRecognizedTangibles)
             {
                 AddMarkerTouches(marker);
@@ -142,12 +160,12 @@ namespace RecognitionService.Input.Tuio
 
         private void AddMarkerTouches(RecognizedTangibleMarker newMarker)
         {
-            markerTouches[newMarker.Id] = new HashSet<int>()
-            {
-                newMarker.verteciesIds[0],
-                newMarker.verteciesIds[1],
-                newMarker.verteciesIds[2]
-            };
+            markerTouches[newMarker.Id] = new Dictionary<int, TouchPoint>()
+                                            {
+                                                {newMarker.vertecies[0].id, newMarker.vertecies[0]},
+                                                {newMarker.vertecies[1].id, newMarker.vertecies[1]},
+                                                {newMarker.vertecies[2].id, newMarker.vertecies[2]}
+                                            };
         }
 
         //обновляем положение точек маркера
@@ -155,18 +173,12 @@ namespace RecognitionService.Input.Tuio
         {
             // Added -> Updated
             // Update triangle position
-            
-            //потом подумаю как переписать нормально - проблема что обновленные тачи хранятся по отдельности не можем сразу сетом их брать
-            //TODO update position by updated markerTouches 
             Dictionary<int, TouchPoint> markerTouchesDictionary = MarkerTouches.ToDictionary(o => o.id);
-            var reverseMarkerTouches = ReverseMarkerTouches;
-            foreach (var touchId in reverseMarkerTouches.Keys)
+            foreach (var markerId in markerTouches.Keys)
             {
-                int currentMarkerId = reverseMarkerTouches[touchId];
-                TouchPoint currentTouch = markerTouchesDictionary[touchId];
-                _recognizedMarkers[currentMarkerId].UpdatePosition(currentTouch);
-                _recognizedMarkers[currentMarkerId].UpdateSides();
-                _recognizedMarkers[currentMarkerId].Type = RecognizedTangibleMarker.ActionType.Updated;
+                _recognizedMarkers[markerId].UpdatePosition(markerTouches[markerId]);
+                //update sides
+                _recognizedMarkers[markerId].Type = RecognizedTangibleMarker.ActionType.Updated;
             }
         }
 
@@ -180,5 +192,6 @@ namespace RecognitionService.Input.Tuio
                 _recognizedMarkers.Remove(removedId);
             }
         }
+        
     }
 }
