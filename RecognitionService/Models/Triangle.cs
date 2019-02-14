@@ -38,8 +38,8 @@ namespace RecognitionService.Models
            result>0 => clockwise; result<0 => counter clockwise */
         public bool ClockwiseRotation
         {
-            get { return (((LargeSide.origin.X - ShortSide.origin.X) * (MiddleSide.origin.Y - ShortSide.origin.Y) - 
-                           (LargeSide.origin.Y - ShortSide.origin.Y) * (MiddleSide.origin.X - ShortSide.origin.X)) > 0);
+            get { return (((posC.X - posA.X) * (posB.Y - posA.Y) - 
+                           (posC.Y - posA.Y) * (posB.X - posA.X)) > 0);
             }
         }
 
