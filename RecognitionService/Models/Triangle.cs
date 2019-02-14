@@ -45,10 +45,6 @@ namespace RecognitionService.Models
 
         public Triangle(Vector2 posA, Vector2 posB, Vector2 posC)
         {
-            this.posA = posA;
-            this.posB = posB;
-            this.posC = posC;
-
             this.sides = new List<Segment>()
             {
                 new Segment(posA, posB),
@@ -63,6 +59,9 @@ namespace RecognitionService.Models
             };*/
            
             this.sides.Sort((v1, v2) => v1.length >= v2.length ? 1 : -1);
+            this.posA = sides[0].origin;
+            this.posB = sides[1].origin;
+            this.posC = sides[2].origin;
         }
 
         public override bool Equals(object obj)
