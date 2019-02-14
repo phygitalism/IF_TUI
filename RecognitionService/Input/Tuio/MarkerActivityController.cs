@@ -157,6 +157,7 @@ namespace RecognitionService.Input.Tuio
             // Update triangle position
             
             //потом подумаю как переписать нормально - проблема что обновленные тачи хранятся по отдельности не можем сразу сетом их брать
+            //TODO update position by updated markerTouches 
             Dictionary<int, TouchPoint> markerTouchesDictionary = MarkerTouches.ToDictionary(o => o.id);
             var reverseMarkerTouches = ReverseMarkerTouches;
             foreach (var touchId in reverseMarkerTouches.Keys)
@@ -164,6 +165,7 @@ namespace RecognitionService.Input.Tuio
                 int currentMarkerId = reverseMarkerTouches[touchId];
                 TouchPoint currentTouch = markerTouchesDictionary[touchId];
                 _recognizedMarkers[currentMarkerId].UpdatePosition(currentTouch);
+                _recognizedMarkers[currentMarkerId].UpdateSides();
                 _recognizedMarkers[currentMarkerId].Type = RecognizedTangibleMarker.ActionType.Updated;
             }
         }

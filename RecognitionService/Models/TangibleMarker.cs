@@ -60,6 +60,17 @@ namespace RecognitionService.Models
 				triangle.posA = newTouch.Position;
 			}
 		}
+
+		//TODO rewrite update methods
+		public void UpdateSides()
+		{
+			triangle.sides = new List<Segment>()
+			{
+				new Segment(triangle.posA, triangle.posB),
+				new Segment(triangle.posB, triangle.posC),
+				new Segment(triangle.posC, triangle.posA)
+			};
+		}
 		public float rotationAngle
 		{
 			get { return ClockwiseDifferenceBetweenAngles(initialAngle, triangle.LargeSide.CalculateAngleBetweenY()); }
