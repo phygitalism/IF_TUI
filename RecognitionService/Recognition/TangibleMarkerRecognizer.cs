@@ -62,8 +62,20 @@ namespace RecognitionService.Recognition
 				{
 					continue;
 				}
+				// айди могут перемешаться суперкостыльныйкостыль я пока не придумала как нормально сделать
+				var sidesFromTouches = new List<(int, Segment)>()
+				{
+					(touches[0].id, new Segment(touches[0].Position, touches[1].Position)),
+					(touches[1].id, new Segment(touches[1].Position, touches[2].Position)),
+					(touches[2].id, new Segment(touches[2].Position, touches[0].Position))
+				};
+				// айди могут перемешаться суперкостыльныйкостыль
+				sidesFromTouches.Sort((v1, v2) => v1.Item2.length >= v2.Item2.length ? 1 : -1);
 				Triangle triangle = new Triangle(touches[0].Position, touches[1].Position, touches[2].Position);
-				List<int> verteciesIds = new List<int>(){touches[0].id, touches[1].id, touches[2].id};
+				
+				List<int> verteciesIds = new List<int>(){sidesFromTouches[0].Item1,
+					sidesFromTouches[1].Item1,
+					sidesFromTouches[2].Item1};
 			
 				if (triangle.LargeSide.length <= physicalMarkerDiameter)
 				{

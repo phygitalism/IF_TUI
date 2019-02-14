@@ -136,7 +136,7 @@ namespace RecognitionService.Input.Tuio
             }
             //соединяем все равспознанные тачи с новыми
             _recognizedMarkers = _recognizedMarkers.Concat(newRecognizedTangibles
-                    .ToDictionary(x => x.Id, x => x))
+                    .ToDictionary(marker => marker.Id, marker => marker))
                 .ToDictionary(x => x.Key, x => x.Value);
         }
 
