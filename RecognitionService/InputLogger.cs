@@ -19,7 +19,7 @@ namespace RecognitionService
         {
             foreach (var tp in frame.touches)
             {
-                Console.WriteLine($"  point {tp.id} come at ({tp.Position.X},{tp.Position.Y}) width:{tp.Acceleration.X} height:{tp.Acceleration.Y}");
+                Console.WriteLine($"  point {tp.Id} come at ({tp.Position.X},{tp.Position.Y}) width:{tp.Acceleration.X} height:{tp.Acceleration.Y}");
             }
         }
 

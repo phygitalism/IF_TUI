@@ -14,32 +14,32 @@ namespace RecognitionService.Input.Tuio
         private Dictionary<int, Dictionary<int, TouchPoint>> markerTouches = new Dictionary<int, Dictionary<int, TouchPoint>>();
         private HashSet<TouchPoint> touches = new HashSet<TouchPoint>();
         private List<RegistredTangibleMarker> _registredMarkers = new List<RegistredTangibleMarker>();
-        
+
         public List<TouchPoint> LostTouches
         {
             get
             {
                 //точки которые пропадут
-                return touches.Where(t => t.type == TouchPoint.ActionType.Up).ToList();
+                return touches.Where(t => t.Type == TouchPoint.ActionType.Up).ToList();
             }
         }
 
         public List<TouchPoint> MarkerTouches
         {
-           /* get
-            {
-                //точки которые входят в зареганные
-                return markerTouches.Values
-                    .Select(touchePoints => touchePoints.ToList())
-                    .SelectMany(touchPoint => touchPoint).ToList();
-            }*/
-           //нужны тачи с рамки они новые
+            /* get
+             {
+                 //точки которые входят в зареганные
+                 return markerTouches.Values
+                     .Select(touchePoints => touchePoints.ToList())
+                     .SelectMany(touchPoint => touchPoint).ToList();
+             }*/
+            //нужны тачи с рамки они новые
             get
             {
                 //точки которые входят в зареганные
                 var markerTouchesIds = markerTouches.Values.Select(dict => dict.Values.ToList())
-                    .SelectMany(tp => tp).ToList().Select(t => t.id);
-                return touches.Where(t => markerTouchesIds.Contains(t.id)).ToList(); 
+                    .SelectMany(tp => tp).ToList().Select(t => t.Id);
+                return touches.Where(t => markerTouchesIds.Contains(t.Id)).ToList();
             }
         }
 
@@ -48,8 +48,8 @@ namespace RecognitionService.Input.Tuio
             get
             {
                 //точки которые не входят в зареганные
-                var markerTouchIds = MarkerTouches.Select(touch => touch.id);
-                return touches.Where(touch => !markerTouchIds.Contains(touch.id)).ToList();
+                var markerTouchIds = MarkerTouches.Select(touch => touch.Id);
+                return touches.Where(touch => !markerTouchIds.Contains(touch.Id)).ToList();
             }
         }
 
@@ -60,24 +60,24 @@ namespace RecognitionService.Input.Tuio
                 return _registredMarkers.Where(reg => !markerTouches.ContainsKey(reg.Id)).ToList();
             }
         }
-/*
-        public Dictionary<int, int> ReverseMarkerTouches
-        {
-            get
-            {
-                Dictionary<int, int> reverseMarkerTouches = new Dictionary<int, int>();
-                foreach (var markerId in markerTouches.Keys)
+        /*
+                public Dictionary<int, int> ReverseMarkerTouches
                 {
-                    foreach (var touchPointId in markerTouches[markerId])
+                    get
                     {
-                        reverseMarkerTouches[touchPointId] = markerId;
+                        Dictionary<int, int> reverseMarkerTouches = new Dictionary<int, int>();
+                        foreach (var markerId in markerTouches.Keys)
+                        {
+                            foreach (var touchPointId in markerTouches[markerId])
+                            {
+                                reverseMarkerTouches[touchPointId] = markerId;
+                            }
+                        }
+                        return reverseMarkerTouches;
                     }
+
                 }
-                return reverseMarkerTouches;
-            }
-            
-        }
-*/
+        */
         public HashSet<int> LostMarkersIds
         {
             get
@@ -88,9 +88,9 @@ namespace RecognitionService.Input.Tuio
                 {
                     foreach (var touchesTripletDict in markerTouches.Values)
                     {
-                        if (touchesTripletDict.ContainsKey(lostTouch.id))
+                        if (touchesTripletDict.ContainsKey(lostTouch.Id))
                         {
-                            lostMarkersIds.Add(lostTouch.id);
+                            lostMarkersIds.Add(lostTouch.Id);
                         }
                     }
                 }
@@ -102,14 +102,14 @@ namespace RecognitionService.Input.Tuio
         public List<RecognizedTangibleMarker> ActiveMarkers
         {
             get
-            {    
-               //return _registredTangibles.Where(reg => !markerTouches.ContainsKey(reg.Id)).ToList();
-               return _recognizedMarkers.Values.ToList();
-            }   
+            {
+                //return _registredTangibles.Where(reg => !markerTouches.ContainsKey(reg.Id)).ToList();
+                return _recognizedMarkers.Values.ToList();
+            }
         }
-        
-        public MarkerActivityController(){ }
-        
+
+        public MarkerActivityController() { }
+
         public void ProcessTouchPointFrame(TouchPointFrame frame, List<RegistredTangibleMarker> registredMarkers)
         {
             touches = new HashSet<TouchPoint>(frame.touches);
@@ -137,14 +137,14 @@ namespace RecognitionService.Input.Tuio
             {
                 foreach (var touchTripletDict in markerTouches.Values)
                 {
-                    if (touchTripletDict.ContainsKey(touch.id))
+                    if (touchTripletDict.ContainsKey(touch.Id))
                     {
-                        touchTripletDict[touch.id] = touch;
-                    } 
+                        touchTripletDict[touch.Id] = touch;
+                    }
                 }
             }
         }
-        
+
         public void AddRecognizedMarkers(List<RecognizedTangibleMarker> newRecognizedTangibles)
         {
             //добавляем новые тачи в словарь
@@ -161,11 +161,11 @@ namespace RecognitionService.Input.Tuio
         private void AddMarkerTouches(RecognizedTangibleMarker newMarker)
         {
             markerTouches[newMarker.Id] = new Dictionary<int, TouchPoint>()
-                                            {
-                                                {newMarker.vertecies[0].id, newMarker.vertecies[0]},
-                                                {newMarker.vertecies[1].id, newMarker.vertecies[1]},
-                                                {newMarker.vertecies[2].id, newMarker.vertecies[2]}
-                                            };
+            {
+                {newMarker.TouchPointMap[0].id, newMarker.TouchPointMap[0]},
+                {newMarker.TouchPointMap[1].id, newMarker.TouchPointMap[1]},
+                {newMarker.TouchPointMap[2].id, newMarker.TouchPointMap[2]}
+            };
         }
 
         //обновляем положение точек маркера
@@ -173,10 +173,10 @@ namespace RecognitionService.Input.Tuio
         {
             // Added -> Updated
             // Update triangle position
-            Dictionary<int, TouchPoint> markerTouchesDictionary = MarkerTouches.ToDictionary(o => o.id);
+            Dictionary<int, TouchPoint> markerTouchesDictionary = MarkerTouches.ToDictionary(o => o.Id);
             foreach (var markerId in markerTouches.Keys)
             {
-                _recognizedMarkers[markerId].UpdatePosition(markerTouches[markerId]);
+                _recognizedMarkers[markerId].UpdateVertexes(markerTouches[markerId]);
                 //update sides
                 _recognizedMarkers[markerId].Type = RecognizedTangibleMarker.ActionType.Updated;
             }
@@ -184,7 +184,7 @@ namespace RecognitionService.Input.Tuio
 
         public void RemoveLostMarkers()
         {
-            var removedMarkersIds = _recognizedMarkers.Values.Where(marker => 
+            var removedMarkersIds = _recognizedMarkers.Values.Where(marker =>
                     marker.Type == RecognizedTangibleMarker.ActionType.Removed)
                 .Select(marker => marker.Id);
             foreach (var removedId in removedMarkersIds)
@@ -192,6 +192,6 @@ namespace RecognitionService.Input.Tuio
                 _recognizedMarkers.Remove(removedId);
             }
         }
-        
+
     }
 }

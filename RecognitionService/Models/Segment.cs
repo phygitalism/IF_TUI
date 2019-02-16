@@ -7,21 +7,23 @@ namespace RecognitionService.Models
 {
     public struct Segment
     {
-        public Vector2 origin;
-        public Vector2 destination;
+        public Vector2 Origin { get; set; }
+        public Vector2 Destination { get; set; }
 
-        public float length;
+        public float Length
+        {
+            get { return Vector2.Distance(Origin, Destination); }
+        }
 
         public Segment(Vector2 origin, Vector2 destination)
         {
-            this.origin = origin;
-            this.destination = destination;
-            this.length = Vector2.Distance(origin, destination);
+            this.Origin = origin;
+            this.Destination = destination;
         }
         
         public float CalculateAngleBetweenY()
         {
-            Vector2 segmentFromZero = destination - origin;
+            Vector2 segmentFromZero = Destination - Origin;
             float radians = (float) Math.Atan2(segmentFromZero.Y, segmentFromZero.X);
             return radians;
         }
@@ -41,13 +43,13 @@ namespace RecognitionService.Models
 
         public static List<Segment> EqualSegmentsInList(this Segment source, List<Segment> segments, double precision = 1e-3)
         {
-            var equalSegments = segments.Where(segment => Math.Abs(segment.length - source.length) <= precision).ToList();
+            var equalSegments = segments.Where(segment => Math.Abs(segment.Length - source.Length) <= precision).ToList();
             return equalSegments;
         }
 
         public static float CompareWith(this Segment source, Segment other)
         {
-            return Math.Abs(source.length - other.length);
+            return Math.Abs(source.Length - other.Length);
         }
     }
 }

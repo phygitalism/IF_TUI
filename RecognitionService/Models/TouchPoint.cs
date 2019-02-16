@@ -12,24 +12,25 @@ namespace RecognitionService.Models
             Up = 2
         }
 
-        public int id;
-        public Vector2 Position;
-        public Vector2 Acceleration;
-        public ActionType type;
+        public int Id { get; private set; }
+        public ActionType Type { get; private set; }
 
+        public Vector2 Position { get; set; }
+        public Vector2 Acceleration { get; set; }
+        
         public TouchPoint(int id, Vector2 position, Vector2 acceleration, ActionType type)
         {
-            this.id = id;
+            this.Id = id;
             this.Position = position;
             this.Acceleration = acceleration;
-            this.type = type;
+            this.Type = type;
         }
 
         public TouchPoint ToRelativeCoordinates(float width, float height)
         {
             var relativePosition = new Vector2(Position.X / width, Position.Y / height);
             var relativeAcceleration = new Vector2(Acceleration.X / width, Acceleration.Y / height);
-            return new TouchPoint(id, relativePosition, relativeAcceleration, type);
+            return new TouchPoint(Id, relativePosition, relativeAcceleration, Type);
         }
     }
 }

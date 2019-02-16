@@ -39,9 +39,8 @@ namespace RecognitionService.Recognition
 				{
 					var recognizedMarker = new RecognizedTangibleMarker(
 						knownTangibleMarker.Id,
-						pair.Item1,
-						knownTangibleMarker.initialAngle,
-						pair.Item2
+						(pair.Item2[0], pair.Item2[1], pair.Item2[2]),
+						knownTangibleMarker.initialAngle
 					);
 
 					recognizedMarkers.Add(recognizedMarker);
@@ -70,14 +69,14 @@ namespace RecognitionService.Recognition
 					(touches[2], new Segment(touches[2].Position, touches[0].Position))
 				};
 				// айди могут перемешаться суперкостыльныйкостыль
-				sidesFromTouches.Sort((v1, v2) => v1.Item2.length >= v2.Item2.length ? 1 : -1);
+				sidesFromTouches.Sort((v1, v2) => v1.Item2.Length >= v2.Item2.Length ? 1 : -1);
 				Triangle triangle = new Triangle(touches[0].Position, touches[1].Position, touches[2].Position);
 				
 				List<TouchPoint> vertecies = new List<TouchPoint>(){sidesFromTouches[0].Item1,
 					sidesFromTouches[1].Item1,
 					sidesFromTouches[2].Item1};
 			
-				if (triangle.LargeSide.length <= physicalMarkerDiameter)
+				if (triangle.LargeSide.Length <= physicalMarkerDiameter)
 				{
 					(Triangle, List<TouchPoint>) pair = (triangle, vertecies);
 					constructedTriangles.Add(pair);
@@ -107,6 +106,14 @@ namespace RecognitionService.Recognition
 			}
 			return null;
 		}
+		
+		// in case when several markers correspond to the same triangle
+		private RegistredTangibleMarker ChooseMostSimilarMarker(List<(RegistredTangibleMarker, float)> pretenderMarkers)
+		{
+			pretenderMarkers.Sort((pair1, pair2) => pair1.Item2 >= pair2.Item2 ? 1 : -1);
+			return pretenderMarkers[0].Item1;
+		}
+
 		/*
 		private List<Triangle> ConstructTriangles(List<Segment> segments)
 		{
@@ -165,12 +172,5 @@ namespace RecognitionService.Recognition
 			return allPossibleSegments;
 		}
 		*/
-
-		// in case when several markers correspond to the same triangle
-		private RegistredTangibleMarker ChooseMostSimilarMarker(List<(RegistredTangibleMarker, float)> pretenderMarkers)
-		{
-			pretenderMarkers.Sort((pair1, pair2) => pair1.Item2 >= pair2.Item2 ? 1 : -1);
-			return pretenderMarkers[0].Item1;
-		}
 	}
 }
