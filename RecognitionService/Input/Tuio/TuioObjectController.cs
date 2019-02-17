@@ -32,18 +32,18 @@ namespace RecognitionService.Input.Tuio
 				var registredTangibles = _tangibleMarkerController.Config.registredTangibles;
 				_activityController.ProcessTouchPointFrame(frame, registredTangibles);
 
-				var validTouches = _activityController.ValidTouches;
+				var passiveTouches = _activityController.PassiveTouches;
 				var passiveMarkers = _activityController.PassiveMarkers;
 
 				//новые распознанные автоматически имеют тип Added
-				var newRecognizedTangibles = _recognizer.RecognizeTangibleMarkers(validTouches, passiveMarkers);
+				var newRecognizedTangibles = _recognizer.RecognizeTangibleMarkers(passiveTouches, passiveMarkers);
 				_activityController.AddRecognizedMarkers(newRecognizedTangibles);
 				
-				var allRecognizedMarkers = _activityController.ActiveMarkers;
-				PrintMarkerStates(allRecognizedMarkers);
+				var allActiveMarkers = _activityController.ActiveMarkers;
+				PrintMarkerStates(allActiveMarkers);
 				
 				//приводим информацию о центре маркеров к относительным координатам
-				allRecognizedMarkers.ForEach(t => 
+				allActiveMarkers.ForEach(t => 
 				{
 					t.RelativeCenter = new System.Numerics.Vector2(
 						t.Center.X / _inputProvider.ScreenWidth,
@@ -52,14 +52,14 @@ namespace RecognitionService.Input.Tuio
 				});
 
 				//приводим информацию о тачах к относительным координатам
-				var touchesWithRelativeCoords = frame.touches
+				var touchesWithRelativeCoords = frame.Touches
 					.Select(touch => touch.ToRelativeCoordinates(
 						_inputProvider.ScreenWidth,
 						_inputProvider.ScreenHeight
 					)).ToList();
 				
 				
-				OnTuioInput?.Invoke(touchesWithRelativeCoords, allRecognizedMarkers);
+				OnTuioInput?.Invoke(touchesWithRelativeCoords, allActiveMarkers);
 
 				//теперь можно удалить маркеры с меткой Remove
 				//в конце в recognizedMarkers останутся только активные (Added and Updated)

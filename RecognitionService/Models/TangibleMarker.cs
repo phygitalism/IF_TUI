@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Numerics;
 using System.Collections.Generic;
 using Newtonsoft.Json;
@@ -38,6 +39,7 @@ namespace RecognitionService.Models
 		public ActionType Type { get; set; } = ActionType.Added;
 		public Triangle Triangle { get; private set; }
 		public float InitialAngle { get; private set; }
+		public Dictionary<int, TouchPoint> ActiveTouchPoints { get; private set; }
 
 		// связывает тач с конкретной вершиной треугольника (хранит по id тача - индекс вершины треугольника в списке)
 		public Dictionary<int, int> TouchPointMap { get; private set; }
@@ -65,6 +67,13 @@ namespace RecognitionService.Models
 			this.Triangle = new Triangle(vertexes.Item1.Position, vertexes.Item2.Position, vertexes.Item3.Position);
 			this.InitialAngle = initialAngle;
 
+			this.ActiveTouchPoints = new Dictionary<int, TouchPoint>
+			{
+				[vertexes.Item1.Id] = vertexes.Item1,
+				[vertexes.Item2.Id] = vertexes.Item2,
+				[vertexes.Item3.Id] = vertexes.Item3
+			};
+
 			// TODO: позднее будет возможность изменять id тачпоинта, если он исчез и появился с другим id
 			this.TouchPointMap = new Dictionary<int, int>()
 			{
@@ -74,17 +83,24 @@ namespace RecognitionService.Models
 			};
 		}
 
-		public void UpdateVertexes(HashSet<TouchPoint> newTouches)
+		public void UpdateVertexes(List<TouchPoint> newTouches)
 		{
-			// TODO: инкапсулировать изменение состояния ActionType
 			if (newTouches.Count != 3)
 			{
 				Console.WriteLine("WARNING: Invalid amount of touches");
 				return;
 			}
 
+			Type = ActionType.Updated;
+
 			foreach (var touch in newTouches)
 			{
+				ActiveTouchPoints[touch.Id] = touch;
+				if (touch.Type == TouchPoint.ActionType.Up)
+				{
+					Type = ActionType.Removed;
+				}
+
 				int vertexIndex;
 				if (TouchPointMap.TryGetValue(touch.Id, out vertexIndex))
 				{
