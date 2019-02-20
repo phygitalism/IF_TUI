@@ -75,10 +75,20 @@ namespace RecognitionService.Input.Tuio
             {
                 var touchesForMarker = _markerTouches[markerId];
 
-                foreach (var key in touchesForMarker.Keys)
+                try
                 {
-                    touchesForMarker[key] = _frame.Lookup[key];
+                    var lol = new List<int>(touchesForMarker.Keys);
+                    foreach (var kek in lol)
+                    {
+                        var kek2 = _frame.Lookup[kek];
+                        touchesForMarker[kek] = kek2;
+                    }
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("KEK");
+                }
+
 
                 // распознаный маркер сам обновляет свое состояние и обновляет вершины своего треугольника
                 // Addded с предыдущего шага перейдет в Updated
