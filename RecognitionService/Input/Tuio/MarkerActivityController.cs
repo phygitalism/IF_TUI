@@ -74,22 +74,19 @@ namespace RecognitionService.Input.Tuio
             foreach (var markerId in _recognizedMarkers.Keys)
             {
                 var touchesForMarker = _markerTouches[markerId];
-
                 try
                 {
-                    var lol = new List<int>(touchesForMarker.Keys);
-                    foreach (var kek in lol)
+                    var touchesForMarkerIds = new List<int>(touchesForMarker.Keys);
+                    foreach (var touchId in touchesForMarkerIds)
                     {
-                        var kek2 = _frame.Lookup[kek];
-                        touchesForMarker[kek] = kek2;
+                        var touchFromFrame = _frame.Lookup[touchId];
+                        touchesForMarker[touchId] = touchFromFrame;
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("KEK");
+                    Console.WriteLine("Can't update touch for marker");
                 }
-
-
                 // распознаный маркер сам обновляет свое состояние и обновляет вершины своего треугольника
                 // Addded с предыдущего шага перейдет в Updated
                 // если тач, входящий в маркер, пропал, то в Removed
