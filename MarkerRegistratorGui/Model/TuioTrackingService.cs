@@ -13,7 +13,9 @@ namespace MarkerRegistratorGui.Model
 	{
 		private const float _markerRadius = 0.1f;
 
-		private readonly TuioClient _tuioClient = new TuioClient();
+        public const int defaultPort = 3334;
+
+        private readonly TuioClient _tuioClient = new TuioClient(defaultPort);
 		private readonly TuioListener _tuioListener = new TuioListener();
 
 		private readonly List<PointerEvent> _pointerEvents = new List<PointerEvent>();
