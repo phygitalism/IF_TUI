@@ -129,16 +129,15 @@ namespace RecognitionService.Models
 
 		private Vector2 FindCenter()
 		{
-			if (Triangle.posB.X - Triangle.posA.X < 1e-3)
+			if (Math.Abs(Triangle.posB.X - Triangle.posA.X) < 1e-3)
 			{
 				return CalculateCenter(Triangle.posB, Triangle.posC, Triangle.posA);
 			}
 
-			if (Triangle.posC.X - Triangle.posB.X < 1e-3)
+			if (Math.Abs(Triangle.posC.X - Triangle.posB.X) < 1e-3)
 			{
 				return CalculateCenter(Triangle.posC, Triangle.posA, Triangle.posB);
 			}
-
 			return CalculateCenter(Triangle.posA, Triangle.posB, Triangle.posC);
 		}
 
