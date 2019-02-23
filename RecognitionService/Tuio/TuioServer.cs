@@ -11,7 +11,7 @@ namespace RecognitionService
     public class TuioServer : IDisposable
     {
         public const string defaultIPAddress = "127.0.0.1";
-        public const int defaultPort = 3333;
+        public const int defaultPort = 3334;
 
         private ITuioInputProvider _tuioInputProvider;
         private TUIOTransmitter _tuioTransmitter;
