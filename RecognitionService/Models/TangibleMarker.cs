@@ -128,6 +128,7 @@ namespace RecognitionService.Models
 		}
 
 
+		/*
 		private Vector2 FindCenter()
 		{
 			var combinationsOfSides = Triangle.SortedSides.GetPermutations(3);
@@ -142,25 +143,25 @@ namespace RecognitionService.Models
 			//окружности не существует
 			return Vector2.Zero;
 		}
-
+		*/
 		
-
-
-/*
 		private Vector2 FindCenter()
 		{
-			if (Math.Abs(Triangle.posB.X - Triangle.posA.X) < 1e-3)
+			var combinationsOfVertecies = new List<Vector2>(){Triangle.posA, Triangle.posB, Triangle.posC}.GetPermutations(3);
+			foreach (var combinationOfVertecies in combinationsOfVertecies)
 			{
-				return CalculateCenter(Triangle.posB, Triangle.posC, Triangle.posA);
+				var listOfVertecies = combinationOfVertecies.ToList();
+				if (!(new Segment(listOfVertecies[0], listOfVertecies[1]).isPerpendicularToAxes() || 
+				      new Segment(listOfVertecies[1], listOfVertecies[2]).isPerpendicularToAxes()))
+				{
+					return CalculateCenter(listOfVertecies[0], listOfVertecies[1], listOfVertecies[2]);
+				}
 			}
-
-			if (Math.Abs(Triangle.posC.X - Triangle.posB.X) < 1e-3)
-			{
-				return CalculateCenter(Triangle.posC, Triangle.posA, Triangle.posB);
-			}
-			return CalculateCenter(Triangle.posA, Triangle.posB, Triangle.posC);
+			//окружности не существует
+			return Vector2.Zero;
 		}
-*/
+
+
 		private Vector2 CalculateCenter(Vector2 v1, Vector2 v2, Vector2 v3)
 		{
 			var m_a = (v2.Y - v1.Y) / (v2.X - v1.X);
