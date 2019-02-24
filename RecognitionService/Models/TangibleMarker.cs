@@ -127,6 +127,53 @@ namespace RecognitionService.Models
 			}
 		}
 
+
+		private Vector2 FindCenter()
+		{
+			if (!isPerpendicular(Triangle.posA, Triangle.posB, Triangle.posC))
+			{
+				return CalculateCenter(Triangle.posA, Triangle.posB, Triangle.posC);
+			}
+			if (!isPerpendicular(Triangle.posA, Triangle.posC, Triangle.posB))
+			{
+				return CalculateCenter(Triangle.posA, Triangle.posC, Triangle.posB);
+			}
+			if (!isPerpendicular(Triangle.posB, Triangle.posA, Triangle.posC))
+			{
+				return CalculateCenter(Triangle.posB, Triangle.posA, Triangle.posC);
+			}
+			if (!isPerpendicular(Triangle.posB, Triangle.posC, Triangle.posA))
+			{
+				return CalculateCenter(Triangle.posB, Triangle.posC, Triangle.posA);
+			}
+			if (!isPerpendicular(Triangle.posC, Triangle.posB, Triangle.posA))
+			{
+				return CalculateCenter(Triangle.posC, Triangle.posB, Triangle.posA);
+			}
+			if (!isPerpendicular(Triangle.posC, Triangle.posA, Triangle.posB))
+			{
+				return CalculateCenter(Triangle.posC, Triangle.posA, Triangle.posB);
+			}
+			return Vector2.Zero;
+		}
+
+		private bool isPerpendicular(Vector2 v1, Vector2 v2, Vector2 v3)
+		{
+			var yDeltaA = Math.Abs(v2.Y - v1.Y);
+			var yDeltaB = Math.Abs(v3.Y - v2.Y);
+			var xDeltaA = Math.Abs(v2.X - v1.X);
+			var xDeltaB = Math.Abs(v3.X - v2.X);
+
+			if (xDeltaA<1e-3 && yDeltaB<1e-3)
+			{
+				//The points are pependicular and parallel to x-y axis\n
+				return false;
+			}
+			return (yDeltaA < 1e-3 || yDeltaB < 1e-3 || xDeltaA < 1e-3 || xDeltaB < 1e-3);
+		}
+
+
+/*
 		private Vector2 FindCenter()
 		{
 			if (Math.Abs(Triangle.posB.X - Triangle.posA.X) < 1e-3)
@@ -140,7 +187,7 @@ namespace RecognitionService.Models
 			}
 			return CalculateCenter(Triangle.posA, Triangle.posB, Triangle.posC);
 		}
-
+*/
 		private Vector2 CalculateCenter(Vector2 v1, Vector2 v2, Vector2 v3)
 		{
 			var m_a = (v2.Y - v1.Y) / (v2.X - v1.X);
