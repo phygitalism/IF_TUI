@@ -27,6 +27,13 @@ namespace RecognitionService.Models
             float radians = (float) Math.Atan2(segmentFromZero.Y, segmentFromZero.X);
             return radians;
         }
+        
+        public bool isPerpendicularToAxes()
+        {
+            var yDelta = Math.Abs(Destination.Y - Origin.Y);
+            var xDelta = Math.Abs(Destination.X - Origin.X);     
+            return (yDelta < 1e-3 || xDelta < 1e-3);
+        }
 		
         private float radToDeg(float rad)
         {

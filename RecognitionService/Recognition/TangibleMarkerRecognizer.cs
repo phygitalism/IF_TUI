@@ -62,12 +62,12 @@ namespace RecognitionService.Recognition
 					continue;
 				}
 				Triangle triangle = new Triangle(touches[0].Position, touches[1].Position, touches[2].Position);
-				List<TouchPoint> vertecies = new List<TouchPoint>(){touches[0], touches[1], touches[2]};
+				var vertecies = new List<TouchPoint>(){touches[0], touches[1], touches[2]};
 			
 				if (triangle.LargeSide.Length <= physicalMarkerDiameter)
 				{
-					(Triangle, List<TouchPoint>) pair = (triangle, vertecies);
-					constructedTriangles.Add(pair);
+					var triangleWithTouches = (triangle, vertecies);
+					constructedTriangles.Add(triangleWithTouches);
 				}
 				else
 				{
