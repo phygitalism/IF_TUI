@@ -130,7 +130,7 @@ namespace RecognitionService.Models
 
 		private Vector2 FindCenter()
 		{
-			var combinationsOfSides = Triangle.SortedSides.GetCombinationsWithoutRepetition(3);
+			var combinationsOfSides = Triangle.SortedSides.GetPermutations(3);
 			foreach (var combinationOfSides in combinationsOfSides)
 			{
 				var listOfSides = combinationOfSides.ToList();
