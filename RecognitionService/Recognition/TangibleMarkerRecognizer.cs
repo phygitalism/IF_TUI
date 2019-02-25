@@ -9,6 +9,7 @@ using RecognitionService.Models;
 
 namespace RecognitionService.Recognition
 {
+	using TriangleWithTouchPoints = Tuple<Triangle, Tuple<TouchPoint, TouchPoint, TouchPoint>>;
 	class TangibleMarkerRecognizer : ITangibleMarkerRecognizer
 	{
 		private const float physicalMarkerDiameter = 120f;
@@ -39,7 +40,7 @@ namespace RecognitionService.Recognition
 				{
 					var recognizedMarker = new RecognizedTangibleMarker(
 						knownTangibleMarker.Id,
-						(pair.Item2[0], pair.Item2[1], pair.Item2[2]),
+						(pair.Item2.Item1, pair.Item2.Item2, pair.Item2.Item3),
 						knownTangibleMarker.initialAngle
 					);
 
@@ -49,9 +50,9 @@ namespace RecognitionService.Recognition
 			return recognizedMarkers;
 		}
 
-		private List<(Triangle, List<TouchPoint>)> CreateTrianglesFromTouches(List<TouchPoint> frame)
+		private List<TriangleWithTouchPoints> CreateTrianglesFromTouches(List<TouchPoint> frame)
 		{
-			var constructedTriangles = new List<(Triangle, List<TouchPoint>)>();
+			var constructedTriangles = new List<TriangleWithTouchPoints>();
 
 			var combinationsOfTouches = frame.GetCombinationsWithoutRepetition(3);
 			foreach (var combinationOfTouches in combinationsOfTouches)
@@ -62,11 +63,11 @@ namespace RecognitionService.Recognition
 					continue;
 				}
 				Triangle triangle = new Triangle(touches[0].Position, touches[1].Position, touches[2].Position);
-				var vertecies = new List<TouchPoint>(){touches[0], touches[1], touches[2]};
+				var vertecies = Tuple.Create(touches[0], touches[1], touches[2]);
 			
 				if (triangle.LargeSide.Length <= physicalMarkerDiameter)
 				{
-					var triangleWithTouches = (triangle, vertecies);
+					TriangleWithTouchPoints triangleWithTouches = Tuple.Create(triangle, vertecies);
 					constructedTriangles.Add(triangleWithTouches);
 				}
 				else
