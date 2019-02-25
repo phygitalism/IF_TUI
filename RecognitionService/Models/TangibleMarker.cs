@@ -126,25 +126,8 @@ namespace RecognitionService.Models
 				}
 			}
 		}
-
-
-		/*
-		private Vector2 FindCenter()
-		{
-			var combinationsOfSides = Triangle.SortedSides.GetPermutations(3);
-			foreach (var combinationOfSides in combinationsOfSides)
-			{
-				var listOfSides = combinationOfSides.ToList();
-				if (!(listOfSides[0].isPerpendicularToAxes() || listOfSides[1].isPerpendicularToAxes()))
-				{
-					return CalculateCenter(listOfSides[0].Origin, listOfSides[1].Origin, listOfSides[2].Origin);
-				}
-			}
-			//окружности не существует
-			return Vector2.Zero;
-		}
-		*/
 		
+		// how to calculate center http://algolist.manual.ru/maths/geom/equation/circle.php
 		private Vector2 FindCenter()
 		{
 			var combinationsOfVertecies = new List<Vector2>(){Triangle.posA, Triangle.posB, Triangle.posC}.GetPermutations(3);
