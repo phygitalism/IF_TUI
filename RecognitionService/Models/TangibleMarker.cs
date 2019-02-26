@@ -53,22 +53,18 @@ namespace RecognitionService.Models
 
 		public float RotationAngle
 		{
-			//get { return ClockwiseDifferenceBetweenAngles(InitialAngle, Triangle.LargeSide.CalculateAngleBetweenY()); }
-			//если все-таки сделать posA и posB упорядоченными в начале
 			get
 			{
-				var v1 = ActiveTouchPoints[LargeSideIds.Item1].Position;
-				var v2 = ActiveTouchPoints[LargeSideIds.Item2].Position;
 				return ClockwiseDifferenceBetweenAngles(InitialAngle, CurrentAngleForLargeSide);
 			}
 		}
 
-		public float CurrentAngleForLargeSide
+		private float CurrentAngleForLargeSide
 		{
 			get
 			{
-				var v1 = ActiveTouchPoints[LargeSideIds.Item1].Position;
-				var v2 = ActiveTouchPoints[LargeSideIds.Item2].Position;
+				var v1 = ActiveTouchPoints[LargeSideTouchIds.Item1].Position;
+				var v2 = ActiveTouchPoints[LargeSideTouchIds.Item2].Position;
 				return new Segment(v1, v2).CalculateAngleBetweenY();
 			}
 		}
@@ -78,7 +74,7 @@ namespace RecognitionService.Models
 			get { return Triangle.SortedSides; }
 		}
 
-		public (int, int) LargeSideIds;
+		public (int, int) LargeSideTouchIds;
 
 		public RecognizedTangibleMarker(int id, (TouchPoint, TouchPoint, TouchPoint) vertexes, float initialAngle = 0.0f)
 		{
@@ -100,10 +96,10 @@ namespace RecognitionService.Models
 				[vertexes.Item2.Id] = 1,
 				[vertexes.Item3.Id] = 2
 			};
-			this.LargeSideIds = GetIdsForLargeSide(vertexes);
+			this.LargeSideTouchIds = GetTouchIdsForLargeSide(vertexes);
 		}
 
-		private (int, int) GetIdsForLargeSide((TouchPoint, TouchPoint, TouchPoint) vertexes)
+		private (int, int) GetTouchIdsForLargeSide((TouchPoint, TouchPoint, TouchPoint) vertexes)
 		{
 			var sortedSidesWithId = new List<(Segment, (int, int))>()
 			{
