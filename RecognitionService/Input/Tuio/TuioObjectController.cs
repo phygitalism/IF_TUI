@@ -12,9 +12,9 @@ namespace RecognitionService.Input.Tuio
 	{
 		private IInputProvider _inputProvider;
 		private TangibleMarkerController _tangibleMarkerController;
-		private ITangibleMarkerRecognizer _tangibleMarkerRecognizer = new TangibleMarkerRecognizer();
-
-		private Dictionary<int, RecognizedTangibleMarker> previouslyRecognizedTangibles = new Dictionary<int, RecognizedTangibleMarker>();
+		
+		private MarkerActivityController _activityController = new MarkerActivityController();
+		private ITangibleMarkerRecognizer _recognizer = new TangibleMarkerRecognizer();
 
 		public event Action<List<TouchPoint>, List<RecognizedTangibleMarker>> OnTuioInput;
 
@@ -30,50 +30,45 @@ namespace RecognitionService.Input.Tuio
 			try
 			{
 				var registredTangibles = _tangibleMarkerController.Config.registredTangibles;
-				var recognizedTangibles = _tangibleMarkerRecognizer.RecognizeTangibleMarkers(frame.touches, registredTangibles);
-				var currentRecognizedTangibles = DetermineMarkerState(recognizedTangibles);
-				previouslyRecognizedTangibles = currentRecognizedTangibles;
+				_activityController.ProcessTouchPointFrame(frame, registredTangibles);
 
-                PrintMarkerStates(currentRecognizedTangibles.Values.ToList());
-                // TODO - split touches from objects
+				var passiveTouches = _activityController.PassiveTouches;
+				var passiveMarkers = _activityController.PassiveMarkers;
 
-				var touchesWithRelativeCoords = frame.touches
+				//новые распознанные автоматически имеют тип Added
+				var newRecognizedTangibles = _recognizer.RecognizeTangibleMarkers(passiveTouches, passiveMarkers);
+				_activityController.AddRecognizedMarkers(newRecognizedTangibles);
+				
+				var allActiveMarkers = _activityController.ActiveMarkers;
+				PrintMarkerStates(allActiveMarkers);
+				
+				//приводим информацию о центре маркеров к относительным координатам
+				allActiveMarkers.ForEach(t => 
+				{
+					t.RelativeCenter = new System.Numerics.Vector2(
+						t.Center.X / _inputProvider.ScreenWidth,
+						t.Center.Y / _inputProvider.ScreenHeight
+					);
+				});
+
+				//приводим информацию о тачах к относительным координатам
+				var touchesWithRelativeCoords = frame.Touches
 					.Select(touch => touch.ToRelativeCoordinates(
 						_inputProvider.ScreenWidth,
 						_inputProvider.ScreenHeight
 					)).ToList();
 				
-				var tangiblesWithUpdatedCenters = currentRecognizedTangibles.Values.ToList();
-				tangiblesWithUpdatedCenters.ForEach(t => 
-				{
-					t.relativeCenter = new System.Numerics.Vector2(
-                        t.Center.X / _inputProvider.ScreenWidth,
-                        t.Center.Y / _inputProvider.ScreenHeight
-                    );
-				});
+				
+				OnTuioInput?.Invoke(touchesWithRelativeCoords, allActiveMarkers);
 
-				OnTuioInput?.Invoke(touchesWithRelativeCoords, tangiblesWithUpdatedCenters);
+				//теперь можно удалить маркеры с меткой Remove
+				//в конце в recognizedMarkers останутся только активные (Added and Updated)
+				_activityController.RemoveLostMarkers();
 			}
 			catch (System.Exception ex)
 			{
 				Console.WriteLine(ex);
 			}
-		}
-
-		private List<RecognizedTangibleMarker> RecognizedMarkersToActive(List<RegistredTangibleMarker> registredTangibles,
-			List<RecognizedTangibleMarker> newRecognizedTangibles)
-		{
-			var registredTangiblesDictionary = registredTangibles.ToDictionary(o => o.Id);
-			foreach (var marker in newRecognizedTangibles)
-			{
-				registredTangiblesDictionary[marker.Id].State = RegistredTangibleMarker.MarkerState.Active;
-			}
-
-			var activeIds = registredTangiblesDictionary.Values.Where(marker =>
-				marker.State == RegistredTangibleMarker.MarkerState.Active).Select(marker => marker.Id);
-
-			var activeMarkers = previouslyRecognizedTangibles.Values.Where(marker => activeIds.Contains(marker.Id)).ToList();
-			return activeMarkers;
 		}
 
         private void PrintMarkerStates(List<RecognizedTangibleMarker> recognizedTangibles)
@@ -95,48 +90,7 @@ namespace RecognitionService.Input.Tuio
                 Console.WriteLine($"Removed markers ids: {string.Join(" ", deletedMarkerIds)}");
             }
         }
-
-		private Dictionary<int, RecognizedTangibleMarker> DetermineMarkerState(List<RecognizedTangibleMarker> recognizedTangibles)
-		{
-			var currentRecognizedTangibles = new Dictionary<int, RecognizedTangibleMarker>();
-			foreach (var tangible in recognizedTangibles)
-			{
-				if (previouslyRecognizedTangibles.ContainsKey(tangible.Id) && previouslyRecognizedTangibles[tangible.Id].Type != RecognizedTangibleMarker.ActionType.Removed)
-				{
-                    // Updated
-                    tangible.Type = RecognizedTangibleMarker.ActionType.Updated;
-                    currentRecognizedTangibles[tangible.Id] = tangible;
-                }
-				else
-				{
-					// Added
-                    tangible.Type = RecognizedTangibleMarker.ActionType.Added;
-                    currentRecognizedTangibles[tangible.Id] = tangible;
-                }
-			}
-
-            try
-            {
-                var lookup = recognizedTangibles.ToDictionary(o => o.Id);
-
-			    foreach (var tangible in previouslyRecognizedTangibles.Values)
-			    {
-				    if (!lookup.ContainsKey(tangible.Id) && previouslyRecognizedTangibles[tangible.Id].Type != RecognizedTangibleMarker.ActionType.Removed)
-				    {
-                        // Removed
-                        tangible.Type = RecognizedTangibleMarker.ActionType.Removed;
-                        currentRecognizedTangibles[tangible.Id] = tangible;
-				    }
-			    }
-            }
-            catch (System.ArgumentException ex)
-            {
-                Console.WriteLine(ex);
-                // TODO - the same marker was recognized from different triangle
-            }
-            return currentRecognizedTangibles;
-		}
-
+   
 		public void Dispose()
 		{
 			_inputProvider.OnTouchesRecieved -= ProcessFrame;

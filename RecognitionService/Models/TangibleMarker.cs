@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Numerics;
 using System.Collections.Generic;
 using Newtonsoft.Json;
@@ -7,19 +8,14 @@ namespace RecognitionService.Models
 {
 	public class RegistredTangibleMarker
 	{
-		public enum MarkerState
-		{
-			Passive, 
-			Active
-		}
 		public int Id;
 		public Triangle triangle;
 		public float initialAngle;
-		public MarkerState State { get; set; } = MarkerState.Passive;
+
 		[JsonIgnore]
 		public List<Segment> Sides
 		{
-			get { return triangle.sides; }
+			get { return triangle.SortedSides; }
 		}
 
 		public RegistredTangibleMarker(int id, Triangle triangle)
@@ -40,52 +36,116 @@ namespace RecognitionService.Models
 		}
 
 		public int Id;
-		public ActionType Type;
-		public Triangle triangle;
-		public float initialAngle;
+		public ActionType Type { get; set; } = ActionType.Added;
+		public Triangle Triangle { get; private set; }
+		public float InitialAngle { get; private set; }
+		public Dictionary<int, TouchPoint> ActiveTouchPoints { get; private set; }
 
-		public float rotationAngle
-		{
-			get { return ClockwiseDifferenceBetweenAngles(initialAngle, triangle.LargeSide.CalculateAngleBetweenY()); }
-		}
+		// связывает тач с конкретной вершиной треугольника (хранит по id тача - индекс вершины треугольника в списке)
+		public Dictionary<int, int> TouchPointMap { get; private set; }
 
-		public Vector2 relativeCenter = new Vector2();
+		public Vector2 RelativeCenter { get; set; } = new Vector2();
 
 		public Vector2 Center
 		{
 			get { return FindCenter(); }
 		}
 
+		public float RotationAngle
+		{
+			get { return ClockwiseDifferenceBetweenAngles(InitialAngle, Triangle.LargeSide.CalculateAngleBetweenY()); }
+		}
+
 		public List<Segment> Sides
 		{
-			get { return triangle.sides; }
+			get { return Triangle.SortedSides; }
 		}
 
-		public RecognizedTangibleMarker(int id, Triangle triangle, float initialAngle)
+		public RecognizedTangibleMarker(int id, (TouchPoint, TouchPoint, TouchPoint) vertexes, float initialAngle = 0.0f)
 		{
 			this.Id = id;
-			this.Type = ActionType.Added;
-			this.triangle = triangle;
-			this.initialAngle = initialAngle;
+			this.Triangle = new Triangle(vertexes.Item1.Position, vertexes.Item2.Position, vertexes.Item3.Position);
+			this.InitialAngle = initialAngle;
+
+			this.ActiveTouchPoints = new Dictionary<int, TouchPoint>
+			{
+				[vertexes.Item1.Id] = vertexes.Item1,
+				[vertexes.Item2.Id] = vertexes.Item2,
+				[vertexes.Item3.Id] = vertexes.Item3
+			};
+
+			// TODO: позднее будет возможность изменять id тачпоинта, если он исчез и появился с другим id
+			this.TouchPointMap = new Dictionary<int, int>()
+			{
+				[vertexes.Item1.Id] = 0,
+				[vertexes.Item2.Id] = 1,
+				[vertexes.Item3.Id] = 2
+			};
 		}
 
+		public void UpdateVertexes(List<TouchPoint> newTouches)
+		{
+			if (newTouches.Count != 3)
+			{
+				Console.WriteLine("WARNING: Invalid amount of touches");
+				return;
+			}
+
+			Type = ActionType.Updated;
+
+			foreach (var touch in newTouches)
+			{
+				ActiveTouchPoints[touch.Id] = touch;
+				if (touch.Type == TouchPoint.ActionType.Up)
+				{
+					Type = ActionType.Removed;
+				}
+
+				int vertexIndex;
+				if (TouchPointMap.TryGetValue(touch.Id, out vertexIndex))
+				{
+					switch (vertexIndex)
+					{
+						case 0:
+							Triangle.posA = touch.Position;
+							break;
+						case 1:
+							Triangle.posB = touch.Position;
+							break;
+						case 2:
+							Triangle.posC = touch.Position;
+							break;
+						default:
+							break;
+					}
+				}
+				else
+				{
+					// TODO: handle unmapped touch id
+					Console.WriteLine($"ERROR: unmapped touch id {touch.Id} for tangible marker {Id}");
+				}
+			}
+		}
+		
+		// how to calculate center http://algolist.manual.ru/maths/geom/equation/circle.php
 		private Vector2 FindCenter()
 		{
-
-			if (triangle.posB.X - triangle.posA.X < 1e-3)
+			var combinationsOfVertecies = new List<Vector2>(){Triangle.posA, Triangle.posB, Triangle.posC}.GetPermutations(3);
+			foreach (var combinationOfVertecies in combinationsOfVertecies)
 			{
-				return find_center(triangle.posB, triangle.posC, triangle.posA);
+				var listOfVertecies = combinationOfVertecies.ToList();
+				if (!(new Segment(listOfVertecies[0], listOfVertecies[1]).isPerpendicularToAxes() || 
+				      new Segment(listOfVertecies[1], listOfVertecies[2]).isPerpendicularToAxes()))
+				{
+					return CalculateCenter(listOfVertecies[0], listOfVertecies[1], listOfVertecies[2]);
+				}
 			}
-
-			if (triangle.posC.X - triangle.posB.X < 1e-3)
-			{
-				return find_center(triangle.posC, triangle.posA, triangle.posB);
-			}
-
-			return find_center(triangle.posA, triangle.posB, triangle.posC);
+			//окружности не существует
+			return Vector2.Zero;
 		}
 
-		private Vector2 find_center(Vector2 v1, Vector2 v2, Vector2 v3)
+
+		private Vector2 CalculateCenter(Vector2 v1, Vector2 v2, Vector2 v3)
 		{
 			var m_a = (v2.Y - v1.Y) / (v2.X - v1.X);
 			var m_b = (v3.Y - v2.Y) / (v3.X - v2.X);
@@ -93,7 +153,7 @@ namespace RecognitionService.Models
 			var y_center = -1 / m_a * (x_center - (v1.X + v2.X) / 2) + (v1.Y + v2.Y) / 2;
 			return new Vector2(x_center, y_center);
 		}
-		
+
 		private float ClockwiseDifferenceBetweenAngles(float initialAngle, float newAngle)
 		{
 			if (initialAngle > newAngle)

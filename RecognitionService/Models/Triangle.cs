@@ -7,39 +7,62 @@ using Newtonsoft.Json;
 
 namespace RecognitionService.Models
 {
-    public struct Triangle : IEquatable<Triangle>
+    public class Triangle : IEquatable<Triangle>
     {
-        public Vector2 posA;
-        public Vector2 posB;
-        public Vector2 posC;
+        public const double defaultPrecision = 1e-3;
 
-        public List<Segment> sides;
+        public Vector2 posA { get; set; }
+        public Vector2 posB { get; set; }
+        public Vector2 posC { get; set; }
 
-		[JsonIgnore]
+        private readonly List<Segment> sides;
+
+        [JsonIgnore]
+        public List<Segment> SortedSides
+        {
+            get
+            {
+                // In order to have updated length for each segment
+                var sortedSides = new List<Segment>()
+                {
+                    new Segment(posA, posB),
+                    new Segment(posB, posC),
+                    new Segment(posC, posA)
+                };
+                sortedSides.Sort((v1, v2) => v1.Length >= v2.Length ? 1 : -1);
+                return sortedSides;
+            }
+        }
+
+        [JsonIgnore]
         public Segment ShortSide
         {
-            get { return sides[0]; }
+            get { return SortedSides[0]; }
         }
 
         [JsonIgnore]
         public Segment MiddleSide
         {
-            get { return sides[1]; }
+            get { return SortedSides[1]; }
         }
 
         [JsonIgnore]
         public Segment LargeSide
         {
-            get { return sides[2]; }
+            get { return SortedSides[2]; }
         }
 
         /* result = vector multiplication of short and large sides in coordinates
            define where point relative to vector
            result>0 => clockwise; result<0 => counter clockwise */
-        public bool ClockwiseRotation
+        public bool IsClockwiseRotated
         {
-            get { return (((LargeSide.origin.X - ShortSide.origin.X) * (MiddleSide.origin.Y - ShortSide.origin.Y) - 
-                           (LargeSide.origin.Y - ShortSide.origin.Y) * (MiddleSide.origin.X - ShortSide.origin.X)) > 0);
+            get
+            {
+                var dotProduct =
+                    (LargeSide.Origin.X - ShortSide.Origin.X) * (MiddleSide.Origin.Y - ShortSide.Origin.Y) - 
+                    (LargeSide.Origin.Y - ShortSide.Origin.Y) * (MiddleSide.Origin.X - ShortSide.Origin.X);
+                return dotProduct > 0;
             }
         }
 
@@ -55,7 +78,6 @@ namespace RecognitionService.Models
                 new Segment(posB, posC),
                 new Segment(posC, posA)
             };
-            this.sides.Sort((v1, v2) => v1.length >= v2.length ? 1 : -1);
         }
 
         public override bool Equals(object obj)
@@ -69,16 +91,16 @@ namespace RecognitionService.Models
             return this.Equals(other);
         }
 
-		public bool Equals(Triangle other)
-		{
-			return Equals(other, 1e-3);
-		}
-
-		public bool Equals(Triangle other, double precision = 1e-3)
+        public bool Equals(Triangle other)
         {
-            var areEqual = ShortSide.EqualSegmentExistInList(other.sides, precision) &&
-                MiddleSide.EqualSegmentExistInList(other.sides, precision) &&
-                LargeSide.EqualSegmentExistInList(other.sides, precision);
+            return Equals(other, defaultPrecision);
+        }
+
+        public bool Equals(Triangle other, double precision = defaultPrecision)
+        {
+            var areEqual = ShortSide.EqualSegmentExistInList(other.SortedSides, precision) &&
+                MiddleSide.EqualSegmentExistInList(other.SortedSides, precision) &&
+                LargeSide.EqualSegmentExistInList(other.SortedSides, precision);
 
             return areEqual;
         }
@@ -87,10 +109,11 @@ namespace RecognitionService.Models
         {
             float meanError = (LargeSide.CompareWith(other.LargeSide) +
                                MiddleSide.CompareWith(other.MiddleSide) +
-                               ShortSide.CompareWith(other.ShortSide))/3;
+                               ShortSide.CompareWith(other.ShortSide)) / 3;
             return meanError;
         }
-        
+
+        /*
         public static bool TryBuildFromSegments(Segment sideA, Segment sideB, Segment sideC, out Triangle? triangle)
         {
             triangle = null;
@@ -121,7 +144,7 @@ namespace RecognitionService.Models
             }
             return set.ToList();
         }
-
+*/
 
         public override int GetHashCode()
         {

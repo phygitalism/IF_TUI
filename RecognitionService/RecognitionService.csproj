@@ -80,6 +80,7 @@
     <Compile Include="Input\Touch\DeviceState.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Input\Touch\IDeviceController.cs" />
+    <Compile Include="Input\Tuio\MarkerActivityController.cs" />
     <Compile Include="MenuViewController.cs" />
     <Compile Include="Models\MarkerConfig.cs" />
     <Compile Include="PQMTClientImport.cs" />

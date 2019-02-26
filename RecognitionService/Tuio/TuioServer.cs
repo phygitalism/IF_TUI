@@ -46,21 +46,20 @@ namespace RecognitionService
         {
             foreach (var tp in touches)
             {
-                switch (tp.type)
+                switch (tp.Type)
                 {
                     case TouchPoint.ActionType.Down:
                         var cursorToAdd = new TUIOCursor(_tuioTransmitter.NextSessionId(), tp.Position.X, tp.Position.Y, 0f, 0f, 0f);
-                        cursors[tp.id] = cursorToAdd;
+                        cursors[tp.Id] = cursorToAdd;
                         _tuioTransmitter.Add(cursorToAdd);
                         break;
                     case TouchPoint.ActionType.Move:
-                        //Console.WriteLine($"{tp.Position.X} {tp.Position.Y}");
-                        cursors[tp.id]?.Update(tp.Position.X, tp.Position.Y, 0f, 0f, 0f);
+                        cursors[tp.Id]?.Update(tp.Position.X, tp.Position.Y, 0f, 0f, 0f);
                         break;
                     case TouchPoint.ActionType.Up:
-                        var cursorToRemove = cursors[tp.id];
+                        var cursorToRemove = cursors[tp.Id];
                         _tuioTransmitter.Remove(cursorToRemove);
-                        cursors.Remove(tp.id);
+                        cursors.Remove(tp.Id);
                         break;
                     default:
                         Console.WriteLine($"ERROR: unkown touchpoint action type");
@@ -77,13 +76,12 @@ namespace RecognitionService
                 {
                     case RecognizedTangibleMarker.ActionType.Added:
 						Console.WriteLine($"Tuio object added {tangible.Id}");
-                        var objectToAdd = new TUIOObject(_tuioTransmitter.NextSessionId(), tangible.Id, tangible.relativeCenter.X, tangible.relativeCenter.Y, tangible.rotationAngle, 0f, 0f, 0f, 0f, 0f);
+                        var objectToAdd = new TUIOObject(_tuioTransmitter.NextSessionId(), tangible.Id, tangible.RelativeCenter.X, tangible.RelativeCenter.Y, tangible.RotationAngle, 0f, 0f, 0f, 0f, 0f);
                         objects[tangible.Id] = objectToAdd;
                         _tuioTransmitter.Add(objectToAdd);
                         break;
                     case RecognizedTangibleMarker.ActionType.Updated:
-						Console.WriteLine($"Tuio object Updated {tangible.Id}");
-						objects[tangible.Id]?.Update(tangible.relativeCenter.X, tangible.relativeCenter.Y, tangible.rotationAngle, 0f, 0f, 0f, 0f, 0f);
+						objects[tangible.Id]?.Update(tangible.RelativeCenter.X, tangible.RelativeCenter.Y, tangible.RotationAngle, 0f, 0f, 0f, 0f, 0f);
                         break;
                     case RecognizedTangibleMarker.ActionType.Removed:
 						Console.WriteLine($"Tuio object Removed {tangible.Id}");
