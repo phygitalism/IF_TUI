@@ -80,7 +80,7 @@ namespace RecognitionService.Models
 		{
 			this.Id = id;
 			this.Triangle = new Triangle(vertexes.Item1.Position, vertexes.Item2.Position, vertexes.Item3.Position);
-			this.InitialAngle = CurrentAngleForLargeSide;
+			this.InitialAngle = Triangle.LargeSide.CalculateAngleBetweenY();
 
 			this.ActiveTouchPoints = new Dictionary<int, TouchPoint>
 			{
