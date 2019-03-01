@@ -122,6 +122,10 @@ namespace RecognitionService.Input.Tuio
                 {
                     continue;
                 }
+                if (_recognizedMarkers.ContainsKey(marker.Id))
+                {
+                    marker.Type = RecognizedTangibleMarker.ActionType.Updated;
+                }
                 
                 AddMarkerTouches(marker);
                 _recognizedMarkers[marker.Id] = marker;

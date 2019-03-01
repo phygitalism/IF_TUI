@@ -83,6 +83,10 @@ namespace RecognitionService
                     case RecognizedTangibleMarker.ActionType.Updated:
 						objects[tangible.Id]?.Update(tangible.RelativeCenter.X, tangible.RelativeCenter.Y, tangible.RotationAngle, 0f, 0f, 0f, 0f, 0f);
                         break;
+                    case RecognizedTangibleMarker.ActionType.Unstable:
+                        objects[tangible.Id]?.Update(tangible.RelativeCenter.X, tangible.RelativeCenter.Y, tangible.RotationAngle, 0f, 0f, 0f, 0f, 0f);
+                        Console.WriteLine($"Tuio object unstable {tangible.Id}");
+                        break;
                     case RecognizedTangibleMarker.ActionType.Removed:
 						Console.WriteLine($"Tuio object Removed {tangible.Id}");
 						var objectToRemove = objects[tangible.Id];
