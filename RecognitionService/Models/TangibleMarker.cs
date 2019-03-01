@@ -120,7 +120,10 @@ namespace RecognitionService.Models
 				return;
 			}
 
-			Type = ActionType.Updated;
+			if (Type != ActionType.Unstable)
+			{
+				Type = ActionType.Updated;
+			}
 
 			foreach (var touch in newTouches)
 			{

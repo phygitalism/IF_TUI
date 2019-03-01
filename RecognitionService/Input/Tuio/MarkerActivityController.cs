@@ -76,7 +76,7 @@ namespace RecognitionService.Input.Tuio
         {
             _frame = frame;
             _registredMarkers = registredMarkers;
-
+            RemoveUnstableTouchesFromMarkerTouches();
             UpdateMarkersTouches();
         }
 
@@ -153,6 +153,15 @@ namespace RecognitionService.Input.Tuio
                 touchesForMarker[touchPointId] = _frame.Lookup[touchPointId];
             }
             _markerTouches[newMarker.Id] = touchesForMarker;
+        }
+
+        private void RemoveUnstableTouchesFromMarkerTouches()
+        {
+            var unstableMarkerIds = UnstableMarkers.Select(marker => marker.Id);
+            foreach (var unstableMarkerId in unstableMarkerIds)
+            {
+                _markerTouches.Remove(unstableMarkerId);
+            }
         }
 
         public void RemoveLostMarkers()
