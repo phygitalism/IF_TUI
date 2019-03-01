@@ -32,7 +32,8 @@ namespace RecognitionService.Models
 		{
 			Added = 0,
 			Updated = 1,
-			Removed = 2
+			Removed = 2,
+			Unstable = 3
 		}
 
 		public int Id;
@@ -124,9 +125,10 @@ namespace RecognitionService.Models
 			foreach (var touch in newTouches)
 			{
 				ActiveTouchPoints[touch.Id] = touch;
+				
 				if (touch.Type == TouchPoint.ActionType.Up)
 				{
-					Type = ActionType.Removed;
+					Type = Type == ActionType.Unstable ? ActionType.Removed : ActionType.Unstable;
 				}
 
 				int vertexIndex;

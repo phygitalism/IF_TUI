@@ -34,10 +34,15 @@ namespace RecognitionService.Input.Tuio
 
 				var passiveTouches = _activityController.PassiveTouches;
 				var passiveMarkers = _activityController.PassiveMarkers;
+				var unstableMarkers = _activityController.UnstableMarkers;
 
 				//новые распознанные автоматически имеют тип Added
-				var newRecognizedTangibles = _recognizer.RecognizeTangibleMarkers(passiveTouches, passiveMarkers);
+				var newRecognizedTangibles = _recognizer.RecognizeTangibleMarkers(passiveTouches, passiveMarkers.Concat(unstableMarkers).ToList());
 				_activityController.AddRecognizedMarkers(newRecognizedTangibles);
+
+				//passiveTouches = _activityController.PassiveTouches;
+				//var unstableMarkers = _activityController.UnstableMarkers;
+				//var unstableRecognizedTangibles = _recognizer.RecognizeTangibleMarkers(passiveTouches, unstableMarkers);
 				
 				var allActiveMarkers = _activityController.ActiveMarkers;
 				PrintMarkerStates(allActiveMarkers);
