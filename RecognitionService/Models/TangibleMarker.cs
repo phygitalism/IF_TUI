@@ -10,6 +10,7 @@ namespace RecognitionService.Models
 	{
 		public readonly int Id;
 		public readonly float InitialAngle;
+		public readonly bool IsClockwiseRotated;
 
 		private readonly Dictionary<string, Vector2> vertexes;
 		private readonly List<Segment> sides;
@@ -38,6 +39,7 @@ namespace RecognitionService.Models
 			var triangle = Triangle;
 			this.sides = triangle.SortedSides;
 			this.InitialAngle = triangle.LargeSide.CalculateAngleBetweenY();
+			this.IsClockwiseRotated = triangle.IsClockwiseRotated;
 		}
 	}
 
