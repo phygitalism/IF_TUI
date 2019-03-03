@@ -102,7 +102,7 @@ namespace RecognitionService
 
         private void SetupServer()
         {
-            _wsServer = (new RecognitionServiceServer(_globalSettings.TuioServerPort))
+            _wsServer = (new RecognitionServiceServer(_globalSettings.WebSocketListenPort))
                 .AddToDisposeBag(_disposeBag);
 
             _wsServer.OnMarkerListRequested += _tangibleMarkerController.GetAllRegistredIds;

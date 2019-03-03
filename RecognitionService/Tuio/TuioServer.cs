@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 
 using RecognitionService.Models;
+using RecognitionService.Services;
 using RecognitionService.Input.Tuio;
 using RecognitionService.Tuio;
 using RecognitionService.Tuio.Entities;
@@ -11,19 +12,23 @@ namespace RecognitionService
     public class TuioServer : IDisposable
     {
         public const string defaultIPAddress = "127.0.0.1";
-        public const int defaultPort = 3334;
+        public const int defaultTuioPort = 3333;
 
         private ITuioInputProvider _tuioInputProvider;
         private TUIOTransmitter _tuioTransmitter;
         private Dictionary<int, TUIOCursor> cursors = new Dictionary<int, TUIOCursor>();
         private Dictionary<int, TUIOObject> objects = new Dictionary<int, TUIOObject>();
 
+        private JsonStorage<Settings> _settingsStorage = new JsonStorage<Settings>("settings");
+        private Settings _globalSettings;
+
         public TuioServer(ITuioInputProvider tuioInputProvider)
         {
+            _globalSettings = _settingsStorage.Load();
             _tuioInputProvider = tuioInputProvider;
             _tuioInputProvider.OnTuioInput += Send;
 
-            _tuioTransmitter = new TUIOTransmitter(defaultIPAddress, defaultPort);
+            _tuioTransmitter = new TUIOTransmitter(defaultIPAddress, _globalSettings.TuioServerPort);
             _tuioTransmitter.Connect();
         }
 
