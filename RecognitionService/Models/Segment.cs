@@ -27,11 +27,6 @@ namespace RecognitionService.Models
             float radians = (float) Math.Atan2(segmentFromZero.Y, segmentFromZero.X);
             return radians;
         }
-        
-        public bool isPerpendicularToAxes()
-        {      
-            return isPerpendicularToX() || isPerpendicularToY();
-        }
 
         public bool isPerpendicularToX()
         {
