@@ -109,8 +109,8 @@ namespace RecognitionService
                 var absoluteA = new Vector2(triangleInfo.posA.X * width, triangleInfo.posA.Y * heigth);
                 var absoluteB = new Vector2(triangleInfo.posB.X * width, triangleInfo.posB.Y * heigth);
                 var absoluteC = new Vector2(triangleInfo.posC.X * width, triangleInfo.posC.Y * heigth);
-                var triangle = new Models.Triangle(absoluteA, absoluteB, absoluteC);
-                _tangibleMarkerController.RegisterMarkerWithId(triangle, id);
+                
+                _tangibleMarkerController.RegisterMarkerWithId(id, (absoluteA, absoluteB, absoluteC));
             };
             _wsServer.OnUnregisterMarkerRequested += _tangibleMarkerController.UnregisterMarkerWithId;
         }
