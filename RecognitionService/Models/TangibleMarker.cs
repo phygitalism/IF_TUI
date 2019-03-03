@@ -10,10 +10,10 @@ namespace RecognitionService.Models
 	{
 		public int Id { get; set; }
 		public float InitialAngle { get; set; }
-        public bool IsClockwiseRotated { get; set; }
+		public bool IsClockwiseRotated { get; set; }
 
-        public Dictionary<string, Vector2> vertexes { get; set; }
-        public List<Segment> sides { get; set; }
+		public Dictionary<string, Vector2> vertexes { get; set; }
+		public List<Segment> sides { get; set; }
 
 		[JsonIgnore]
 		public List<Segment> Sides
@@ -27,10 +27,10 @@ namespace RecognitionService.Models
 			get { return new Triangle(vertexes["v1"], vertexes["v2"], vertexes["v3"]); }
 		}
 
-        public RegistredTangibleMarker()
-        { }
+		public RegistredTangibleMarker()
+		{ }
 
-        public RegistredTangibleMarker(int id, (Vector2 v1, Vector2 v2, Vector2 v3) vertexes)
+		public RegistredTangibleMarker(int id, (Vector2 v1, Vector2 v2, Vector2 v3) vertexes)
 		{
 			this.Id = id;
 			this.vertexes = new Dictionary<string, Vector2>
@@ -185,8 +185,8 @@ namespace RecognitionService.Models
 				var firstSide = new Segment(listOfVertecies[0], listOfVertecies[1]);
 				var secondSide = new Segment(listOfVertecies[1], listOfVertecies[2]);
 				if ( (!firstSide.isPerpendicularToX() && !firstSide.isPerpendicularToY() &&
-				      !secondSide.isPerpendicularToX() && !secondSide.isPerpendicularToY()) ||
-				     (firstSide.isPerpendicularToX() && secondSide.isPerpendicularToY()))
+					  !secondSide.isPerpendicularToX() && !secondSide.isPerpendicularToY()) ||
+					 (firstSide.isPerpendicularToX() && secondSide.isPerpendicularToY()))
 				{
 					return CalculateCenter(listOfVertecies[0], listOfVertecies[1], listOfVertecies[2]);
 				}
