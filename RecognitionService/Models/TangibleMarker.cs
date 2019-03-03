@@ -53,7 +53,20 @@ namespace RecognitionService.Models
 
 		public float RotationAngle
 		{
-			get { return ClockwiseDifferenceBetweenAngles(InitialAngle, Triangle.LargeSide.CalculateAngleBetweenY()); }
+			get
+			{
+				return ClockwiseDifferenceBetweenAngles(InitialAngle, CurrentAngleForLargeSide);
+			}
+		}
+
+		private float CurrentAngleForLargeSide
+		{
+			get
+			{
+				var v1 = ActiveTouchPoints[LargeSideTouchIds.Item1].Position;
+				var v2 = ActiveTouchPoints[LargeSideTouchIds.Item2].Position;
+				return new Segment(v1, v2).CalculateAngleBetweenY();
+			}
 		}
 
 		public List<Segment> Sides
@@ -61,11 +74,13 @@ namespace RecognitionService.Models
 			get { return Triangle.SortedSides; }
 		}
 
+		public (int, int) LargeSideTouchIds;
+
 		public RecognizedTangibleMarker(int id, (TouchPoint, TouchPoint, TouchPoint) vertexes, float initialAngle = 0.0f)
 		{
 			this.Id = id;
 			this.Triangle = new Triangle(vertexes.Item1.Position, vertexes.Item2.Position, vertexes.Item3.Position);
-			this.InitialAngle = initialAngle;
+			this.InitialAngle = Triangle.LargeSide.CalculateAngleBetweenY();
 
 			this.ActiveTouchPoints = new Dictionary<int, TouchPoint>
 			{
@@ -81,6 +96,19 @@ namespace RecognitionService.Models
 				[vertexes.Item2.Id] = 1,
 				[vertexes.Item3.Id] = 2
 			};
+			this.LargeSideTouchIds = GetTouchIdsForLargeSide(vertexes);
+		}
+
+		private (int, int) GetTouchIdsForLargeSide((TouchPoint, TouchPoint, TouchPoint) vertexes)
+		{
+			var sortedSidesWithId = new List<(Segment, (int, int))>()
+			{
+				(new Segment(vertexes.Item1.Position, vertexes.Item2.Position), (vertexes.Item1.Id, vertexes.Item2.Id)),
+				(new Segment(vertexes.Item2.Position, vertexes.Item3.Position), (vertexes.Item2.Id, vertexes.Item3.Id)),
+				(new Segment(vertexes.Item3.Position, vertexes.Item1.Position), (vertexes.Item3.Id, vertexes.Item1.Id))
+			};
+			sortedSidesWithId.Sort((v1, v2) => v1.Item1.Length >= v2.Item1.Length ? 1 : -1);
+			return sortedSidesWithId[2].Item2;
 		}
 
 		public void UpdateVertexes(List<TouchPoint> newTouches)
@@ -134,8 +162,11 @@ namespace RecognitionService.Models
 			foreach (var combinationOfVertecies in combinationsOfVertecies)
 			{
 				var listOfVertecies = combinationOfVertecies.ToList();
-				if (!(new Segment(listOfVertecies[0], listOfVertecies[1]).isPerpendicularToAxes() || 
-				      new Segment(listOfVertecies[1], listOfVertecies[2]).isPerpendicularToAxes()))
+				var firstSide = new Segment(listOfVertecies[0], listOfVertecies[1]);
+				var secondSide = new Segment(listOfVertecies[1], listOfVertecies[2]);
+				if ( (!firstSide.isPerpendicularToX() && !firstSide.isPerpendicularToY() &&
+				      !secondSide.isPerpendicularToX() && !secondSide.isPerpendicularToY()) ||
+				     (firstSide.isPerpendicularToX() && secondSide.isPerpendicularToY()))
 				{
 					return CalculateCenter(listOfVertecies[0], listOfVertecies[1], listOfVertecies[2]);
 				}
