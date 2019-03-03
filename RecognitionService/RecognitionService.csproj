@@ -178,6 +178,7 @@
     <Compile Include="Input\Tuio\TuioObjectController.cs" />
     <Compile Include="Input\Tuio\ITuioInputProvider.cs" />
     <Folder Include="Services\" />
+    <Compile Include="Models\Settings.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\PackRelease.targets" />
