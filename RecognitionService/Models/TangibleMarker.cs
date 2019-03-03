@@ -8,12 +8,12 @@ namespace RecognitionService.Models
 {
 	public class RegistredTangibleMarker
 	{
-		public readonly int Id;
-		public readonly float InitialAngle;
-		public readonly bool IsClockwiseRotated;
+		public int Id { get; set; }
+		public float InitialAngle { get; set; }
+        public bool IsClockwiseRotated { get; set; }
 
-		private readonly Dictionary<string, Vector2> vertexes;
-		private readonly List<Segment> sides;
+        public Dictionary<string, Vector2> vertexes { get; set; }
+        public List<Segment> sides { get; set; }
 
 		[JsonIgnore]
 		public List<Segment> Sides
@@ -27,7 +27,10 @@ namespace RecognitionService.Models
 			get { return new Triangle(vertexes["v1"], vertexes["v2"], vertexes["v3"]); }
 		}
 
-		public RegistredTangibleMarker(int id, (Vector2 v1, Vector2 v2, Vector2 v3) vertexes)
+        public RegistredTangibleMarker()
+        { }
+
+        public RegistredTangibleMarker(int id, (Vector2 v1, Vector2 v2, Vector2 v3) vertexes)
 		{
 			this.Id = id;
 			this.vertexes = new Dictionary<string, Vector2>
