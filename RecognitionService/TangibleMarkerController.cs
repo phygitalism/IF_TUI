@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using RecognitionService.Models;
+using RecognitionService.Services;
 
 namespace RecognitionService
 {
@@ -13,7 +14,7 @@ namespace RecognitionService
 	{
 		public MarkerConfig Config { get; private set; }
 
-		private Storage _storage = new Storage();
+		private JsonStorage<MarkerConfig> _storage = new JsonStorage<MarkerConfig>("markers");
 
 		public TangibleMarkerController()
 		{
