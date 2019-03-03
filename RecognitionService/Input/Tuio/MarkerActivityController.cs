@@ -85,7 +85,7 @@ namespace RecognitionService.Input.Tuio
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Can't update touch for marker");
+                    Console.WriteLine($"Can't update touch for marker. {ex}");
                 }
                 // распознаный маркер сам обновляет свое состояние и обновляет вершины своего треугольника
                 // Addded с предыдущего шага перейдет в Updated
