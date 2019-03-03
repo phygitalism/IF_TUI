@@ -164,7 +164,8 @@ namespace RecognitionService.Models
 				var listOfVertecies = combinationOfVertecies.ToList();
 				var firstSide = new Segment(listOfVertecies[0], listOfVertecies[1]);
 				var secondSide = new Segment(listOfVertecies[1], listOfVertecies[2]);
-				if ( (!firstSide.isPerpendicularToX() && !firstSide.isPerpendicularToY() && !secondSide.isPerpendicularToX() && !secondSide.isPerpendicularToY()) ||
+				if ( (!firstSide.isPerpendicularToX() && !firstSide.isPerpendicularToY() &&
+				      !secondSide.isPerpendicularToX() && !secondSide.isPerpendicularToY()) ||
 				     (firstSide.isPerpendicularToX() && secondSide.isPerpendicularToY()))
 				{
 					return CalculateCenter(listOfVertecies[0], listOfVertecies[1], listOfVertecies[2]);
