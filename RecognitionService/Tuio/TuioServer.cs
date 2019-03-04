@@ -84,7 +84,6 @@ namespace RecognitionService
 						objects[tangible.Id]?.Update(tangible.RelativeCenter.X, tangible.RelativeCenter.Y, tangible.RotationAngle, 0f, 0f, 0f, 0f, 0f);
                         break;
                     case RecognizedTangibleMarker.ActionType.Unstable:
-                        objects[tangible.Id]?.Update(tangible.RelativeCenter.X, tangible.RelativeCenter.Y, tangible.RotationAngle, 0f, 0f, 0f, 0f, 0f);
                         Console.WriteLine($"Tuio object unstable {tangible.Id}");
                         break;
                     case RecognizedTangibleMarker.ActionType.Removed:

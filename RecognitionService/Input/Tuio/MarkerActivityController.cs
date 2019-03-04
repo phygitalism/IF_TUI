@@ -84,16 +84,13 @@ namespace RecognitionService.Input.Tuio
         {
             foreach (var markerId in _recognizedMarkers.Keys)
             {
-                if (_recognizedMarkers[markerId].Type != RecognizedTangibleMarker.ActionType.Unstable)
-                {
-                    UpdateOneMarkerTouches(markerId);
-                }
+                UpdateMarkerTouches(markerId); 
             }
         }
 
-        private void UpdateOneMarkerTouches(int markerId)
+        private void UpdateMarkerTouches(int markerId)
         {
-            var touchesForMarker = _markerTouches[markerId];
+            var touchesForMarker = StableTouchesForMarker(markerId);
             try
             {
                 var touchesForMarkerIds = new List<int>(touchesForMarker.Keys);
@@ -105,13 +102,24 @@ namespace RecognitionService.Input.Tuio
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Can't update touch for marker");
+                Console.WriteLine("UpdateMarkerTouches: Can't update touch for marker");
             }
 
             // распознаный маркер сам обновляет свое состояние и обновляет вершины своего треугольника
             // Addded с предыдущего шага перейдет в Updated
             // если тач, входящий в маркер, пропал, то в Removed
             _recognizedMarkers[markerId].UpdateVertexes(touchesForMarker.Values.ToList());
+        }
+
+        private Dictionary<int, TouchPoint> StableTouchesForMarker(int markerId)
+        {
+            if (_recognizedMarkers[markerId].Type != RecognizedTangibleMarker.ActionType.Unstable)
+            {
+                return _markerTouches[markerId];
+            }
+            
+            return _recognizedMarkers[markerId].ActiveTouchPoints.
+                    Where(elem => elem.Value.Type != TouchPoint.ActionType.Up).ToDictionary(x => x.Key, x=> x.Value);
         }
 
         public void AddRecognizedMarkers(List<RecognizedTangibleMarker> newRecognizedTangibles)
