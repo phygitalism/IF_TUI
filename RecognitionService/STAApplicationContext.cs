@@ -9,6 +9,7 @@ using System.Numerics;
 
 using RecognitionService.Api;
 using RecognitionService.Models;
+using RecognitionService.Services;
 using RecognitionService.Input.Touch;
 using RecognitionService.Input.Tuio;
 
@@ -44,6 +45,9 @@ namespace RecognitionService
         private RecognitionServiceServer _wsServer;
         private TangibleMarkerController _tangibleMarkerController = new TangibleMarkerController();
 
+        private JsonStorage<Settings> _settingsStorage = new JsonStorage<Settings>("settings");
+        private Settings _globalSettings;
+
         private List<IDisposable> _disposeBag = new List<IDisposable>();
 
         private readonly Dictionary<string, bool> featureToggles = new Dictionary<string, bool>()
@@ -55,6 +59,7 @@ namespace RecognitionService
 
         public STAApplicationContext()
         {
+            _globalSettings = _settingsStorage.Load();
             SetupServer();
 
             if (!featureToggles[isDeviceMockedKey])
@@ -97,7 +102,7 @@ namespace RecognitionService
 
         private void SetupServer()
         {
-            _wsServer = (new RecognitionServiceServer(_serverPort))
+            _wsServer = (new RecognitionServiceServer(_globalSettings.WebSocketListenPort))
                 .AddToDisposeBag(_disposeBag);
 
             _wsServer.OnMarkerListRequested += _tangibleMarkerController.GetAllRegistredIds;
@@ -109,8 +114,8 @@ namespace RecognitionService
                 var absoluteA = new Vector2(triangleInfo.posA.X * width, triangleInfo.posA.Y * heigth);
                 var absoluteB = new Vector2(triangleInfo.posB.X * width, triangleInfo.posB.Y * heigth);
                 var absoluteC = new Vector2(triangleInfo.posC.X * width, triangleInfo.posC.Y * heigth);
-                var triangle = new Models.Triangle(absoluteA, absoluteB, absoluteC);
-                _tangibleMarkerController.RegisterMarkerWithId(triangle, id);
+                
+                _tangibleMarkerController.RegisterMarkerWithId(id, (absoluteA, absoluteB, absoluteC));
             };
             _wsServer.OnUnregisterMarkerRequested += _tangibleMarkerController.UnregisterMarkerWithId;
         }

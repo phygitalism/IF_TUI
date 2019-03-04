@@ -41,7 +41,7 @@ namespace RecognitionService.Recognition
 					var recognizedMarker = new RecognizedTangibleMarker(
 						knownTangibleMarker.Id,
 						(pair.Item2.Item1, pair.Item2.Item2, pair.Item2.Item3),
-						knownTangibleMarker.initialAngle
+						knownTangibleMarker.InitialAngle
 					);
 
 					recognizedMarkers.Add(recognizedMarker);
@@ -83,7 +83,7 @@ namespace RecognitionService.Recognition
 			List<(RegistredTangibleMarker, float)> pretenderMarkers = new List<(RegistredTangibleMarker, float)>();
 			foreach (var tangibleMarker in _knownMarkers)
 			{
-				float sidesMeanError = triangle.SimiliarityWith(tangibleMarker.triangle);
+				float sidesMeanError = triangle.SimiliarityWith(tangibleMarker.Triangle);
 				if (sidesMeanError < tolerance)
 				{
 					pretenderMarkers.Add((tangibleMarker, sidesMeanError));

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using RecognitionService.Models;
+using RecognitionService.Services;
 
 namespace RecognitionService
 {
@@ -13,23 +14,24 @@ namespace RecognitionService
 	{
 		public MarkerConfig Config { get; private set; }
 
-		private Storage _storage = new Storage();
+		private JsonStorage<MarkerConfig> _storage = new JsonStorage<MarkerConfig>("markers");
 
 		public TangibleMarkerController()
 		{
 			Config = _storage.Load();
 		}
 
-		public void RegisterMarkerWithId(Triangle triangle, int id)
+		public void RegisterMarkerWithId(int id, (Vector2 v1, Vector2 v2, Vector2 v3) vertexes)
 		{
-			Console.WriteLine("RegisterMarkerWithId");
-			var tangible = new RegistredTangibleMarker(id, triangle);
+			Console.WriteLine($"RegisterMarkerWithId {id}: {vertexes}");
+			var tangible = new RegistredTangibleMarker(id, vertexes);
 			if (!Config.IsRegistredWithId(tangible.Id))
 			{
 				Config.Add(tangible);
 			}
 			else
 			{
+				Console.WriteLine($"Already registered marker with id {id}. Update {vertexes}");
 				Config.Update(tangible);
 			}
 			_storage.Save(Config);
@@ -37,7 +39,7 @@ namespace RecognitionService
 
 		public void UnregisterMarkerWithId(int id)
 		{
-			Console.WriteLine("UnregisterMarkerWithId");
+			Console.WriteLine($"UnregisterMarkerWithId {id}");
 			if (!Config.IsRegistredWithId(id)) { return; }
 
 			var tangible = Config.GetTangibleWithId(id);
