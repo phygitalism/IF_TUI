@@ -114,7 +114,7 @@ namespace RecognitionService.Models
 
 		public void UpdateVertexes(List<TouchPoint> newTouches)
 		{
-			if (newTouches.Count != 3)
+			if (newTouches.Count != 3 && Type != ActionType.Unstable)
 			{
 				Console.WriteLine("WARNING: Invalid amount of touches");
 				return;
@@ -131,7 +131,7 @@ namespace RecognitionService.Models
 				
 				if (touch.Type == TouchPoint.ActionType.Up)
 				{
-					Type = Type == ActionType.Unstable ? ActionType.Removed : ActionType.Unstable;
+					Type = Type == ActionType.Unstable || Type == ActionType.Removed ? ActionType.Removed : ActionType.Unstable;
 				}
 
 				int vertexIndex;
