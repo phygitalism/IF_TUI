@@ -132,12 +132,10 @@ namespace RecognitionService.Models
 				
 				if (touch.Type == TouchPoint.ActionType.Up)
 				{
-                    //Type = Type == ActionType.Unstable || Type == ActionType.Removed ? ActionType.Removed : ActionType.Unstable;
                     count--;
                     if (count  == 0)
                     {
                         Type = ActionType.Removed;
-               
                     }
                     else
                     {

@@ -134,23 +134,22 @@ namespace RecognitionService.Input.Tuio
                 {
                     marker.Type = RecognizedTangibleMarker.ActionType.Updated;
                 }
-                
+                else
+                {
+                    // если у нового распознанного маркера есть такие же айди как у оставшихся ножек нестабильного маркера 
+                    // и он не нестабильный значит новый маркер самозванец и мародер захватил оторванные конечности нестабильного маркера себе 
+                    var stableTouchIds = _recognizedMarkers[marker.Id].ActiveTouchPoints
+                        .Where(elem => elem.Value.Type != TouchPoint.ActionType.Up).Select(elem => elem.Key);
+                    if (stableTouchIds.Any(id => marker.ActiveTouchPoints.Keys.Contains(id)))
+                    {
+                        continue;
+                    }
+                }
+
                 AddMarkerTouches(marker);
                 _recognizedMarkers[marker.Id] = marker;
             }
         }
-
-        /*
-        public void UpdateUnstableMarkers(List<RecognizedTangibleMarker> unstableRecognizedTangibles)
-        {
-            AddRecognizedMarkers(unstableRecognizedTangibles);
-            var unstableRecognizedTangiblesDictionary = unstableRecognizedTangibles.ToDictionary(marker => marker.Id, marker => marker);
-            foreach (var markerId in unstableRecognizedTangiblesDictionary.Keys)
-            {
-                UpdateOneMarkerTouches(markerId);
-            }
-        }
-        */
 
         private void AddMarkerTouches(RecognizedTangibleMarker newMarker)
         {
