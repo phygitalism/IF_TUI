@@ -141,8 +141,14 @@ namespace RecognitionService.Models
 				return;
 			}
 
-			if (Type != ActionType.Unstable || Type == ActionType.Unstable && count == 3)
+			if (Type != ActionType.Unstable)
 			{
+				Type = ActionType.Updated;
+			}
+
+			if (Type == ActionType.Unstable && count == 3)
+			{
+				ActiveTouchPoints.Clear();
 				Type = ActionType.Updated;
 			}
 
@@ -153,14 +159,14 @@ namespace RecognitionService.Models
 				if (touch.Type == TouchPoint.ActionType.Up)
 				{
                     count--;
-                    if (count  == 0)
-                    {
-                        Type = ActionType.Removed;
-                    }
-                    else
-                    {
-                        Type = ActionType.Unstable;
-                    }
+					if (count == 0)
+					{
+						Type = ActionType.Removed;
+					}
+					else
+					{
+						Type = ActionType.Unstable;
+					}
 				}
 
 				int vertexIndex;
