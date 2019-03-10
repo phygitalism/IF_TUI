@@ -133,7 +133,7 @@ namespace RecognitionService.Input.Tuio
                 
                 // если у нового распознанного маркера есть такие же айди как у оставшихся ножек нестабильного маркера 
                 // и он не нестабильный значит новый маркер самозванец и мародер захватил оторванные конечности нестабильного маркера себе 
-                if (IsIntersectStableFingers(marker.ActiveTouchPoints.Keys.ToList()) && !_recognizedMarkers.ContainsKey(marker.Id))
+                if (IsIntersectStableTouches(marker.ActiveTouchPoints.Keys.ToList()) && !_recognizedMarkers.ContainsKey(marker.Id))
                     {
                         continue;
                     }
@@ -142,7 +142,7 @@ namespace RecognitionService.Input.Tuio
             }
         }
 
-        private bool IsIntersectStableFingers(List<int> newMarkerTouchIds)
+        private bool IsIntersectStableTouches(List<int> newMarkerTouchIds)
         {
             var unstableMarkers = _recognizedMarkers.Values
                 .Where(rec => rec.Type == RecognizedTangibleMarker.ActionType.Unstable);
