@@ -132,6 +132,42 @@ namespace RecognitionService.Models
 			return sortedSidesWithId[2].Item2;
 		}
 
+		public void RestoreUnstable(List<TouchPoint> newTouches)
+		{
+			var count = newTouches.Count;
+			ActiveTouchPoints.Clear();
+			Type = ActionType.Updated;
+			
+			foreach (var touch in newTouches)
+			{
+				ActiveTouchPoints[touch.Id] = touch;
+
+				int vertexIndex;
+				if (TouchPointMap.TryGetValue(touch.Id, out vertexIndex))
+				{
+					switch (vertexIndex)
+					{
+						case 0:
+							Triangle.posA = touch.Position;
+							break;
+						case 1:
+							Triangle.posB = touch.Position;
+							break;
+						case 2:
+							Triangle.posC = touch.Position;
+							break;
+						default:
+							break;
+					}
+				}
+				else
+				{
+					// TODO: handle unmapped touch id
+					Console.WriteLine($"ERROR: unmapped touch id {touch.Id} for tangible marker {Id}");
+				}
+			}
+		}
+
 		public void UpdateVertexes(List<TouchPoint> newTouches)
 		{
             var count = newTouches.Count;
@@ -141,16 +177,10 @@ namespace RecognitionService.Models
 				return;
 			}
 
-			if (Type != ActionType.Unstable)
-			{
-				Type = ActionType.Updated;
-			}
-
-			if (Type == ActionType.Unstable && count == 3)
-			{
-				ActiveTouchPoints.Clear();
-				Type = ActionType.Updated;
-			}
+            if (Type != ActionType.Unstable)
+            {
+	            Type = ActionType.Updated;
+            }
 
 			foreach (var touch in newTouches)
 			{
