@@ -141,7 +141,7 @@ namespace RecognitionService.Models
 				return;
 			}
 
-			if (Type != ActionType.Unstable)
+			if (Type != ActionType.Unstable || Type == ActionType.Unstable && count == 3)
 			{
 				Type = ActionType.Updated;
 			}

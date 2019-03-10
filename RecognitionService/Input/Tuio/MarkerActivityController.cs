@@ -130,19 +130,13 @@ namespace RecognitionService.Input.Tuio
                 {
                     continue;
                 }
-                if (_recognizedMarkers.ContainsKey(marker.Id))
-                {
-                    marker.Type = RecognizedTangibleMarker.ActionType.Updated;
-                }
-                else
-                {
-                    // если у нового распознанного маркера есть такие же айди как у оставшихся ножек нестабильного маркера 
-                    // и он не нестабильный значит новый маркер самозванец и мародер захватил оторванные конечности нестабильного маркера себе 
-                    if (IsIntersectStableFingers(marker.ActiveTouchPoints.Keys.ToList()))
+                
+                // если у нового распознанного маркера есть такие же айди как у оставшихся ножек нестабильного маркера 
+                // и он не нестабильный значит новый маркер самозванец и мародер захватил оторванные конечности нестабильного маркера себе 
+                if (IsIntersectStableFingers(marker.ActiveTouchPoints.Keys.ToList()) && !_recognizedMarkers.ContainsKey(marker.Id))
                     {
                         continue;
                     }
-                }
                 AddMarkerTouches(marker);
                 _recognizedMarkers[marker.Id] = marker;
             }
