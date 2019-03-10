@@ -126,7 +126,7 @@ namespace RecognitionService.Input.Tuio
         {
             foreach (var marker in newRecognizedTangibles)
             {
-                if (marker.Type == RecognizedTangibleMarker.ActionType.Updated || marker.Type == RecognizedTangibleMarker.ActionType.Removed)
+                if (marker.Type != RecognizedTangibleMarker.ActionType.Added && marker.Type != RecognizedTangibleMarker.ActionType.Unstable)
                 {
                     continue;
                 }
