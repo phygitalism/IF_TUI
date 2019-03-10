@@ -44,6 +44,17 @@ namespace RecognitionService.Input.Tuio
             get { return _registredMarkers.Where(reg => !_recognizedMarkers.ContainsKey(reg.Id)).ToList(); }
         }
 
+        public List<RegistredTangibleMarker> UnstableMarkers
+        {
+            get
+            {
+                var unstableMarkersIds = _recognizedMarkers
+                    .Where(rec => rec.Value.Type == RecognizedTangibleMarker.ActionType.Unstable)
+                    .Select(marker => marker.Key);
+                return _registredMarkers.Where(reg => unstableMarkersIds.Contains(reg.Id)).ToList();
+            }
+        }
+
         public List<RecognizedTangibleMarker> LostMarkers
         {
             get
@@ -65,47 +76,92 @@ namespace RecognitionService.Input.Tuio
         {
             _frame = frame;
             _registredMarkers = registredMarkers;
-
-            UpdateMarkerTouches();
+            RemoveUnstableTouchesFromMarkerTouches();
+            UpdateMarkersTouches();
         }
 
-        public void UpdateMarkerTouches()
+        public void UpdateMarkersTouches()
         {
             foreach (var markerId in _recognizedMarkers.Keys)
             {
-                var touchesForMarker = _markerTouches[markerId];
-                try
-                {
-                    var touchesForMarkerIds = new List<int>(touchesForMarker.Keys);
-                    foreach (var touchId in touchesForMarkerIds)
-                    {
-                        var touchFromFrame = _frame.Lookup[touchId];
-                        touchesForMarker[touchId] = touchFromFrame;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Can't update touch for marker. {ex}");
-                }
-                // распознаный маркер сам обновляет свое состояние и обновляет вершины своего треугольника
-                // Addded с предыдущего шага перейдет в Updated
-                // если тач, входящий в маркер, пропал, то в Removed
-                _recognizedMarkers[markerId].UpdateVertexes(touchesForMarker.Values.ToList());
+                UpdateMarkerTouches(markerId); 
             }
+        }
+
+        private void UpdateMarkerTouches(int markerId)
+        {
+            var touchesForMarker = StableTouchesForMarker(markerId);
+            try
+            {
+                var touchesForMarkerIds = new List<int>(touchesForMarker.Keys);
+                foreach (var touchId in touchesForMarkerIds)
+                {
+                    var touchFromFrame = _frame.Lookup[touchId];
+                    touchesForMarker[touchId] = touchFromFrame;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("UpdateMarkerTouches: Can't update touch for marker");
+            }
+
+            // распознаный маркер сам обновляет свое состояние и обновляет вершины своего треугольника
+            // Addded с предыдущего шага перейдет в Updated
+            // если тач, входящий в маркер, пропал, то в Removed
+            _recognizedMarkers[markerId].UpdateVertexes(touchesForMarker.Values.ToList());
+        }
+
+        private Dictionary<int, TouchPoint> StableTouchesForMarker(int markerId)
+        {
+            if (_recognizedMarkers[markerId].Type != RecognizedTangibleMarker.ActionType.Unstable)
+            {
+                return _markerTouches[markerId];
+            }
+            
+            return _recognizedMarkers[markerId].ActiveTouchPoints.
+                    Where(elem => elem.Value.Type != TouchPoint.ActionType.Up).ToDictionary(x => x.Key, x=> x.Value);
         }
 
         public void AddRecognizedMarkers(List<RecognizedTangibleMarker> newRecognizedTangibles)
         {
             foreach (var marker in newRecognizedTangibles)
             {
-                if (marker.Type != RecognizedTangibleMarker.ActionType.Added)
+                if (marker.Type == RecognizedTangibleMarker.ActionType.Updated || marker.Type == RecognizedTangibleMarker.ActionType.Removed)
                 {
                     continue;
                 }
-                
+                if (_recognizedMarkers.ContainsKey(marker.Id))
+                {
+                    marker.Type = RecognizedTangibleMarker.ActionType.Updated;
+                }
+                else
+                {
+                    // если у нового распознанного маркера есть такие же айди как у оставшихся ножек нестабильного маркера 
+                    // и он не нестабильный значит новый маркер самозванец и мародер захватил оторванные конечности нестабильного маркера себе 
+                    if (IsIntersectStableFingers(marker.ActiveTouchPoints.Keys.ToList()))
+                    {
+                        continue;
+                    }
+                }
                 AddMarkerTouches(marker);
                 _recognizedMarkers[marker.Id] = marker;
             }
+        }
+
+        private bool IsIntersectStableFingers(List<int> newMarkerTouchIds)
+        {
+            var unstableMarkers = _recognizedMarkers.Values
+                .Where(rec => rec.Type == RecognizedTangibleMarker.ActionType.Unstable);
+            foreach (var unstableMarker in unstableMarkers)
+            {
+                var stableTouchIds = unstableMarker.ActiveTouchPoints
+                    .Where(elem => elem.Value.Type != TouchPoint.ActionType.Up).Select(elem => elem.Key);
+                if (stableTouchIds.Any(newMarkerTouchIds.Contains))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private void AddMarkerTouches(RecognizedTangibleMarker newMarker)
@@ -117,6 +173,15 @@ namespace RecognitionService.Input.Tuio
                 touchesForMarker[touchPointId] = _frame.Lookup[touchPointId];
             }
             _markerTouches[newMarker.Id] = touchesForMarker;
+        }
+
+        private void RemoveUnstableTouchesFromMarkerTouches()
+        {
+            var unstableMarkerIds = UnstableMarkers.Select(marker => marker.Id);
+            foreach (var unstableMarkerId in unstableMarkerIds)
+            {
+                _markerTouches.Remove(unstableMarkerId);
+            }
         }
 
         public void RemoveLostMarkers()
