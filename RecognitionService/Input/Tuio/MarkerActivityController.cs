@@ -133,6 +133,8 @@ namespace RecognitionService.Input.Tuio
                 if (_recognizedMarkers.ContainsKey(marker.Id))
                 {
                     _recognizedMarkers[marker.Id].RestoreUnstable(marker.ActiveTouchPoints.Values.ToList());
+                    AddMarkerTouches(marker);
+                    continue;
                 }
                 // если у нового распознанного маркера есть такие же айди как у оставшихся ножек нестабильного маркера 
                 // и он не нестабильный значит новый маркер самозванец и мародер захватил оторванные конечности нестабильного маркера себе 

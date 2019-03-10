@@ -134,7 +134,6 @@ namespace RecognitionService.Models
 
 		public void RestoreUnstable(List<TouchPoint> newTouches)
 		{
-			var count = newTouches.Count;
 			ActiveTouchPoints.Clear();
 			Type = ActionType.Updated;
 			
