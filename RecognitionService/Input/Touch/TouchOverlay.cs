@@ -13,6 +13,9 @@ using EPQT_Error = PQMultiTouch.PQMTClientImport.EnumPQErrorType;
 using EPQT_TPoint = PQMultiTouch.PQMTClientImport.EnumPQTouchPointType;
 using EPQT_TRequest = PQMultiTouch.PQMTClientImport.EnumTouchClientRequestType;
 
+using log4net;
+using log4net.Config;
+
 using RecognitionService.Models;
 
 namespace RecognitionService.Input.Touch
@@ -24,6 +27,7 @@ namespace RecognitionService.Input.Touch
 
     class TouchOverlay : IDeviceController, IInputProvider, IDisposable
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(TouchOverlay));
         public string DeviceName { get; private set; } = "PQ LABS Touch Overlay";
         public DeviceState State { get; private set; } = DeviceState.Uninitialized;
         public event Action<DeviceState> OnStateChanged;
@@ -55,8 +59,8 @@ namespace RecognitionService.Input.Touch
                 }
                 catch (СonnectionServerException ex)
                 {
-                    Console.WriteLine("Unable connect to device.");
-                    Console.WriteLine(ex);
+                    Logger.Error("Unable connect to device.");
+                    Logger.Error(ex);
                     OnStateChanged?.Invoke(DeviceState.Uninitialized);
                 }
             }
@@ -84,7 +88,7 @@ namespace RecognitionService.Input.Touch
         public void Terminate()
         {
             Stop();
-            Console.WriteLine("disconnect server...");
+            Logger.Info("disconnect server...");
             PQ.DisconnectServer();
             State = DeviceState.Uninitialized;
         }
@@ -112,13 +116,13 @@ namespace RecognitionService.Input.Touch
             int err_code = (int)EPQT_Error.PQMTE_SUCCESS;
             string local_ip = "127.0.0.1";
 
-            Console.WriteLine("connect to server...");
+            Logger.Info("connect to server...");
             if ((err_code = PQ.ConnectServer(local_ip, PQ.PQMT_DEFAULT_CLIENT_PORT)) != (int)EPQT_Error.PQMTE_SUCCESS)
             {
                 throw new СonnectionServerException($"connect server fail, socket errror code:{err_code}");
             }
 
-            Console.WriteLine("connect success, send request.");
+            Logger.Info("connect success, send request.");
             PQ.TouchClientRequest tcq = new PQ.TouchClientRequest();
             tcq.type = (int)EPQT_TRequest.RQST_RAWDATA_ALL | (int)EPQT_TRequest.RQST_GESTURE_ALL;
 
@@ -132,12 +136,12 @@ namespace RecognitionService.Input.Touch
                 throw new СonnectionServerException($"get server resolution fail, errror code:{err_code}");
             }
 
-            Console.WriteLine("send request success, start recv.");
+            Logger.Info("send request success, start recv.");
         }
 
         private void OnReceivePointFrame(int frameId, int timestamp, int movingPointCount, IntPtr movingPointArray, IntPtr callbackObject)
         {
-            //Console.WriteLine($"frame_id:{frameId},time_stamp:{timestamp} ms,moving point count:{movingPointCount}");
+            //Logger.Info($"frame_id:{frameId},time_stamp:{timestamp} ms,moving point count:{movingPointCount}");
 
             var touchPoints = new List<TouchPoint>();
             for (int i = 0; i < movingPointCount; ++i)
@@ -156,7 +160,7 @@ namespace RecognitionService.Input.Touch
 
         private void OnServerBreak(IntPtr param, IntPtr callbackObject)
         {
-            Console.WriteLine("server break, disconnect here");
+            Logger.Info("server break, disconnect here");
             PQ.DisconnectServer();
         }
 
@@ -164,7 +168,7 @@ namespace RecognitionService.Input.Touch
         {
             ScreenWidth = width;
             ScreenHeight = height;
-            Console.WriteLine($"server resolution:{width},{height}");
+            Logger.Info($"server resolution:{width},{height}");
         }
 
         private void OnReceiveError(int errorCode, IntPtr callbackObject)
@@ -172,23 +176,23 @@ namespace RecognitionService.Input.Touch
             switch (errorCode)
             {
                 case (int)EPQT_Error.PQMTE_RCV_INVALIDATE_DATA:
-                    Console.WriteLine(" error: receive invalidate data.");
+                    Logger.Error(" error: receive invalidate data.");
                     break;
                 case (int)EPQT_Error.PQMTE_SERVER_VERSION_OLD:
-                    Console.WriteLine(" error: the multi-touch server is old for this client, please update the multi-touch server.");
+                    Logger.Error(" error: the multi-touch server is old for this client, please update the multi-touch server.");
                     break;
                 case (int)EPQT_Error.PQMTE_EXCEPTION_FROM_CALLBACKFUNCTION:
-                    Console.WriteLine(" **** some exceptions thrown from the call back functions.");
+                    Logger.Error(" **** some exceptions thrown from the call back functions.");
                     break;
                 default:
-                    Console.WriteLine($" socket error, socket error code:{errorCode}");
+                    Logger.Error($" socket error, socket error code:{errorCode}");
                     break;
             }
         }
 
         private void OnGetDeviceInfo(ref PQ.TouchDeviceInfo deviceInfo, IntPtr callbackObject)
         {
-            Console.WriteLine($" touch screen, SerialNumber:{deviceInfo.serial_number},({deviceInfo.screen_width},{deviceInfo.screen_height}).");
+            Logger.Info($" touch screen, SerialNumber:{deviceInfo.serial_number},({deviceInfo.screen_width},{deviceInfo.screen_height}).");
         }
     }
 }

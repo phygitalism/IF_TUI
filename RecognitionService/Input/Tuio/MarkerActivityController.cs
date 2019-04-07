@@ -5,10 +5,14 @@ using System.Linq;
 
 using RecognitionService.Models;
 
+using log4net;
+using log4net.Config;
+
 namespace RecognitionService.Input.Tuio
 {
     public class MarkerActivityController
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(MarkerActivityController));
         private List<RegistredTangibleMarker> _registredMarkers = new List<RegistredTangibleMarker>();
 
         // recognizedMarkers - активные маркеры
@@ -102,7 +106,7 @@ namespace RecognitionService.Input.Tuio
             }
             catch (Exception ex)
             {
-                Console.WriteLine("UpdateMarkerTouches: Can't update touch for marker");
+                Logger.Error("UpdateMarkerTouches: Can't update touch for marker");
             }
 
             // распознаный маркер сам обновляет свое состояние и обновляет вершины своего треугольника

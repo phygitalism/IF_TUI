@@ -7,10 +7,14 @@ using RecognitionService.Input.Tuio;
 using RecognitionService.Tuio;
 using RecognitionService.Tuio.Entities;
 
+using log4net;
+using log4net.Config;
+
 namespace RecognitionService
 {
     public class TuioServer : IDisposable
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(TuioServer));
         public const string defaultIPAddress = "127.0.0.1";
         public const int defaultTuioPort = 3333;
 
@@ -43,7 +47,7 @@ namespace RecognitionService
             }
             catch (SendTuioBundleException ex)
             {
-                Console.WriteLine(ex);
+                Logger.Error(ex);
             }
         }
 
@@ -67,7 +71,7 @@ namespace RecognitionService
                         cursors.Remove(tp.Id);
                         break;
                     default:
-                        Console.WriteLine($"ERROR: unkown touchpoint action type");
+                        Logger.Error($"ERROR: unkown touchpoint action type");
                         break;
                 }
             }
@@ -80,7 +84,7 @@ namespace RecognitionService
                 switch (tangible.Type)
                 {
                     case RecognizedTangibleMarker.ActionType.Added:
-						Console.WriteLine($"Tuio object added {tangible.Id}");
+						Logger.Info($"Tuio object added {tangible.Id}");
                         var objectToAdd = new TUIOObject(_tuioTransmitter.NextSessionId(), tangible.Id, tangible.RelativeCenter.X, tangible.RelativeCenter.Y, tangible.RotationAngle, 0f, 0f, 0f, 0f, 0f);
                         objects[tangible.Id] = objectToAdd;
                         _tuioTransmitter.Add(objectToAdd);
@@ -89,16 +93,16 @@ namespace RecognitionService
 						objects[tangible.Id]?.Update(tangible.RelativeCenter.X, tangible.RelativeCenter.Y, tangible.RotationAngle, 0f, 0f, 0f, 0f, 0f);
                         break;
                     case RecognizedTangibleMarker.ActionType.Unstable:
-                        Console.WriteLine($"Tuio object unstable {tangible.Id}");
+                        Logger.Info($"Tuio object unstable {tangible.Id}");
                         break;
                     case RecognizedTangibleMarker.ActionType.Removed:
-						Console.WriteLine($"Tuio object Removed {tangible.Id}");
+						Logger.Info($"Tuio object Removed {tangible.Id}");
 						var objectToRemove = objects[tangible.Id];
                         _tuioTransmitter.Remove(objectToRemove);
                         objects.Remove(tangible.Id);
                         break;
                     default:
-                        Console.WriteLine($"ERROR: unkown tangible action type");
+                        Logger.Error($"ERROR: unkown tangible action type");
                         break;
                 }
             }

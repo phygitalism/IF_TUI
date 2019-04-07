@@ -8,10 +8,14 @@ using System.Threading.Tasks;
 using RecognitionService.Models;
 using RecognitionService.Services;
 
+using log4net;
+using log4net.Config;
+
 namespace RecognitionService
 {
 	public class TangibleMarkerController : IDisposable
 	{
+		private static readonly ILog Logger = LogManager.GetLogger(typeof(TangibleMarkerController));
 		public MarkerConfig Config { get; private set; }
 
 		private JsonStorage<MarkerConfig> _storage = new JsonStorage<MarkerConfig>("markers");
@@ -23,7 +27,7 @@ namespace RecognitionService
 
 		public void RegisterMarkerWithId(int id, (Vector2 v1, Vector2 v2, Vector2 v3) vertexes)
 		{
-			Console.WriteLine($"RegisterMarkerWithId {id}: {vertexes}");
+			Logger.Info($"RegisterMarkerWithId {id}: {vertexes}");
 			var tangible = new RegistredTangibleMarker(id, vertexes);
 			if (!Config.IsRegistredWithId(tangible.Id))
 			{
@@ -31,7 +35,7 @@ namespace RecognitionService
 			}
 			else
 			{
-				Console.WriteLine($"Already registered marker with id {id}. Update {vertexes}");
+				Logger.Info($"Already registered marker with id {id}. Update {vertexes}");
 				Config.Update(tangible);
 			}
 			_storage.Save(Config);
@@ -39,7 +43,7 @@ namespace RecognitionService
 
 		public void UnregisterMarkerWithId(int id)
 		{
-			Console.WriteLine($"UnregisterMarkerWithId {id}");
+			Logger.Info($"UnregisterMarkerWithId {id}");
 			if (!Config.IsRegistredWithId(id)) { return; }
 
 			var tangible = Config.GetTangibleWithId(id);
@@ -49,7 +53,7 @@ namespace RecognitionService
 
 		public int[] GetAllRegistredIds()
 		{
-			Console.WriteLine("OnMarkerListRequested");
+			Logger.Info("OnMarkerListRequested");
 			return Config.registredTangibles.Select(marker => marker.Id).ToArray();
 		}
 

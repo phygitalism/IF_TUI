@@ -3,10 +3,14 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 
+using log4net;
+using log4net.Config;
+
 namespace RecognitionService.Tuio
 {
     public static class IPHelper
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(IPHelper));
         public static List<string> localIPAddresses { get; private set; }
         public static string localIPAddressesString { get; private set; }
 
@@ -42,7 +46,7 @@ namespace RecognitionService.Tuio
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Logger.Error(ex);
             }
         }
     }

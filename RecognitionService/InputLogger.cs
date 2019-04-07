@@ -3,10 +3,14 @@ using System;
 using RecognitionService.Models;
 using RecognitionService.Input.Touch;
 
+using log4net;
+using log4net.Config;
+
 namespace RecognitionService
 {
     public class InputLogger : IDisposable
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(InputLogger));
         private IInputProvider _inputProvider;
 
         public InputLogger(IInputProvider inputProvider)
@@ -19,7 +23,7 @@ namespace RecognitionService
         {
             foreach (var tp in frame.Touches)
             {
-                Console.WriteLine($"  point {tp.Id} come at ({tp.Position.X},{tp.Position.Y}) width:{tp.Acceleration.X} height:{tp.Acceleration.Y}");
+                Logger.Info($"  point {tp.Id} come at ({tp.Position.X},{tp.Position.Y}) width:{tp.Acceleration.X} height:{tp.Acceleration.Y}");
             }
         }
 

@@ -4,10 +4,14 @@ using System.Numerics;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
+using log4net;
+using log4net.Config;
+
 namespace RecognitionService.Models
 {
 	public class RegistredTangibleMarker
 	{
+		private static readonly ILog Logger = LogManager.GetLogger(typeof(RegistredTangibleMarker));
 		public int Id { get; set; }
 		public float InitialAngle { get; set; }
 		public bool IsClockwiseRotated { get; set; }
@@ -48,6 +52,7 @@ namespace RecognitionService.Models
 
 	public class RecognizedTangibleMarker
 	{
+		private static readonly ILog Logger = LogManager.GetLogger(typeof(RecognizedTangibleMarker));
 		public enum ActionType
 		{
 			Added = 0,
@@ -137,7 +142,7 @@ namespace RecognitionService.Models
             var count = newTouches.Count;
             if (count != 3 && Type != ActionType.Unstable)
 			{
-				Console.WriteLine("WARNING: Invalid amount of touches");
+				Logger.Error("WARNING: Invalid amount of touches");
 				return;
 			}
 
@@ -184,7 +189,7 @@ namespace RecognitionService.Models
 				else
 				{
 					// TODO: handle unmapped touch id
-					Console.WriteLine($"ERROR: unmapped touch id {touch.Id} for tangible marker {Id}");
+					Logger.Error($"ERROR: unmapped touch id {touch.Id} for tangible marker {Id}");
 				}
 			}
 		}

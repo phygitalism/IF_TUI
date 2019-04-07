@@ -72,7 +72,7 @@ namespace RecognitionService.Recognition
 				}
 				else
 				{
-					//Console.WriteLine(ex);
+					//Logger.Log.Error(ex);
 				}
 			}
 			return constructedTriangles;
@@ -123,7 +123,7 @@ namespace RecognitionService.Recognition
 				}
 				else
 				{
-					//Console.WriteLine(ex);
+					//Logger.Log.Error(ex);
 				}
 			}
 

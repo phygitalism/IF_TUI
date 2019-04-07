@@ -9,10 +9,14 @@ using Newtonsoft.Json.Linq;
 
 using RecognitionService.Models;
 
+using log4net;
+using log4net.Config;
+
 namespace RecognitionService.Input.Touch
 {
     public class TouchPointFrameGenerator : IInputProvider, IDisposable
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(TouchPointFrameGenerator));
         private DispatcherTimer _statusTimer;
 
         private string filePath;
@@ -29,7 +33,7 @@ namespace RecognitionService.Input.Touch
             var basePath = Environment.CurrentDirectory;
             this.filePath = Path.Combine(basePath, "Resources", fileName);
 
-            Console.WriteLine($"PATH {filePath}");
+            Logger.Info($"PATH {filePath}");
 
             try
             {
@@ -38,7 +42,7 @@ namespace RecognitionService.Input.Touch
             }
             catch (FileNotFoundException ex)
             {
-                Console.WriteLine(ex);
+                Logger.Error(ex);
             }
         }
 
@@ -52,7 +56,7 @@ namespace RecognitionService.Input.Touch
                     var line = file.ReadLine();
                     if (line != null)
                     {
-                        // Console.WriteLine(line);
+                        // Logger.Info(line);
                         counter++;
 
                         var touchPointFrame = Parse(line);
@@ -61,10 +65,10 @@ namespace RecognitionService.Input.Touch
                     else
                     {
                         file.Close();
-                        Console.WriteLine("There were {0} lines.", counter);
+                        Logger.Info($"There were {counter} lines.");
                         file = new StreamReader(filePath);
                         counter = 0;
-                        Console.WriteLine("Start again");
+                        Logger.Info("Start again");
                     }
                 },
                 Dispatcher.CurrentDispatcher
@@ -113,7 +117,7 @@ namespace RecognitionService.Input.Touch
         {
             KillTimer();
             file.Close();
-            Console.WriteLine("There were {0} lines.", counter);
+            Logger.Info($"There were {counter} lines.");
         }
     }
 }

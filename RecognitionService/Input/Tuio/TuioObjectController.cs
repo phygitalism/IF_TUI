@@ -6,10 +6,14 @@ using RecognitionService.Models;
 using RecognitionService.Recognition;
 using RecognitionService.Input.Touch;
 
+using log4net;
+using log4net.Config;
+
 namespace RecognitionService.Input.Tuio
 {
 	public class TuioObjectController : ITuioInputProvider, IDisposable
 	{
+		private static readonly ILog Logger = LogManager.GetLogger(typeof(TuioObjectController));
 		private IInputProvider _inputProvider;
 		private TangibleMarkerController _tangibleMarkerController;
 		
@@ -68,7 +72,7 @@ namespace RecognitionService.Input.Tuio
 			}
 			catch (System.Exception ex)
 			{
-				Console.WriteLine(ex);
+				Logger.Error(ex);
 			}
 		}
 
@@ -80,15 +84,15 @@ namespace RecognitionService.Input.Tuio
 
             if (addedMarkerIds.Count > 0)
             {
-                Console.WriteLine($"Added markers ids: {string.Join(" ", addedMarkerIds)}");
+                Logger.Info($"Added markers ids: {string.Join(" ", addedMarkerIds)}");
             }
             //if (uptedMarkerIds.Count > 0)
             //{
-            //    Console.WriteLine($"Updated markers ids: {string.Join(" ", uptedMarkerIds)}");
+            //    Logger.Info($"Updated markers ids: {string.Join(" ", uptedMarkerIds)}");
             //}
             if (deletedMarkerIds.Count > 0)
             {
-                Console.WriteLine($"Removed markers ids: {string.Join(" ", deletedMarkerIds)}");
+                Logger.Info($"Removed markers ids: {string.Join(" ", deletedMarkerIds)}");
             }
         }
    

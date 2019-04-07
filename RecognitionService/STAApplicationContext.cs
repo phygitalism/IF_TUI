@@ -13,6 +13,7 @@ using RecognitionService.Services;
 using RecognitionService.Input.Touch;
 using RecognitionService.Input.Tuio;
 
+
 namespace RecognitionService
 {
     public static class DisposebleExtensions
@@ -59,6 +60,8 @@ namespace RecognitionService
 
         public STAApplicationContext()
         {
+            Logger.InitLogger();
+            
             _globalSettings = _settingsStorage.Load();
             SetupServer();
 

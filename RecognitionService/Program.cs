@@ -14,6 +14,7 @@ namespace RecognitionService
         [STAThread]
         static void Main()
         {
+            //Logger.InitLogger();
             // Use the assembly GUID as the name of the mutex which we use to detect if an application instance is already running
             bool createdNew = false;
             string mutexName = System.Reflection.Assembly.GetExecutingAssembly().GetType().GUID.ToString();
