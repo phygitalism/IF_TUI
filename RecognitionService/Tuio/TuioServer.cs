@@ -16,7 +16,7 @@ namespace RecognitionService
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(TuioServer));
         public const string defaultIPAddress = "127.0.0.1";
-        public const int defaultTuioPort = 3333;
+        public const int defaultTuioPort = 3334;
 
         private ITuioInputProvider _tuioInputProvider;
         private TUIOTransmitter _tuioTransmitter;
@@ -28,11 +28,22 @@ namespace RecognitionService
 
         public TuioServer(ITuioInputProvider tuioInputProvider)
         {
-            _globalSettings = _settingsStorage.Load();
             _tuioInputProvider = tuioInputProvider;
             _tuioInputProvider.OnTuioInput += Send;
 
-            _tuioTransmitter = new TUIOTransmitter(defaultIPAddress, _globalSettings.TuioServerPort);
+            int tuioPort;
+            try
+            {
+                _globalSettings = _settingsStorage.Load();
+                tuioPort = _globalSettings.TuioServerPort;
+            }
+            catch (Exception e)
+            {
+                Logger.Warn(e);
+                tuioPort = defaultTuioPort;
+            }
+            
+            _tuioTransmitter = new TUIOTransmitter(defaultIPAddress, tuioPort);
             _tuioTransmitter.Connect();
         }
 
