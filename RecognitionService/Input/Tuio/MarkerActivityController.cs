@@ -108,18 +108,18 @@ namespace RecognitionService.Input.Tuio
                     var touchFromFrame = _frame.Lookup[touchId];
                     touchesForMarker[touchId] = touchFromFrame;
                 }
+                // распознаный маркер сам обновляет свое состояние и обновляет вершины своего треугольника
+                // Addded с предыдущего шага перейдет в Updated
+                // если тач, входящий в маркер, пропал, то в Removed
+                _recognizedMarkers[markerId].UpdateVertexes(touchesForMarker.Values.ToList());
             }
             catch (Exception ex)
             {
                 Logger.Error("UpdateMarkerTouches: Can't update touch for marker");
-                touchesForMarker = new Dictionary<int, TouchPoint>();
-                //_recognizedMarkers[markerId].Type = RecognizedTangibleMarker.ActionType.Removed;
+                //touchesForMarker = new Dictionary<int, TouchPoint>();
+                _recognizedMarkers[markerId].Type = RecognizedTangibleMarker.ActionType.Removed;
             }
-
-            // распознаный маркер сам обновляет свое состояние и обновляет вершины своего треугольника
-            // Addded с предыдущего шага перейдет в Updated
-            // если тач, входящий в маркер, пропал, то в Removed
-            _recognizedMarkers[markerId].UpdateVertexes(touchesForMarker.Values.ToList());
+            //_recognizedMarkers[markerId].UpdateVertexes(touchesForMarker.Values.ToList());
         }
 
         private Dictionary<int, TouchPoint> StableTouchesForMarker(int markerId)
