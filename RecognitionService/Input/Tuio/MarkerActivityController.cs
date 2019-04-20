@@ -19,7 +19,7 @@ namespace RecognitionService.Input.Tuio
         private Dictionary<int, RecognizedTangibleMarker> _recognizedMarkers = new Dictionary<int, RecognizedTangibleMarker>();
         // соотвествие тачей распознаным маркерам
         private Dictionary<int, Dictionary<int, TouchPoint>> _markerTouches = new Dictionary<int, Dictionary<int, TouchPoint>>();
-        
+
         private TouchPointFrame _frame;
 
         // тачи которые соотвествуют распознаным маркерам
@@ -37,7 +37,7 @@ namespace RecognitionService.Input.Tuio
         public List<TouchPoint> PassiveTouches
         {
             get
-            {   
+            {
                 var markerTouchIds = MarkerTouches.Select(touch => touch.Id);
                 return _frame.Touches.Where(touch => !markerTouchIds.Contains(touch.Id)).ToList();
             }
@@ -88,7 +88,12 @@ namespace RecognitionService.Input.Tuio
         {
             foreach (var markerId in _recognizedMarkers.Keys)
             {
-                UpdateMarkerTouches(markerId); 
+                if (_recognizedMarkers[markerId].Type != RecognizedTangibleMarker.ActionType.Removed &&
+                    _markerTouches.ContainsKey(markerId) || _recognizedMarkers[markerId].Type ==
+                    RecognizedTangibleMarker.ActionType.Unstable)
+                {
+                    UpdateMarkerTouches(markerId);
+                }
             }
         }
 
@@ -107,6 +112,8 @@ namespace RecognitionService.Input.Tuio
             catch (Exception ex)
             {
                 Logger.Error("UpdateMarkerTouches: Can't update touch for marker");
+                touchesForMarker = new Dictionary<int, TouchPoint>();
+                //_recognizedMarkers[markerId].Type = RecognizedTangibleMarker.ActionType.Removed;
             }
 
             // распознаный маркер сам обновляет свое состояние и обновляет вершины своего треугольника
@@ -121,7 +128,7 @@ namespace RecognitionService.Input.Tuio
             {
                 return _markerTouches[markerId];
             }
-            
+
             return _recognizedMarkers[markerId].ActiveTouchPoints.
                     Where(elem => elem.Value.Type != TouchPoint.ActionType.Up).ToDictionary(x => x.Key, x=> x.Value);
         }
@@ -140,8 +147,8 @@ namespace RecognitionService.Input.Tuio
                 }
                 else
                 {
-                    // если у нового распознанного маркера есть такие же айди как у оставшихся ножек нестабильного маркера 
-                    // и он не нестабильный значит новый маркер самозванец и мародер захватил оторванные конечности нестабильного маркера себе 
+                    // если у нового распознанного маркера есть такие же айди как у оставшихся ножек нестабильного маркера
+                    // и он не нестабильный значит новый маркер самозванец и мародер захватил оторванные конечности нестабильного маркера себе
                     if (IsIntersectStableFingers(marker.ActiveTouchPoints.Keys.ToList()))
                     {
                         continue;

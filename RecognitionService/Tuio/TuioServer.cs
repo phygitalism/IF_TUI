@@ -42,7 +42,6 @@ namespace RecognitionService
                 Logger.Warn(e);
                 tuioPort = defaultTuioPort;
             }
-            
             _tuioTransmitter = new TUIOTransmitter(defaultIPAddress, tuioPort);
             _tuioTransmitter.Connect();
         }
@@ -101,16 +100,23 @@ namespace RecognitionService
                         _tuioTransmitter.Add(objectToAdd);
                         break;
                     case RecognizedTangibleMarker.ActionType.Updated:
-						objects[tangible.Id]?.Update(tangible.RelativeCenter.X, tangible.RelativeCenter.Y, tangible.RotationAngle, 0f, 0f, 0f, 0f, 0f);
+                        if (objects.ContainsKey(tangible.Id))
+                        {
+                            objects[tangible.Id]?.Update(tangible.RelativeCenter.X, tangible.RelativeCenter.Y,
+                                tangible.RotationAngle, 0f, 0f, 0f, 0f, 0f);
+                        }
                         break;
                     case RecognizedTangibleMarker.ActionType.Unstable:
                         Logger.Info($"Tuio object unstable {tangible.Id}");
                         break;
                     case RecognizedTangibleMarker.ActionType.Removed:
-						Logger.Info($"Tuio object Removed {tangible.Id}");
-						var objectToRemove = objects[tangible.Id];
-                        _tuioTransmitter.Remove(objectToRemove);
-                        objects.Remove(tangible.Id);
+                        if (objects.ContainsKey(tangible.Id))
+                        {
+                            Logger.Info($"Tuio object Removed {tangible.Id}");
+                            var objectToRemove = objects[tangible.Id];
+                            _tuioTransmitter.Remove(objectToRemove);
+                            objects.Remove(tangible.Id);
+                        }
                         break;
                     default:
                         Logger.Error($"ERROR: unkown tangible action type");

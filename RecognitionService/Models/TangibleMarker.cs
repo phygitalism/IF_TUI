@@ -150,11 +150,13 @@ namespace RecognitionService.Models
 			{
 				Type = ActionType.Updated;
 			}
-
+            else
+            {
+                ActiveTouchPoints.Clear();
+            }
 			foreach (var touch in newTouches)
 			{
 				ActiveTouchPoints[touch.Id] = touch;
-				
 				if (touch.Type == TouchPoint.ActionType.Up)
 				{
                     count--;
@@ -193,7 +195,7 @@ namespace RecognitionService.Models
 				}
 			}
 		}
-		
+
 		// how to calculate center http://algolist.manual.ru/maths/geom/equation/circle.php
 		private Vector2 FindCenter()
 		{
